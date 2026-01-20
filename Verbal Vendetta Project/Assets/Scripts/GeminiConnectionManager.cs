@@ -13,7 +13,8 @@ using Newtonsoft.Json;
 public class GeminiConnectionManager : MonoBehaviour
 {
     // The environment provides the API key at runtime.
-    private string apiKey = "gen-lang-client-0347778969";
+    // IF RUNNING IN UNITY EDITOR: You must paste your API key here or the request will fail.
+    [SerializeField] private string apiKey = "AIzaSyDZFQ5SqXgFCpA7fvDcGOWVLXOjKrZYc2A";
     private string model = "gemini-2.5-flash-preview-09-2025";
 
     [Header("Current Game State")]
@@ -27,6 +28,10 @@ public class GeminiConnectionManager : MonoBehaviour
     /// </summary>
     public void GenerateScenario(ScenarioCallback callback)
     {
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            Debug.LogWarning("Gemini API Key is missing! The request will likely fail or get stuck in retries.");
+        }
         StartCoroutine(PostScenarioRequest(callback));
     }
 
@@ -76,61 +81,75 @@ public class GeminiConnectionManager : MonoBehaviour
 
         string jsonPayload = JsonConvert.SerializeObject(payload);
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
-        {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
+        // Exponential backoff retry logic (up to 5 tries)
+        int retries = 0;
+        bool success = false;
+        string lastError = "";
 
-            // Exponential backoff retry logic (up to 5 tries)
-            int retries = 0;
-            bool success = false;
-            while (retries < 5 && !success)
+        while (retries < 5 && !success)
+        {
+            Debug.Log($"Gemini API Attempt {retries + 1}/5...");
+
+            using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
             {
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+
                 yield return request.SendWebRequest();
+
                 if (request.result == UnityWebRequest.Result.Success)
                 {
-                    success = true;
+                    try
+                    {
+                        GeminiResponseWrapper response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+
+                        if (response != null && response.candidates != null && response.candidates.Count > 0)
+                        {
+                            string jsonText = response.candidates[0].content.parts[0].text;
+                            ScenarioData scenario = JsonConvert.DeserializeObject<ScenarioData>(jsonText);
+
+                            currentScenario = scenario;
+                            success = true;
+                            Debug.Log("<color=green>Gemini Scenario Generated Successfully!</color>");
+                            callback?.Invoke(scenario, null);
+                        }
+                        else
+                        {
+                            lastError = "API returned an empty or malformed response. Check safety settings in Google AI Studio.";
+                            Debug.LogWarning(lastError);
+                            retries++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        lastError = "Parsing Error: " + ex.Message;
+                        Debug.LogError(lastError);
+                        retries++;
+                    }
                 }
                 else
                 {
+                    // Log the actual server response text to see the error details (like invalid API key)
+                    lastError = $"API Error ({request.responseCode}): {request.error}\nDetails: {request.downloadHandler.text}";
+                    Debug.LogWarning(lastError);
                     retries++;
-                    yield return new WaitForSeconds(Mathf.Pow(2, retries));
                 }
-            }
 
-            if (success)
-            {
-                try
+                if (!success && retries < 5)
                 {
-                    // FIXED: Replaced 'dynamic' with explicit GeminiResponseWrapper classes to fix CS0656.
-                    GeminiResponseWrapper response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-
-                    if (response != null && response.candidates != null && response.candidates.Count > 0)
-                    {
-                        string jsonText = response.candidates[0].content.parts[0].text;
-                        ScenarioData scenario = JsonConvert.DeserializeObject<ScenarioData>(jsonText);
-
-                        // Update the game state variable
-                        currentScenario = scenario;
-
-                        callback?.Invoke(scenario, null);
-                    }
-                    else
-                    {
-                        callback?.Invoke(null, "API returned an empty or malformed response.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    callback?.Invoke(null, "Parsing Error: " + ex.Message);
+                    float waitTime = Mathf.Pow(2, retries);
+                    Debug.Log($"Retrying in {waitTime} seconds...");
+                    yield return new WaitForSeconds(waitTime);
                 }
             }
-            else
-            {
-                callback?.Invoke(null, "API Error: " + request.error);
-            }
+        }
+
+        if (!success)
+        {
+            Debug.LogError($"<color=red>Gemini Request Failed permanently.</color> Final error: {lastError}");
+            callback?.Invoke(null, "Failed after max retries. Check console for details.");
         }
     }
 
@@ -140,3 +159,4 @@ public class GeminiConnectionManager : MonoBehaviour
     [Serializable] public class GeminiContent { public List<GeminiPart> parts; }
     [Serializable] public class GeminiPart { public string text; }
 }
+

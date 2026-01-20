@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json; // Added to handle the ToString conversion
 
 // These classes allow Unity to turn the Gemini JSON string into actual C# objects.
-
-
 [Serializable]
 public class ScenarioData
 {
-    // Victim Info (Flattened for easier access)
+    // Victim Info
     public string victim_name;
     public string victim_occupation;
-    public string victim_discovery_details; // The "Hook" for the player's first questions
+    public string victim_discovery_details;
 
     // Case Info
     public string murder_weapon;
@@ -18,6 +17,14 @@ public class ScenarioData
 
     // Suspect List
     public List<SuspectData> suspects;
+
+    // --- THE FIX ---
+    // This method tells Unity: "When I ask for a string version of this object, 
+    // use the JSON library to format all my variables nicely."
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
+    }
 }
 
 [Serializable]
@@ -26,16 +33,20 @@ public class SuspectData
     public string name;
     public string personality;
     public string alibi_statement;
-    public string minor_secret; // Can be null if they are completely honest
+    public string minor_secret;
 
-    // Key: Suspect Name, Value: Rumor/Hunch about that person
     public Dictionary<string, string> rumors;
 
     // Logical Flags for the Triple-Filter
-    // The Game Logic uses these to verify the "Intersection of Guilt"
-    public bool is_in_group_a; // The Liars (Killer + 1 Red Herring)
-    public bool is_in_group_b; // The Motivated (Killer + 1-2 others)
-    public bool is_in_group_c; // The Capable (Killer + 1-2 others with weapon access)
+    public bool is_in_group_a;
+    public bool is_in_group_b;
+    public bool is_in_group_c;
 
-    public bool is_killer; // Must be true only for the person in Groups A, B, and C
+    public bool is_killer;
+
+    // We add it here too, so you can print individual suspects if needed.
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this, Formatting.Indented);
+    }
 }
