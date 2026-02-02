@@ -4,17 +4,23 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Manages the UI interrogation flow. 
-/// Handles switching suspects and sending questions to the Gemini API.
+/// Handles switching suspects, sending questions, and submitting the final accusation.
 /// </summary>
 public class InterrogationManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
 
-    [Header("UI Elements")]
-    public TMP_InputField playerInputField; // Where the player types
+    [Header("Interrogation UI")]
+    public TMP_InputField playerInputField; // Where the player types questions
     public TMP_Text responseTextField;      // Where the suspect's answer appears
     public TMP_Text suspectNameDisplay;     // Shows who you are currently talking to
+
+    [Header("Accusation UI")]
+    public TMP_InputField accusedNameInput;   // Input for the killer's name
+    public TMP_InputField motiveInput;        // Input for the motive reasoning
+    public TMP_InputField accessInput;        // Input for the access reasoning
+    public TMP_Text accusationResultDisplay;  // Where the Judge's verdict appears
 
     [Header("Debug Display")]
     [Tooltip("Assign a TMP_Text here to see the full secret scenario JSON for testing.")]
@@ -145,6 +151,53 @@ public class InterrogationManager : MonoBehaviour
             {
                 // Show the error in the display field
                 responseTextField.text = $"<color=red>Error:</color> {error}";
+            }
+        });
+    }
+
+    /// <summary>
+    /// Submits the final accusation report to the Judge API.
+    /// </summary>
+    public void SubmitAccusation()
+    {
+        if (connectionManager.currentScenario == null)
+        {
+            if (accusationResultDisplay != null)
+                accusationResultDisplay.text = "Error: No scenario loaded.";
+            return;
+        }
+
+        string name = accusedNameInput.text;
+        string motive = motiveInput.text;
+        string access = accessInput.text;
+
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(motive) || string.IsNullOrWhiteSpace(access))
+        {
+            if (accusationResultDisplay != null)
+                accusationResultDisplay.text = "Please fill in all fields of the report.";
+            return;
+        }
+
+        if (accusationResultDisplay != null)
+            accusationResultDisplay.text = "<i>Submitting report to the Judge...</i>";
+
+        connectionManager.JudgeAccusation(name, motive, access, (isCorrect, feedback, error) =>
+        {
+            if (string.IsNullOrEmpty(error))
+            {
+                string color = isCorrect ? "green" : "red";
+                string verdict = isCorrect ? "GUILTY" : "INNOCENT / WRONG REASONING";
+
+                if (accusationResultDisplay != null)
+                {
+                    accusationResultDisplay.text = $"<b>Verdict: <color={color}>{verdict}</color></b>\n\n" +
+                                                 $"<i>{feedback}</i>";
+                }
+            }
+            else
+            {
+                if (accusationResultDisplay != null)
+                    accusationResultDisplay.text = $"<color=red>Judge Error:</color> {error}";
             }
         });
     }

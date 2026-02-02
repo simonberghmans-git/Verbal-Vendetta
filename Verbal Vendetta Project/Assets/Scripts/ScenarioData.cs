@@ -10,14 +10,12 @@ public class ScenarioData
 {
     public string victim_name;
     public string victim_occupation;
+    public string victim_biography;         // NEW: Detailed background to provide player context
     public string victim_discovery_details;
     public string murder_weapon;
     public string murder_location;
     public List<SuspectData> suspects;
 
-    /// <summary>
-    /// Pretty-prints the scenario data as JSON for debugging in the Unity console.
-    /// </summary>
     public override string ToString()
     {
         return JsonConvert.SerializeObject(this, Formatting.Indented);
@@ -25,30 +23,27 @@ public class ScenarioData
 }
 
 /// <summary>
-/// Data structure for an individual suspect, including their memory and logic flags.
+/// Data structure for an individual suspect, including their relationship to the victim.
 /// </summary>
 [Serializable]
 public class SuspectData
 {
     public string name;
+    public string relationship;                   // e.g., "Estranged Daughter", "Personal Chef"
     public string personality;
-    public string motive;          // Only assigned if has_motive is true
+    public string motive;                         // Only assigned if has_motive is true
+    public string access_to_weapon_description;    // The specific "Means" for the Judge to verify
     public string alibi_statement;
-    public string minor_secret;    // Only assigned for the Red Herring (has_no_alibi = true, is_killer = false)
+    public string minor_secret;                   // Only assigned for the Red Herring
 
-    // Key: Suspect Name, Value: Rumor text about that suspect
     public Dictionary<string, string> rumors;
 
     // --- TRIPLE-FILTER LOGIC FLAGS ---
-    public bool has_no_alibi;          // Group A: True if they are lying
-    public bool has_motive;            // Group B: True if they have a reason
-    public bool has_access_to_weapon;  // Group C: True if they could reach the scene
+    public bool has_no_alibi;
+    public bool has_motive;
+    public bool has_access_to_weapon;
+    public bool is_killer;
 
-    public bool is_killer;             // True only if all three flags above are true
-
-    // --- INTERROGATION MEMORY ---
-    // Stores the transcript of questions and answers for THIS specific suspect.
-    // [JsonIgnore] ensures this local history doesn't interfere with the initial generation.
     [JsonIgnore]
     public List<GeminiConnectionManager.GeminiContent> chatHistory = new List<GeminiConnectionManager.GeminiContent>();
 

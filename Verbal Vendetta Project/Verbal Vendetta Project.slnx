@@ -1,0 +1,14 @@
+﻿<Solution>
+  <Project Path="uLipSync.Editor.csproj" />
+  <Project Path="uLipSync.Runtime.csproj" />
+  <Project Path="UnityChan.csproj" />
+  <Project Path="uLipSync.Example.RuntimeProfile.Runtime.csproj" />
+  <Project Path="uLipSync.Samples.VRM.Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="uLipSync.Samples.VRM.Runtime.csproj" />
+  <Project Path="uLipSync.Samples.RuntimeSetup.Runtime.csproj" />
+  <Project Path="uLipSync.Samples.Animator.Runtime.csproj" />
+  <Project Path="uLipSync.Samples.Common.csproj" />
+  <Project Path="uLipSync.Samples.WebGL.Runtime.csproj" />
+</Solution>
