@@ -156,6 +156,41 @@ public class InterrogationManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Sends a provided text string to the active suspect (used for voice input path).
+    /// </summary>
+    public void AskSuspectWithText(string text)
+    {
+        if (connectionManager.currentScenario == null)
+        {
+            responseTextField.text = "Please generate a mystery scenario first!";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        // Show a "Thinking" indicator while waiting for the API
+        responseTextField.text = "<i>Thinking...</i>";
+
+        SuspectData activeSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
+
+        connectionManager.SpeakWithSuspect(text, activeSuspect, (response, error) =>
+        {
+            if (string.IsNullOrEmpty(error))
+            {
+                responseTextField.text = $"<b>{activeSuspect.name}:</b> {response}";
+            }
+            else
+            {
+                responseTextField.text = $"<color=red>Error:</color> {error}";
+            }
+
+            // Notify the input manager that an answer has been received so it can update the status
+            var inputManager = FindObjectOfType<InterrogationInputManager>();
+            if (inputManager != null) inputManager.OnAnswerReceived();
+        });
+    }
+
+    /// <summary>
     /// Submits the final accusation report to the Judge API.
     /// </summary>
     public void SubmitAccusation()
