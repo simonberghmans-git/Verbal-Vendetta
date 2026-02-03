@@ -6,14 +6,14 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 
 /// <summary>
-/// Uses Gemini 3.0 Multimodal capabilities to transcribe audio data.
-/// This script handles the conversion of audio bytes into a text transcript.
+/// Uses Gemini Multimodal capabilities to transcribe audio data.
+/// Reverted to gemini-2.5-flash-preview-09-2025 as it is the only model found by the current endpoint.
 /// </summary>
 public class GeminiSTTHandler : MonoBehaviour
 {
     [SerializeField] private string apiKey = "";
 
-    // Using Gemini 3.0 Flash for low-latency multimodal processing
+    // Using the specific preview model that was successfully found previously.
     private string model = "gemini-2.5-flash-preview-09-2025";
 
     public delegate void STTCallback(string transcription, string error);
@@ -30,6 +30,14 @@ public class GeminiSTTHandler : MonoBehaviour
             callback?.Invoke(null, "API Key Missing for STT");
             return;
         }
+
+        // Safety check: Don't send empty or tiny audio files
+        if (wavData == null || wavData.Length < 100)
+        {
+            callback?.Invoke("", null);
+            return;
+        }
+
         StartCoroutine(PostSTTRequest(wavData, callback));
     }
 
@@ -37,8 +45,7 @@ public class GeminiSTTHandler : MonoBehaviour
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
-        // Constructing the multimodal payload
-        // NOTE: inlineData and mimeType must use camelCase for the Google API
+        // Constructing the multimodal payload using camelCase for API compatibility
         var payload = new
         {
             contents = new[] {
@@ -75,7 +82,7 @@ public class GeminiSTTHandler : MonoBehaviour
                     }
                     else
                     {
-                        callback?.Invoke("", null); // Return empty if no candidates found
+                        callback?.Invoke("", null);
                     }
                 }
                 catch (Exception ex)
@@ -85,7 +92,6 @@ public class GeminiSTTHandler : MonoBehaviour
             }
             else
             {
-                // Log detail to console for debugging
                 string errorDetail = request.downloadHandler.text;
                 Debug.LogError($"STT API Error Detail: {errorDetail}");
                 callback?.Invoke(null, "STT API Error: " + request.error);
@@ -93,7 +99,6 @@ public class GeminiSTTHandler : MonoBehaviour
         }
     }
 
-    // JSON response wrappers
     [Serializable] public class GeminiResponseWrapper { public List<Candidate> candidates; }
     [Serializable] public class Candidate { public Content content; }
     [Serializable] public class Content { public List<Part> parts; }
