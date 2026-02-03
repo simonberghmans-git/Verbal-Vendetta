@@ -18,7 +18,7 @@ public class InterrogationInputManager : MonoBehaviour
     public TMP_Text transcriptionPreview;
 
     [Header("Settings")]
-    public float cancellationTime = 2.0f;
+    public float cancellationTime = 3.0f; //set in inspector
     private string micName;
     private AudioClip recordedClip;
     private bool isRecording = false;
