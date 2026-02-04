@@ -158,7 +158,12 @@ public class GeminiConnectionManager : MonoBehaviour
         ACCESS: {(suspect.has_access_to_weapon ? suspect.access_to_weapon_description : "None.")}.
         GUILT: {(suspect.is_killer ? "YOU ARE THE KILLER." : "INNOCENT.")}.
         RUMORS YOU KNOW: {JsonConvert.SerializeObject(suspect.rumors)}.
-        RULES: Stay in character. 1-2 sentences. If asked about the time of the murder, refer strictly to your alibi.";
+        RULES: 
+        1. Stay in character. 
+        2. 1-2 sentences. 
+        3. Refer only to what your character knows as described in the JSON file
+        4. Do not use any colon symbols when referring to time, but say things like 3 45PM as to keep TTS models capable of repeating your response properly
+        5. When asked about things that do not at all relate to the case, point out the absurdidy of the question ";
 
         suspect.chatHistory.Add(new GeminiContent { role = "user", parts = new List<GeminiPart> { new GeminiPart { text = question } } });
 
