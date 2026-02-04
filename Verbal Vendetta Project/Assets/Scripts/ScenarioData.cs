@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -10,8 +11,16 @@ public class ScenarioData
 {
     public string victim_name;
     public string victim_occupation;
-    public string victim_biography;         // NEW: Detailed background to provide player context
+    public string victim_biography;         // Detailed background to provide player context
     public string victim_discovery_details;
+
+    [Header("Crime Timeline")]
+    public string murder_time;              // e.g., "11:20 PM"
+    public string murder_date;              // e.g., "October 12th, 1947"
+
+    [Header("Interrogation Timeline")]
+    public string interrogation_date;
+
     public string murder_weapon;
     public string murder_location;
     public List<SuspectData> suspects;
@@ -23,7 +32,7 @@ public class ScenarioData
 }
 
 /// <summary>
-/// Data structure for an individual suspect, including their relationship to the victim.
+/// Data structure for an individual suspect, including their relationship to the victim and voice settings.
 /// </summary>
 [Serializable]
 public class SuspectData
@@ -31,6 +40,7 @@ public class SuspectData
     public string name;
     public string relationship;                   // e.g., "Estranged Daughter", "Personal Chef"
     public string personality;
+    public string voice_id;                       // The ElevenLabs Voice ID assigned at generation
     public string motive;                         // Only assigned if has_motive is true
     public string access_to_weapon_description;    // The specific "Means" for the Judge to verify
     public string alibi_statement;

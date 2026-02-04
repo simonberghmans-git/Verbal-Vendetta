@@ -9,7 +9,8 @@ using TMPro;
 
 /// <summary>
 /// Manages the connection to the Gemini API and stores the current mystery state.
-/// Updated to include specific Access descriptions, Victim Biography, and Relationships.
+/// Updated with refined Triple-Filter logic, Timeline anchoring, Rumor cross-referencing,
+/// and Gender-based Voice ID assignment.
 /// </summary>
 public class GeminiConnectionManager : MonoBehaviour
 {
@@ -17,12 +18,19 @@ public class GeminiConnectionManager : MonoBehaviour
     private string model = "gemini-3-flash-preview";
     public ScenarioData currentScenario;
 
+    [Header("Voice Settings")]
+    [Tooltip("List of ElevenLabs Voice IDs for Male suspects.")]
+    [SerializeField] private List<string> maleVoiceIds = new List<string>();
+    [Tooltip("List of ElevenLabs Voice IDs for Female suspects.")]
+    [SerializeField] private List<string> femaleVoiceIds = new List<string>();
+
     [Header("Debug Settings")]
     [SerializeField] private TMP_Text debugDisplayField;
 
-    [Header("References")]
+    [Header("UI References")]
     public NotebookManager notebookManager;
 
+    // --- DELEGATES ---
     public delegate void ScenarioCallback(ScenarioData data, string error);
     public delegate void InterrogationCallback(string response, string error);
     public delegate void JudgeCallback(bool isCorrect, string feedback, string error);
@@ -33,6 +41,7 @@ public class GeminiConnectionManager : MonoBehaviour
         if (string.IsNullOrEmpty(apiKey))
         {
             Debug.LogError("API Key is missing!");
+            callback?.Invoke(null, "API Key Missing");
             return;
         }
         StartCoroutine(PostScenarioRequest(callback));
@@ -42,85 +51,89 @@ public class GeminiConnectionManager : MonoBehaviour
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
-        // UPDATED SYSTEM PROMPT: Now requires 'access_to_weapon_description', 'relationship', and 'victim_biography'
-        string systemPrompt = @"You are a master mystery writer. Generate a murder mystery scenario in JSON.
+        // Convert lists to strings for the prompt
+        string maleIdsJoined = maleVoiceIds.Count > 0 ? string.Join(", ", maleVoiceIds) : "No Male IDs provided";
+        string femaleIdsJoined = femaleVoiceIds.Count > 0 ? string.Join(", ", femaleVoiceIds) : "No Female IDs provided";
+
+        // UPDATED SYSTEM PROMPT: Integrates Voice ID assignment logic
+        string systemPrompt = $@"You are a master mystery writer. Generate a murder mystery scenario in JSON.
         
         LOGIC RULES (The Triple-Filter):
         1. Exactly 5 suspects.
         2. The Liars (No Alibi): Exactly 2 suspects have has_no_alibi = true (Killer + Red Herring).
         3. The Motivated: Exactly 2 to 3 suspects have has_motive = true (Must include the Killer).
         4. The Capable (Access): Exactly 2 to 3 suspects have has_access_to_weapon = true (Must include the Killer).
-           - CRITICAL: For these suspects, you MUST provide a 'access_to_weapon_description' explaining HOW they reached/obtained the weapon.
+            - CRITICAL: For these suspects, you MUST provide a 'access_to_weapon_description' explaining HOW they reached/obtained the weapon.
         5. THE KILLER: The ONLY suspect with all three flags true.
         
-        STORY RULES:
-        6. Victim Biography: Provide 2-3 sentences of background info on the victim's life and social standing.
-        7. Relationship: Define a clear connection to the victim (e.g., 'Business Partner', 'Scorned Lover').
-        8. Personality: Adjectives only. No spoilers.
-        9. Access Description: Be specific (e.g., 'Possesses the master key', 'Was left alone in the kitchen with the knives').
-        10. RANDOMIZATION: You MUST randomize the index of the killer in the suspects list. Do NOT always place the killer at the first position (index 0). The killer should appear randomly at any index (0-4).
-        11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' MUST have a corresponding clue hidden in at least one other suspect's 'rumors' dictionary. The player must be able to solve the case purely by cross-referencing these rumors.
+        STORY & TIMELINE RULES:
+        6. TIMELINE: You MUST provide a specific 'murder_time', 'murder_date', and 'interrogation_date'.
+        7. Victim Biography: Provide 2-3 sentences of background info.
+        8. Relationship: Define a clear connection.
+        9. Personality: Adjectives only.
+        10. RANDOMIZATION: You MUST randomize the index of the killer in the suspects list (0-4).
+        11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' MUST have a corresponding clue in 'rumors'.
+        12. VOICE ASSIGNMENT: Assign a 'voice_id' to each suspect based on their gender.
+            - Available Male IDs: [{maleIdsJoined}]
+            - Available Female IDs: [{femaleIdsJoined}]
+            - RULE: Try to ensure each suspect has a unique voice_id. If a list is too short, you may reuse IDs, but prioritize variety across the 5 suspects.
 
         JSON_STRUCTURE_EXAMPLE:
-        {
+        {{
           ""victim_name"": ""Name"",
           ""victim_occupation"": ""Job"",
-          ""victim_biography"": ""Context about their life and history."",
+          ""victim_biography"": ""Context..."",
+          ""murder_time"": ""10:15 PM"",
+          ""murder_date"": ""July 14th"",
+          ""interrogation_date"": ""July 15th"",
           ""victim_discovery_details"": ""Details"",
           ""murder_weapon"": ""Weapon"",
           ""murder_location"": ""Location"",
           ""suspects"": [
-            {
+            {{
               ""name"": ""Name"",
-              ""relationship"": ""Connection to victim"",
+              ""relationship"": ""Connection"",
               ""personality"": ""Trait"",
+              ""voice_id"": ""TheSelectedID"",
               ""motive"": ""Reason or null"",
-              ""access_to_weapon_description"": ""How they got the weapon or null"",
-              ""alibi_statement"": ""Alibi"",
+              ""access_to_weapon_description"": ""Description or null"",
+              ""alibi_statement"": ""Statement..."",
               ""minor_secret"": ""Secret or null"",
-              ""rumors"": { ""OtherSuspectName"": ""I saw them sneaking into the vault earlier."" },
+              ""rumors"": {{ ""OtherSuspectName"": ""Rumor text..."" }},
               ""has_no_alibi"": true,
               ""has_motive"": true,
               ""has_access_to_weapon"": true,
               ""is_killer"": true
-            }
+            }}
           ]
-        }";
+        }}";
 
         var payload = new
         {
-            contents = new[] { new { parts = new[] { new { text = "Generate a new mystery following the logic rules." } } } },
+            contents = new[] { new { parts = new[] { new { text = "Generate a new mystery scenario following all timeline, logic, and voice assignment rules. Randomize the killer." } } } },
             systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
             generationConfig = new { responseMimeType = "application/json" }
         };
 
-        string jsonPayload = JsonConvert.SerializeObject(payload);
-        if (debugDisplayField != null) debugDisplayField.text = "Generating Scenario...";
-
-        using (UnityWebRequest request = CreateRequest(url, jsonPayload))
+        using (UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload)))
         {
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
             {
                 try
                 {
-                    GeminiResponseWrapper response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                    currentScenario = JsonConvert.DeserializeObject<ScenarioData>(response.candidates[0].content.parts[0].text);
-                    if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
+                    var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                    string jsonText = res.candidates[0].content.parts[0].text;
+                    currentScenario = JsonConvert.DeserializeObject<ScenarioData>(jsonText);
 
-                    // If a NotebookManager has been assigned in the inspector, ensure it has
-                    // a reference to this connection manager and populate the victim page.
-                    if (notebookManager != null)
-                    {
-                        if (notebookManager.connectionManager == null) notebookManager.connectionManager = this;
-                        notebookManager.PopulateVictimPage();
-                    }
+                    if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
+                    if (notebookManager != null) notebookManager.PopulateVictimPage();
 
                     callback?.Invoke(currentScenario, null);
                 }
-                catch (Exception ex) { callback?.Invoke(null, ex.Message); }
+                catch (Exception ex) { callback?.Invoke(null, "Parsing Error: " + ex.Message); }
             }
-            else { callback?.Invoke(null, request.error); }
+            else { callback?.Invoke(null, "API Error: " + request.error); }
         }
     }
 
@@ -134,15 +147,18 @@ public class GeminiConnectionManager : MonoBehaviour
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
+        string timelineContext = $"TODAY IS: {currentScenario.interrogation_date}. THE MURDER HAPPENED ON: {currentScenario.murder_date} AT {currentScenario.murder_time}.";
+
         string systemPrompt = $@"You are roleplaying as {suspect.name}.
-        RELATIONSHIP TO VICTIM: {suspect.relationship}.
+        {timelineContext}
+        RELATIONSHIP: {suspect.relationship}.
         TRAITS: {suspect.personality}.
         ALIBI: {suspect.alibi_statement}.
         MOTIVE: {(suspect.has_motive ? suspect.motive : "None.")}.
-        ACCESS: {(suspect.has_access_to_weapon ? suspect.access_to_weapon_description : "You had no access.")}.
+        ACCESS: {(suspect.has_access_to_weapon ? suspect.access_to_weapon_description : "None.")}.
         GUILT: {(suspect.is_killer ? "YOU ARE THE KILLER." : "INNOCENT.")}.
-        RUMORS: {JsonConvert.SerializeObject(suspect.rumors)}.
-        RULES: Stay in character. Speak appropriately regarding your relationship to the deceased. 1-2 sentences.";
+        RUMORS YOU KNOW: {JsonConvert.SerializeObject(suspect.rumors)}.
+        RULES: Stay in character. 1-2 sentences. If asked about the time of the murder, refer strictly to your alibi.";
 
         suspect.chatHistory.Add(new GeminiContent { role = "user", parts = new List<GeminiPart> { new GeminiPart { text = question } } });
 
@@ -157,8 +173,8 @@ public class GeminiConnectionManager : MonoBehaviour
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
             {
-                GeminiResponseWrapper response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                string reply = response.candidates[0].content.parts[0].text;
+                var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                string reply = res.candidates[0].content.parts[0].text;
                 suspect.chatHistory.Add(new GeminiContent { role = "model", parts = new List<GeminiPart> { new GeminiPart { text = reply } } });
                 callback?.Invoke(reply, null);
             }
@@ -177,21 +193,14 @@ public class GeminiConnectionManager : MonoBehaviour
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
-        string systemPrompt = $@"You are the Judge. Compare the player's accusation to this TRUTH:
-        {JsonConvert.SerializeObject(currentScenario)}
-
-        EVALUATION:
-        1. WHO: Does name match is_killer=true?
-        2. MOTIVE: Does reasoning match 'motive'?
-        3. ACCESS: Does reasoning match 'access_to_weapon_description'?
-
-        OUTPUT JSON: is_correct (bool), feedback (string).";
-
-        string userQuery = $"Accused: {accusedName}\nMotive: {motive}\nAccess: {access}";
+        string systemPrompt = $@"You are the Judge. Compare the player's accusation to the hidden truth.
+        TRUTH: {JsonConvert.SerializeObject(currentScenario)}
+        RULES: Determine if the player identified the correct killer AND the correct logic (motive/access). 
+        Output JSON: is_correct (bool), feedback (string).";
 
         var payload = new
         {
-            contents = new[] { new { parts = new[] { new { text = userQuery } } } },
+            contents = new[] { new { parts = new[] { new { text = $"Accused: {accusedName}\nMotive: {motive}\nAccess: {access}" } } } },
             systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
             generationConfig = new
             {
@@ -199,11 +208,7 @@ public class GeminiConnectionManager : MonoBehaviour
                 responseSchema = new
                 {
                     type = "OBJECT",
-                    properties = new
-                    {
-                        is_correct = new { type = "BOOLEAN" },
-                        feedback = new { type = "STRING" }
-                    },
+                    properties = new { is_correct = new { type = "BOOLEAN" }, feedback = new { type = "STRING" } },
                     required = new[] { "is_correct", "feedback" }
                 }
             }
@@ -214,8 +219,8 @@ public class GeminiConnectionManager : MonoBehaviour
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
             {
-                GeminiResponseWrapper response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                JudgeResult result = JsonConvert.DeserializeObject<JudgeResult>(response.candidates[0].content.parts[0].text);
+                var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                var result = JsonConvert.DeserializeObject<JudgeResult>(res.candidates[0].content.parts[0].text);
                 callback?.Invoke(result.is_correct, result.feedback, null);
             }
             else { callback?.Invoke(false, null, request.error); }
