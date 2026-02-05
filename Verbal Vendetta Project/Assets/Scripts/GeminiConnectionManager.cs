@@ -72,8 +72,9 @@ public class GeminiConnectionManager : MonoBehaviour
         8. Relationship: Define a clear connection.
         9. Personality: Adjectives only.
         10. RANDOMIZATION: You MUST randomize the index of the killer in the suspects list (0-4).
-        11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' MUST have a corresponding clue in 'rumors'.
-        12. VOICE ASSIGNMENT: Assign a 'voice_id' to each suspect based on their gender.
+        11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' of one suspect MUST have a corresponding clue in the 'rumors' of a different suspect.
+        12. CONTRADICTION: Every 'rumor' a suspect knows, must not contradict their own alibi. Unless the suspect who knows this 'rumor' has a false alibi (Killer or Red Herring).
+        13. VOICE ASSIGNMENT: Assign a 'voice_id' to each suspect based on their gender.
             - Available Male IDs: [{maleIdsJoined}]
             - Available Female IDs: [{femaleIdsJoined}]
             - RULE: Try to ensure each suspect has a unique voice_id. If a list is too short, you may reuse IDs, but prioritize variety across the 5 suspects.
@@ -163,7 +164,8 @@ public class GeminiConnectionManager : MonoBehaviour
         2. 1-2 sentences. 
         3. Refer only to what your character knows as described in the JSON file
         4. Do not use any colon symbols when referring to time, but say things like 3 45PM as to keep TTS models capable of repeating your response properly
-        5. When asked about things that do not at all relate to the case, point out the absurdidy of the question ";
+        5. When asked about things that do not at all relate to the case, point out the absurdidy of the question
+        6. When pressured about their false alibi, only the suspect with no motive and a false alibi (= Red Herring) will reveal their minor secret, explaining why they would fake their alibi";
 
         suspect.chatHistory.Add(new GeminiContent { role = "user", parts = new List<GeminiPart> { new GeminiPart { text = question } } });
 

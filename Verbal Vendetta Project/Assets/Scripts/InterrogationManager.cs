@@ -10,6 +10,7 @@ public class InterrogationManager : MonoBehaviour
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
     public ElevenLabsTTSHandler ttsHandler; // New Dependency
+    public NotebookManager notebookManager;
 
     [Header("Interrogation UI")]
     public TMP_InputField playerInputField;
@@ -72,6 +73,11 @@ public class InterrogationManager : MonoBehaviour
 
         responseTextField.text = "<i>Thinking...</i>";
         SuspectData activeSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
+        // Append the player's question to the suspect's transcript in the notebook
+        if (notebookManager != null)
+        {
+            notebookManager.AppendSuspectLine(currentSuspectIndex, $"Player: {question}");
+        }
         // Disable TTS trigger until we have a response
         connectionManager.SpeakWithSuspect(question, activeSuspect, (response, error) =>
         {
@@ -84,6 +90,12 @@ public class InterrogationManager : MonoBehaviour
                 if (!string.IsNullOrEmpty(response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
                 {
                     ttsHandler.PlayVoice(response, activeSuspect.voice_id);
+                }
+
+                // Append the suspect's response to the notebook transcript
+                if (notebookManager != null)
+                {
+                    notebookManager.AppendSuspectLine(currentSuspectIndex, $"{activeSuspect.name}: {response}");
                 }
 
                 // Inform any input manager that an answer was received so that UI state can be reset
