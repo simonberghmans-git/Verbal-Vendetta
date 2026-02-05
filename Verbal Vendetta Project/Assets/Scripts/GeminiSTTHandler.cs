@@ -60,42 +60,87 @@ public class GeminiSTTHandler : MonoBehaviour
 
         string jsonPayload = JsonConvert.SerializeObject(payload);
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        int maxAttempts = 3;
+        float baseDelay = 1.0f; // seconds
+        bool finished = false;
+        string lastError = null;
+
+        for (int attempt = 1; attempt <= maxAttempts && !finished; attempt++)
         {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonPayload);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
+            using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
             {
-                try
-                {
-                    var response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonPayload);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.timeout = 30; // seconds
 
-                    if (response?.candidates != null && response.candidates.Count > 0)
+                yield return request.SendWebRequest();
+
+                // Log some additional diagnostics for intermittent failures
+                long responseCode = request.responseCode;
+                string responseText = string.Empty;
+                try { responseText = request.downloadHandler != null ? request.downloadHandler.text : string.Empty; } catch { responseText = "<unable to read response>"; }
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    try
                     {
-                        string result = response.candidates[0].content.parts[0].text;
-                        callback?.Invoke(result.Trim(), null);
+                        var response = JsonConvert.DeserializeObject<GeminiResponseWrapper>(responseText);
+
+                        if (response?.candidates != null && response.candidates.Count > 0)
+                        {
+                            var candidate = response.candidates[0];
+                            // Defensive checks: some API responses may include candidate.content.role without parts
+                            if (candidate?.content != null && candidate.content.parts != null && candidate.content.parts.Count > 0 && !string.IsNullOrEmpty(candidate.content.parts[0].text))
+                            {
+                                string result = candidate.content.parts[0].text;
+                                callback?.Invoke(result.Trim(), null);
+                            }
+                            else
+                            {
+                                // No transcript parts present -> treat as empty transcription (silence or non-text response)
+                                callback?.Invoke("", null);
+                            }
+                        }
+                        else
+                        {
+                            callback?.Invoke("", null);
+                        }
+
+                        finished = true;
                     }
-                    else
+                    catch (JsonException jex)
                     {
-                        callback?.Invoke("", null);
+                        lastError = "STT Parsing Error: " + jex.Message;
+                        Debug.LogError($"STT Parsing Error (attempt {attempt}): {jex.Message}\nResponseCode: {responseCode}\nResponseText: {responseText}");
+                        // don't finish, maybe transient malformed response
+                    }
+                    catch (Exception ex)
+                    {
+                        lastError = "STT Unknown Error: " + ex.Message;
+                        Debug.LogError($"STT Unknown Error (attempt {attempt}): {ex.Message}\nResponseCode: {responseCode}\nResponseText: {responseText}");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    callback?.Invoke(null, "STT Parsing Error: " + ex.Message);
+                    // Detailed logging to help diagnose intermittent issues
+                    lastError = $"STT API Error: {request.error} (code: {responseCode})";
+                    Debug.LogError($"STT API Error (attempt {attempt}): {request.error} | ResponseCode: {responseCode} | ResponseText: {responseText}");
                 }
             }
-            else
+
+            if (!finished && attempt < maxAttempts)
             {
-                string errorDetail = request.downloadHandler.text;
-                Debug.LogError($"STT API Error Detail: {errorDetail}");
-                callback?.Invoke(null, "STT API Error: " + request.error);
+                // exponential backoff with simple jitter
+                float delay = baseDelay * Mathf.Pow(2, attempt - 1) + UnityEngine.Random.Range(0f, 0.5f);
+                yield return new WaitForSeconds(delay);
             }
+        }
+
+        if (!finished)
+        {
+            callback?.Invoke(null, lastError ?? "STT API Error: Unknown");
         }
     }
 
