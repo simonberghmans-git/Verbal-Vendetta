@@ -72,7 +72,7 @@ public class InterrogationManager : MonoBehaviour
 
         responseTextField.text = "<i>Thinking...</i>";
         SuspectData activeSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
-
+        // Disable TTS trigger until we have a response
         connectionManager.SpeakWithSuspect(question, activeSuspect, (response, error) =>
         {
             if (string.IsNullOrEmpty(error))
@@ -80,11 +80,15 @@ public class InterrogationManager : MonoBehaviour
                 responseTextField.text = $"<b>{activeSuspect.name}:</b> {response}";
                 playerInputField.text = "";
 
-                // TRIGGER ELEVENLABS VOICE
-                if (ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
+                // Only play TTS if we actually received text
+                if (!string.IsNullOrEmpty(response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
                 {
                     ttsHandler.PlayVoice(response, activeSuspect.voice_id);
                 }
+
+                // Inform any input manager that an answer was received so that UI state can be reset
+                var inputMgr = FindObjectOfType<InterrogationInputManager>();
+                if (inputMgr != null) inputMgr.OnAnswerReceived();
             }
             else
             {

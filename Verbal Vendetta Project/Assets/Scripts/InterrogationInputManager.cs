@@ -22,6 +22,7 @@ public class InterrogationInputManager : MonoBehaviour
     private string micName;
     private AudioClip recordedClip;
     private bool isRecording = false;
+    private bool isTranscribing = false;
     private bool isReviewing = false;
     private Coroutine submissionCoroutine;
     private string pendingTranscript = "";
@@ -41,7 +42,7 @@ public class InterrogationInputManager : MonoBehaviour
     void Update()
     {
         // 1. Press and Hold Space to record
-        if (Input.GetKeyDown(KeyCode.Space) && !isRecording && !isReviewing)
+        if (Input.GetKeyDown(KeyCode.Space) && !isRecording && !isReviewing && !isTranscribing)
         {
             StartRecording();
         }
@@ -79,9 +80,10 @@ public class InterrogationInputManager : MonoBehaviour
             statusLabel.text = "TRANSCRIBING...";
             AudioClip trimmed = TrimClip(recordedClip, micPos);
             byte[] wavData = WavUtility.FromAudioClip(trimmed);
-
             // Step 2: Request the full transcription from Gemini
+            isTranscribing = true;
             sttHandler.TranscribeAudio(wavData, (text, error) => {
+                isTranscribing = false;
                 if (string.IsNullOrEmpty(error))
                 {
                     pendingTranscript = text;
@@ -101,6 +103,8 @@ public class InterrogationInputManager : MonoBehaviour
                 else
                 {
                     statusLabel.text = "<color=red>STT API Error</color>";
+                    transcriptionPreview.text = "Ready.";
+                    pendingTranscript = "";
                 }
             });
         }
