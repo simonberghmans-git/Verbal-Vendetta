@@ -28,6 +28,8 @@ public class NotebookManager : MonoBehaviour
     [Header("Transcripts")]
     [Tooltip("TMP_Text fields for each suspect's full transcript. Order must match suspects in the scenario.")]
     public List<TMP_Text> suspectTranscriptTexts = new List<TMP_Text>();
+    [Tooltip("Separate TMP_Text fields for each suspect's name/header. Order must match suspects in the scenario.")]
+    public List<TMP_Text> suspectHeaderTexts = new List<TMP_Text>();
 
     [Header("Notebook Pages")]
     [Tooltip("Root GameObject for the Notebook UI. This will be toggled with Tab.")]
@@ -95,10 +97,16 @@ public class NotebookManager : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             suspectTranscripts.Add("");
+            // Set header in separate header text if available
+            if (i < suspectHeaderTexts.Count && suspectHeaderTexts[i] != null)
+            {
+                suspectHeaderTexts[i].text = $"<b>{scenario.suspects[i].name}</b>";
+            }
+
+            // Initialize the transcript body placeholder independently
             if (i < suspectTranscriptTexts.Count && suspectTranscriptTexts[i] != null)
             {
-                // Optionally show suspect header
-                suspectTranscriptTexts[i].text = $"<b>{scenario.suspects[i].name}</b>\n";
+                suspectTranscriptTexts[i].text = "No questions asked yet";
             }
         }
     }
@@ -121,20 +129,8 @@ public class NotebookManager : MonoBehaviour
 
         if (suspectIndex < suspectTranscriptTexts.Count && suspectTranscriptTexts[suspectIndex] != null)
         {
-            // If the field already had a header (name), keep it and append beneath
-            string existing = suspectTranscriptTexts[suspectIndex].text ?? "";
-            // If the TMP field currently matches just the header, replace it with header + transcript
-            if (!string.IsNullOrEmpty(existing) && existing.Contains("</b>"))
-            {
-                // preserve header line and append full transcript after
-                int idx = existing.IndexOf('\n');
-                string header = idx >= 0 ? existing.Substring(0, idx + 1) : existing + "\n";
-                suspectTranscriptTexts[suspectIndex].text = header + suspectTranscripts[suspectIndex];
-            }
-            else
-            {
-                suspectTranscriptTexts[suspectIndex].text = suspectTranscripts[suspectIndex];
-            }
+            // Transcript body is kept separate from header; show placeholder if empty
+            suspectTranscriptTexts[suspectIndex].text = string.IsNullOrEmpty(suspectTranscripts[suspectIndex]) ? "No questions asked yet" : suspectTranscripts[suspectIndex];
         }
     }
 
@@ -142,6 +138,36 @@ public class NotebookManager : MonoBehaviour
     {
         if (suspectIndex < 0 || suspectIndex >= suspectTranscripts.Count) return "";
         return suspectTranscripts[suspectIndex];
+    }
+
+    /// <summary>
+    /// Append a formatted question and answer pair to the specified suspect's transcript.
+    /// Format:
+    /// You: "question"
+    /// Suspect: "answer"
+    /// Does not add the suspect's name to the transcript (header is kept separately).
+    /// </summary>
+    public void AppendQuestionAndAnswer(int suspectIndex, string question, string answer)
+    {
+        if (suspectIndex < 0) return;
+
+        // Ensure internal list is large enough
+        while (suspectIndex >= suspectTranscripts.Count) suspectTranscripts.Add("");
+
+        string q = question ?? "";
+        string a = answer ?? "";
+        string combined = $"You: \"{q}\"\nSuspect: \"{a}\"";
+
+        if (suspectTranscripts[suspectIndex].Length > 0)
+            suspectTranscripts[suspectIndex] += "\n" + combined;
+        else
+            suspectTranscripts[suspectIndex] = combined;
+
+        if (suspectIndex < suspectTranscriptTexts.Count && suspectTranscriptTexts[suspectIndex] != null)
+        {
+            // Transcript body is separate from header; show placeholder if empty
+            suspectTranscriptTexts[suspectIndex].text = string.IsNullOrEmpty(suspectTranscripts[suspectIndex]) ? "No questions asked yet" : suspectTranscripts[suspectIndex];
+        }
     }
 
     /// <summary>
