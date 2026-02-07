@@ -33,7 +33,7 @@ public class GeminiConnectionManager : MonoBehaviour
     // --- DELEGATES ---
     public delegate void ScenarioCallback(ScenarioData data, string error);
     public delegate void InterrogationCallback(string response, string error);
-    public delegate void JudgeCallback(bool isCorrect, string feedback, string error);
+    public delegate void JudgeCallback(string headline, string article, bool isCorrect, string error);
 
     // --- CALL 1: SCENARIO GENERATION ---
     public void GenerateScenario(ScenarioCallback callback)
@@ -200,10 +200,25 @@ public class GeminiConnectionManager : MonoBehaviour
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
-        string systemPrompt = $@"You are the Judge. Compare the player's accusation to the hidden truth.
+        string systemPrompt = $@"You are a cynical 1940s crime journalist for the 'Daily Truth'. 
+        Compare the detective's accusation to the hidden truth.
+        
         TRUTH: {JsonConvert.SerializeObject(currentScenario)}
-        RULES: Determine if the player identified the correct killer AND the correct logic (motive/access). 
-        Output JSON: is_correct (bool), feedback (string).";
+        
+        TASK:
+        1. Evaluate if the detective identified the CORRECT KILLER and valid LOGIC (Motive/Access).
+        2. Write a SENSATIONAL NEWSPAPER HEADLINE. 
+           - If Correct: Celebrate the capture.
+           - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., 'DETECTIVE BLUNDERS! [True Killer] WAS THE REAL CULPRIT!').
+        3. Write the ARTICLE BODY (Noir Style).
+           - Provide feedback on the investigation.
+           - Explain WHY the logic was right or wrong.
+           - If the detective missed clues, mention them mockingly or tragically.
+        
+        Output JSON: 
+        - is_correct (boolean)
+        - headline (string)
+        - article (string)";
 
         var payload = new
         {
@@ -215,8 +230,12 @@ public class GeminiConnectionManager : MonoBehaviour
                 responseSchema = new
                 {
                     type = "OBJECT",
-                    properties = new { is_correct = new { type = "BOOLEAN" }, feedback = new { type = "STRING" } },
-                    required = new[] { "is_correct", "feedback" }
+                    properties = new { 
+                        is_correct = new { type = "BOOLEAN" }, 
+                        headline = new { type = "STRING" },
+                        article = new { type = "STRING" }
+                    },
+                    required = new[] { "is_correct", "headline", "article" }
                 }
             }
         };
@@ -228,9 +247,9 @@ public class GeminiConnectionManager : MonoBehaviour
             {
                 var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
                 var result = JsonConvert.DeserializeObject<JudgeResult>(res.candidates[0].content.parts[0].text);
-                callback?.Invoke(result.is_correct, result.feedback, null);
+                callback?.Invoke(result.headline, result.article, result.is_correct, null);
             }
-            else { callback?.Invoke(false, null, request.error); }
+            else { callback?.Invoke(null, null, false, request.error); }
         }
     }
 
@@ -248,5 +267,5 @@ public class GeminiConnectionManager : MonoBehaviour
     [Serializable] public class GeminiCandidate { public GeminiContent content; }
     [Serializable] public class GeminiContent { public string role; public List<GeminiPart> parts; }
     [Serializable] public class GeminiPart { public string text; }
-    [Serializable] private class JudgeResult { public bool is_correct; public string feedback; }
+    [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
 }

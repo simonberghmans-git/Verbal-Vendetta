@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 
 /// <summary>
 /// Manages the UI interrogation flow and triggers TTS playback.
@@ -11,6 +12,7 @@ public class InterrogationManager : MonoBehaviour
     public GeminiConnectionManager connectionManager;
     public ElevenLabsTTSHandler ttsHandler; // New Dependency
     public NotebookManager notebookManager;
+    public ScenesManager scenesManager;
 
     [Header("Interrogation UI")]
     public TMP_InputField playerInputField;
@@ -22,12 +24,16 @@ public class InterrogationManager : MonoBehaviour
     public TMP_InputField motiveInput;
     public TMP_InputField accessInput;
     public TMP_Text accusationResultDisplay;
+    public GameObject endScreen;
+    public GameObject newsArticle;
 
     [Header("Interrogation State")]
     public int currentSuspectIndex = 0;
 
     private void Start()
     {
+        if (newsArticle != null) newsArticle.SetActive(false);
+
         suspectNameDisplay.text = "Generating scenario...";
         responseTextField.text = "<i>Please wait while the mystery is prepared...</i>";
 
@@ -132,27 +138,40 @@ public class InterrogationManager : MonoBehaviour
             return;
         }
 
-        if (accusationResultDisplay != null)
-            accusationResultDisplay.text = "<i>Submitting report to the Judge...</i>";
+        if (endScreen != null) endScreen.SetActive(true);
 
-        connectionManager.JudgeAccusation(name, motive, access, (isCorrect, feedback, error) =>
+        if (accusationResultDisplay != null)
+            accusationResultDisplay.text = "<i>Submitting report to the Editor...</i>";
+
+        connectionManager.JudgeAccusation(name, motive, access, (headline, article, isCorrect, error) =>
         {
             if (string.IsNullOrEmpty(error))
             {
                 string color = isCorrect ? "green" : "red";
-                string verdict = isCorrect ? "GUILTY" : "INNOCENT / WRONG REASONING";
+                // Formatting: Bold Headline (Larger) + Article Body
+                string finalOutput = $"<size=120%><b><color={color}>{headline}</color></b></size>\n\n" +
+                                     $"{article}";
 
                 if (accusationResultDisplay != null)
                 {
-                    accusationResultDisplay.text = $"<b>Verdict: <color={color}>{verdict}</color></b>\n\n" +
-                                                 $"<i>{feedback}</i>";
+                    accusationResultDisplay.text = finalOutput;
                 }
+
+                if (newsArticle != null) newsArticle.SetActive(true);
+
+                StartCoroutine(ReturnToMenuRoutine());
             }
             else
             {
                 if (accusationResultDisplay != null)
-                    accusationResultDisplay.text = $"<color=red>Judge Error:</color> {error}";
+                    accusationResultDisplay.text = $"<color=red>Newsroom Error:</color> {error}";
             }
         });
+    }
+    
+    private IEnumerator ReturnToMenuRoutine()
+    {
+        yield return new WaitForSeconds(60f);
+        if (scenesManager != null) scenesManager.GoToMenu();
     }
 }
