@@ -10,7 +10,7 @@ public class InterrogationManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
-    public ElevenLabsTTSHandler ttsHandler; // New Dependency
+    public GeminiTTSHandler ttsHandler; // Updated to Gemini TTS
     public NotebookManager notebookManager;
     public ScenesManager scenesManager;
 

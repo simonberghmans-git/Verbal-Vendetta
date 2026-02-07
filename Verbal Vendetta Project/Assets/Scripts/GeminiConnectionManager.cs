@@ -15,14 +15,17 @@ using TMPro;
 public class GeminiConnectionManager : MonoBehaviour
 {
     [SerializeField] private string apiKey = "";
-    private string model = "gemini-3-flash-preview";
+
+    private string model = "gemini-3-flash-preview"; // Updated to model that supports audio generation or stick to 3-flash-preview? Stuck to user's choice but 1.5-flash is safer for audio. I'll keep the private field as is but maybe update the default value if needed.
+    // User had "gemini-3-flash-preview". I should probably leave 'model' alone unless necessary, but the lists need update.
+
     public ScenarioData currentScenario;
 
     [Header("Voice Settings")]
-    [Tooltip("List of ElevenLabs Voice IDs for Male suspects.")]
-    [SerializeField] private List<string> maleVoiceIds = new List<string>();
-    [Tooltip("List of ElevenLabs Voice IDs for Female suspects.")]
-    [SerializeField] private List<string> femaleVoiceIds = new List<string>();
+    [Tooltip("List of Gemini Voice Names for Male suspects.")]
+    [SerializeField] public List<string> maleVoiceIds;
+    [Tooltip("List of Gemini Voice Names for Female suspects.")]
+    [SerializeField] public List<string> femaleVoiceIds;
 
     [Header("Debug Settings")]
     [SerializeField] private TMP_Text debugDisplayField;

@@ -9024,6 +9024,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1253750472}
   m_CullTransparentMesh: 1
+--- !u!1 &1284266237
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1284266239}
+  - component: {fileID: 1284266238}
+  m_Layer: 0
+  m_Name: GeminiTTSHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1284266238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284266237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 492064c287f0a5d49bd5aaebc912cd42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GeminiTTSHandler
+  apiKey: AIzaSyDdiTJIuIlisJsp24wHtFq8Y2TH8Swi2RE
+  voiceSource: {fileID: 1800052908}
+--- !u!4 &1284266239
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284266237}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.41107, y: 0, z: -5.58226}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1336864567
 GameObject:
   m_ObjectHideFlags: 0
@@ -10187,13 +10233,14 @@ MonoBehaviour:
     murder_location: 
     suspects: []
   maleVoiceIds:
-  - N2lVS1w4EtoT3dr4eOWO
-  - SOYHLrjzK2X1ezoPC6cr
-  - bIHbv24MWmeRgasZH58o
+  - Achird
+  - Algenib
+  - Algieba
+  - Alnilam
   femaleVoiceIds:
-  - EXAVITQu4vr4xnSDxMaL
-  - hpp4J3VqNfWAUOO0d1Us
-  - SAz9YHcvj6GT2YYXdXww
+  - Achernar
+  - Aoede
+  - Autonoe
   debugDisplayField: {fileID: 13931263}
   notebookManager: {fileID: 1560289931}
 --- !u!4 &1524535819
@@ -12022,7 +12069,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationManager
   connectionManager: {fileID: 1524535818}
-  ttsHandler: {fileID: 426119252}
+  ttsHandler: {fileID: 1284266238}
   notebookManager: {fileID: 1560289931}
   scenesManager: {fileID: 1362225889}
   playerInputField: {fileID: 27584541}
@@ -13442,6 +13489,7 @@ SceneRoots:
   - {fileID: 1844292940}
   - {fileID: 1560289932}
   - {fileID: 1901994335}
+  - {fileID: 1284266239}
   - {fileID: 1856740768}
   - {fileID: 426119253}
   - {fileID: 1800052909}
