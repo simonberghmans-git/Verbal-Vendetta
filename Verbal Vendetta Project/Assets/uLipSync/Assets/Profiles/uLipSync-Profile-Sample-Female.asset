@@ -19,7 +19,7 @@ MonoBehaviour:
   targetSampleRate: 16000
   sampleCount: 1024
   useStandardization: 0
-  compareMethod: 2
+  compareMethod: 1
   mfccs:
   - name: A
     mfccCalibrationDataList:
