@@ -186,4 +186,13 @@ public class FaceAnimator : MonoBehaviour
     }
 
     public void ResetToNeutral() => SetEmotion(EmotionType.Neutral);
+
+    public static EmotionType ParseEmotion(string emotionName)
+    {
+        if (System.Enum.TryParse<EmotionType>(emotionName, true, out EmotionType result))
+        {
+            return result;
+        }
+        return EmotionType.Neutral;
+    }
 }

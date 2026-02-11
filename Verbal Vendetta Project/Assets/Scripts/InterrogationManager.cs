@@ -107,45 +107,89 @@ public class InterrogationManager : MonoBehaviour
 
         responseTextField.text = "<i>Thinking...</i>";
         SuspectData activeSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
-        // Append the player's question to the suspect's transcript in the notebook
+        
+        // Append the player's question to the suspect's transcript
         if (notebookManager != null)
         {
             notebookManager.AppendSuspectLine(currentSuspectIndex, $"Player: {question}");
         }
-        // Disable TTS trigger until we have a response
-        connectionManager.SpeakWithSuspect(question, activeSuspect, (response, error) =>
-        {
-            if (string.IsNullOrEmpty(error))
-            {
-                responseTextField.text = $"<b>{activeSuspect.name}:</b> {response}";
-                playerInputField.text = "";
 
-                // Only play TTS if we actually received text
-                if (!string.IsNullOrEmpty(response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
+        // STEP 1: Immediate Reaction Analysis
+        connectionManager.AnalyzeSuspectReaction(question, activeSuspect, (reactionEmotion, stressChange, reactionError) => 
+        {
+            if (reactionError == null)
+            {
+                // Immediate Transition: Apply the reaction emotion NOW
+                if (AnimationsManager.Instance != null)
                 {
-                    AudioSource suspectAudioSource = null;
+                    AnimationsManager.Instance.stressLevel = Mathf.Clamp01(AnimationsManager.Instance.stressLevel + stressChange);
+                    
+                    // We need to access the current animator's FaceAnimator component
+                    // Assuming the currentSuspectModel has the FaceAnimator
                     if (currentSuspectModel != null)
                     {
-                        suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
+                        var faceAnim = currentSuspectModel.GetComponent<FaceAnimator>();
+                        if (faceAnim != null)
+                        {
+                            faceAnim.SetEmotion(reactionEmotion);
+                        }
+                    }
+                }
+            }
+        
+            // STEP 2: Get Verbal Response
+            connectionManager.SpeakWithSuspect(question, activeSuspect, (suspectResponse, error) =>
+            {
+                if (string.IsNullOrEmpty(error))
+                {
+                    responseTextField.text = $"<b>{activeSuspect.name}:</b> {suspectResponse.response}";
+                    playerInputField.text = "";
+
+                    // Parse End Emotion
+                    FaceAnimator.EmotionType endEmotion = FaceAnimator.ParseEmotion(suspectResponse.end_emotion);
+                    FaceAnimator.EmotionType startEmotion = reactionEmotion; // We are currently at this emotion
+
+                    // Only play TTS if we actually received text
+                    if (!string.IsNullOrEmpty(suspectResponse.response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
+                    {
+                        AudioSource suspectAudioSource = null;
+                        if (currentSuspectModel != null)
+                        {
+                            suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
+                        }
+
+                        // STEP 3: Play TTS and Animate Speech Transition
+                        ttsHandler.PlayVoice(suspectResponse.response, activeSuspect.voice_id, suspectAudioSource, (clip, ttsError) => 
+                        {
+                            if (clip != null)
+                            {
+                                if (currentSuspectModel != null)
+                                {
+                                    var faceAnim = currentSuspectModel.GetComponent<FaceAnimator>();
+                                    if (faceAnim != null)
+                                    {
+                                        faceAnim.PlaySpeechEmotions(startEmotion, endEmotion, clip.length);
+                                    }
+                                }
+                            }
+                        });
                     }
 
-                    ttsHandler.PlayVoice(response, activeSuspect.voice_id, suspectAudioSource);
-                }
+                    // Append the suspect's response to the notebook transcript
+                    if (notebookManager != null)
+                    {
+                        notebookManager.AppendSuspectLine(currentSuspectIndex, $"{activeSuspect.name}: {suspectResponse.response}");
+                    }
 
-                // Append the suspect's response to the notebook transcript
-                if (notebookManager != null)
+                    // Inform any input manager that an answer was received
+                    var inputMgr = FindObjectOfType<InterrogationInputManager>();
+                    if (inputMgr != null) inputMgr.OnAnswerReceived();
+                }
+                else
                 {
-                    notebookManager.AppendSuspectLine(currentSuspectIndex, $"{activeSuspect.name}: {response}");
+                    responseTextField.text = $"<color=red>Error:</color> {error}";
                 }
-
-                // Inform any input manager that an answer was received so that UI state can be reset
-                var inputMgr = FindObjectOfType<InterrogationInputManager>();
-                if (inputMgr != null) inputMgr.OnAnswerReceived();
-            }
-            else
-            {
-                responseTextField.text = $"<color=red>Error:</color> {error}";
-            }
+            });
         });
     }
 

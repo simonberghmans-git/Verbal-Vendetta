@@ -19,7 +19,7 @@ public class GeminiTTSHandler : MonoBehaviour
     [Header("Audio Output")]
     public AudioSource voiceSource;
 
-    public delegate void TTSCallback(bool success, string error);
+    public delegate void TTSCallback(AudioClip clip, string error);
 
     /// <summary>
     /// Generates and plays a voice for the given text.
@@ -30,7 +30,7 @@ public class GeminiTTSHandler : MonoBehaviour
         if (string.IsNullOrEmpty(apiKey))
         {
             Debug.LogError("GeminiTTSHandler: API Key is missing!");
-            callback?.Invoke(false, "API Key Missing");
+            callback?.Invoke(null, "API Key Missing");
             return;
         }
 
@@ -120,29 +120,29 @@ public class GeminiTTSHandler : MonoBehaviour
                             {
                                 sourceToUse.clip = clip;
                                 sourceToUse.Play();
-                                callback?.Invoke(true, null);
+                                callback?.Invoke(clip, null);
                             }
                         }
                         else
                         {
-                            callback?.Invoke(false, "No audio data found in response parts.");
+                            callback?.Invoke(null, "No audio data found in response parts.");
                         }
                     }
                     else
                     {
-                        callback?.Invoke(false, "No candidates returned by API.");
+                        callback?.Invoke(null, "No candidates returned by API.");
                     }
                 }
                 catch (Exception ex)
                 {
                     Debug.LogError($"GeminiTTSHandler: Error processing audio: {ex.Message}");
-                    callback?.Invoke(false, ex.Message);
+                    callback?.Invoke(null, ex.Message);
                 }
             }
             else
             {
                 Debug.LogError($"GeminiTTSHandler: API Error: {request.downloadHandler.text}");
-                callback?.Invoke(false, request.error);
+                callback?.Invoke(null, request.error);
             }
         }
     }
