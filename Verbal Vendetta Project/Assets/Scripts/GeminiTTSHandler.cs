@@ -25,7 +25,7 @@ public class GeminiTTSHandler : MonoBehaviour
     /// Generates and plays a voice for the given text.
     /// Available voices: Zephyr, Puck, Charon, Kore, Fenrir, Leda, Orus, etc.
     /// </summary>
-    public void PlayVoice(string text, string voiceName, TTSCallback callback = null)
+    public void PlayVoice(string text, string voiceName, AudioSource overrideSource = null, TTSCallback callback = null)
     {
         if (string.IsNullOrEmpty(apiKey))
         {
@@ -39,10 +39,10 @@ public class GeminiTTSHandler : MonoBehaviour
             voiceName = "Puck";
         }
 
-        StartCoroutine(PostTTSRequest(text, voiceName, callback));
+        StartCoroutine(PostTTSRequest(text, voiceName, overrideSource, callback));
     }
 
-    private IEnumerator PostTTSRequest(string text, string voiceName, TTSCallback callback)
+    private IEnumerator PostTTSRequest(string text, string voiceName, AudioSource overrideSource, TTSCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelId}:generateContent?key={apiKey.Trim()}";
 
@@ -113,10 +113,13 @@ public class GeminiTTSHandler : MonoBehaviour
                             // 3. Convert PCM16 bytes to Unity AudioClip
                             AudioClip clip = Pcm16ToAudioClip(pcmBytes, "GeminiVoice", sampleRate);
 
-                            if (clip != null && voiceSource != null)
+                            // Determine which AudioSource to use
+                            AudioSource sourceToUse = overrideSource != null ? overrideSource : voiceSource;
+
+                            if (clip != null && sourceToUse != null)
                             {
-                                voiceSource.clip = clip;
-                                voiceSource.Play();
+                                sourceToUse.clip = clip;
+                                sourceToUse.Play();
                                 callback?.Invoke(true, null);
                             }
                         }

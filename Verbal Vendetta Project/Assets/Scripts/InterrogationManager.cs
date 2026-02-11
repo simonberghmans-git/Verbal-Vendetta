@@ -27,6 +27,10 @@ public class InterrogationManager : MonoBehaviour
     public GameObject endScreen;
     public GameObject newsArticle;
 
+    [Header("Suspect Models")]
+    public List<GameObject> suspectPrefabs;
+    private GameObject currentSuspectModel;
+
     [Header("Interrogation State")]
     public int currentSuspectIndex = 0;
 
@@ -68,6 +72,30 @@ public class InterrogationManager : MonoBehaviour
         SuspectData currentSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
         suspectNameDisplay.text = $"Interrogating: {currentSuspect.name}";
         responseTextField.text = $"<i>{currentSuspect.name} waits for your first question.</i>";
+
+        UpdateSuspectModel(currentSuspectIndex);
+    }
+
+    private void UpdateSuspectModel(int index)
+    {
+        if (suspectPrefabs == null || suspectPrefabs.Count == 0) return;
+
+        if (currentSuspectModel != null)
+        {
+            Destroy(currentSuspectModel);
+        }
+
+        if (index >= 0 && index < suspectPrefabs.Count && suspectPrefabs[index] != null)
+        {
+            currentSuspectModel = Instantiate(suspectPrefabs[index], Vector3.zero, Quaternion.Euler(0, 180, 0));
+            
+            // Register the new animator with the AnimationsManager
+            Animator suspectAnimator = currentSuspectModel.GetComponent<Animator>();
+            if (suspectAnimator != null && AnimationsManager.Instance != null)
+            {
+                AnimationsManager.Instance.SetCurrentAnimator(suspectAnimator);
+            }
+        }
     }
 
     public void AskSuspect()
@@ -95,7 +123,13 @@ public class InterrogationManager : MonoBehaviour
                 // Only play TTS if we actually received text
                 if (!string.IsNullOrEmpty(response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
                 {
-                    ttsHandler.PlayVoice(response, activeSuspect.voice_id);
+                    AudioSource suspectAudioSource = null;
+                    if (currentSuspectModel != null)
+                    {
+                        suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
+                    }
+
+                    ttsHandler.PlayVoice(response, activeSuspect.voice_id, suspectAudioSource);
                 }
 
                 // Append the suspect's response to the notebook transcript
