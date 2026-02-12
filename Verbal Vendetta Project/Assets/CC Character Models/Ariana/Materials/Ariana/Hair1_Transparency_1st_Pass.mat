@@ -183,7 +183,7 @@ Material:
     - _VertexBaseColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &1164877614901885486
+--- !u!114 &8891109982299183673
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
