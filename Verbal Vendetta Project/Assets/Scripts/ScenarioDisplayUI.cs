@@ -11,7 +11,7 @@ public class ScenarioDisplayUI : MonoBehaviour
     {
         displayField.text = "Contacting Gemini API... Please wait.";
 
-        connectionManager.GenerateScenario((data, error) => {
+        connectionManager.GenerateScenario("", "", (data, error) => {
             if (data != null)
             {
                 // Here we use that ToString() override we made!

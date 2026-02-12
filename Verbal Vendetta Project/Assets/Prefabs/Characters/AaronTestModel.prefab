@@ -52,6 +52,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 882335638797273989, guid: d7b9b35b3c45c9b479304a661f25929d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 882335638797273989, guid: d7b9b35b3c45c9b479304a661f25929d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 882335638797273989, guid: d7b9b35b3c45c9b479304a661f25929d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 882335638797273989, guid: d7b9b35b3c45c9b479304a661f25929d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7071068
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d7b9b35b3c45c9b479304a661f25929d, type: 3}
       propertyPath: m_Name
       value: AaronTestModel

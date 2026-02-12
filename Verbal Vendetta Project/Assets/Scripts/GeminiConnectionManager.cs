@@ -40,7 +40,7 @@ public class GeminiConnectionManager : MonoBehaviour
     public delegate void JudgeCallback(string headline, string article, bool isCorrect, string error);
 
     // --- CALL 1: SCENARIO GENERATION ---
-    public void GenerateScenario(ScenarioCallback callback)
+    public void GenerateScenario(string maleIndices, string femaleIndices, ScenarioCallback callback)
     {
         if (string.IsNullOrEmpty(apiKey))
         {
@@ -48,10 +48,10 @@ public class GeminiConnectionManager : MonoBehaviour
             callback?.Invoke(null, "API Key Missing");
             return;
         }
-        StartCoroutine(PostScenarioRequest(callback));
+        StartCoroutine(PostScenarioRequest(maleIndices, femaleIndices, callback));
     }
 
-    private IEnumerator PostScenarioRequest(ScenarioCallback callback)
+    private IEnumerator PostScenarioRequest(string maleIndices, string femaleIndices, ScenarioCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
@@ -81,7 +81,14 @@ public class GeminiConnectionManager : MonoBehaviour
         13. VOICE ASSIGNMENT: Assign a 'voice_id' to each suspect based on their gender.
             - Available Male IDs: [{maleIdsJoined}]
             - Available Female IDs: [{femaleIdsJoined}]
+            - Available Female IDs: [{femaleIdsJoined}]
             - RULE: Try to ensure each suspect has a unique voice_id. If a list is too short, you may reuse IDs, but prioritize variety across the 5 suspects.
+        14. MODEL ASSIGNMENT:
+            - Available Male Model IDs: [ {maleIndices} ]
+            - Available Female Model IDs: [ {femaleIndices} ]
+            - Assign a 'model_id' (integer) to each suspect from the appropriate list based on their gender.
+            - RULE: Try to assign a unique model_id for each suspect if possible.
+        15. GENDER ASSIGNMENT: Assign a 'gender' ('Male' or 'Female') to each suspect. Ensure it matches the voice_id, model_id, and name.
 
         JSON_STRUCTURE_EXAMPLE:
         {{
@@ -97,9 +104,11 @@ public class GeminiConnectionManager : MonoBehaviour
           ""suspects"": [
             {{
               ""name"": ""Name"",
+              ""gender"": ""Male"",
               ""relationship"": ""Connection"",
               ""personality"": ""Trait"",
               ""voice_id"": ""TheSelectedID"",
+              ""model_id"": 0,
               ""motive"": ""Reason or null"",
               ""access_to_weapon_description"": ""Description or null"",
               ""alibi_statement"": ""Statement..."",

@@ -12405,12 +12405,13 @@ MonoBehaviour:
   accusationResultDisplay: {fileID: 439700038}
   endScreen: {fileID: 2139242140}
   newsArticle: {fileID: 2038357198}
-  suspectPrefabs:
+  allSuspectPrefabs:
   - {fileID: 8982777280354732220, guid: 06bd84a03c9396a42a2edc2d1ef924da, type: 3}
   - {fileID: 8982777280354732220, guid: 5c7fe560bf96dd74c8c5fd8b265237ca, type: 3}
-  - {fileID: 8982777280354732220, guid: 06bd84a03c9396a42a2edc2d1ef924da, type: 3}
-  - {fileID: 8982777280354732220, guid: 5c7fe560bf96dd74c8c5fd8b265237ca, type: 3}
-  - {fileID: 8982777280354732220, guid: 06bd84a03c9396a42a2edc2d1ef924da, type: 3}
+  - {fileID: 6523015728506747655, guid: 9125bdae95f8fde43a1f0fd06183a5eb, type: 3}
+  allSuspectImages: []
+  maleModelIndices: 0000000001000000
+  femaleModelIndices: 02000000
   currentSuspectIndex: 0
 --- !u!1 &1845206438
 GameObject:

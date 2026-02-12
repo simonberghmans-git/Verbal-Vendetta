@@ -28,7 +28,15 @@ public class InterrogationManager : MonoBehaviour
     public GameObject newsArticle;
 
     [Header("Suspect Models")]
-    public List<GameObject> suspectPrefabs;
+    public List<GameObject> allSuspectPrefabs;
+    public List<Sprite> allSuspectImages;
+
+    [Header("Model Configuration")]
+    [Tooltip("Indices in allSuspectPrefabs that correspond to Male characters.")]
+    public List<int> maleModelIndices;
+    [Tooltip("Indices in allSuspectPrefabs that correspond to Female characters.")]
+    public List<int> femaleModelIndices;
+
     private GameObject currentSuspectModel;
 
     [Header("Interrogation State")]
@@ -43,7 +51,10 @@ public class InterrogationManager : MonoBehaviour
 
         if (connectionManager != null)
         {
-            connectionManager.GenerateScenario((data, error) =>
+            string maleIndices = string.Join(", ", maleModelIndices);
+            string femaleIndices = string.Join(", ", femaleModelIndices);
+
+            connectionManager.GenerateScenario(maleIndices, femaleIndices, (data, error) =>
             {
                 if (data != null)
                 {
@@ -76,18 +87,23 @@ public class InterrogationManager : MonoBehaviour
         UpdateSuspectModel(currentSuspectIndex);
     }
 
+
+
     private void UpdateSuspectModel(int index)
     {
-        if (suspectPrefabs == null || suspectPrefabs.Count == 0) return;
+        if (allSuspectPrefabs == null || allSuspectPrefabs.Count == 0) return;
 
         if (currentSuspectModel != null)
         {
             Destroy(currentSuspectModel);
         }
 
-        if (index >= 0 && index < suspectPrefabs.Count && suspectPrefabs[index] != null)
+        SuspectData currentSuspect = connectionManager.currentScenario.suspects[index];
+        int modelId = currentSuspect.model_id;
+
+        if (index >= 0 && modelId >= 0 && modelId < allSuspectPrefabs.Count && allSuspectPrefabs[modelId] != null)
         {
-            currentSuspectModel = Instantiate(suspectPrefabs[index], Vector3.zero, Quaternion.Euler(0, 180, 0));
+            currentSuspectModel = Instantiate(allSuspectPrefabs[modelId], Vector3.zero, Quaternion.Euler(0, 180, 0));
             
             // Register the new animator with the AnimationsManager
             Animator suspectAnimator = currentSuspectModel.GetComponent<Animator>();

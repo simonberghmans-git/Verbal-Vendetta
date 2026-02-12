@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "com.soupday.cc3_unity_tools": {
+      "version": "file:C:/Users/empir/Downloads/CCiC-Unity-Tools-2.2.3/CCiC-Unity-Tools-2.2.3",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.0"
+      }
+    },
     "com.unity.burst": {
       "version": "1.8.26",
       "depth": 2,
