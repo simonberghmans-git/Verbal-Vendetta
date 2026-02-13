@@ -25,7 +25,12 @@ MonoBehaviour:
   pendingRuntimeInstall: 0
   performPostInstallationCheck: 0
   performPostInstallationRuntimeCheck: 0
-  updateMessage: 
+  updateMessage: 'Shader package: HDRP17 2.2.2 has been imported.
+
+    Runtime package:
+    2.2.3 has been imported.
+
+'
   updateAvailable: 0
   lastUpdateCheck: 639065024325300300
   jsonTagName: 2.2.3
@@ -136,10 +141,11 @@ MonoBehaviour:
     are also functions to remove and install different shader packages if required."}]'
   lastPath: Assets/Reallusion/CCiC Unity Tools/RLSettingsObject.asset
   toolVersion: 2.2.3
-  shaderToolVersion: 
-  runtimeToolVersion: 
+  shaderToolVersion: 2.2.3
+  runtimeToolVersion: 2.2.3
   showProps: 1
-  lastExportPath: 
+  lastExportPath: C:\Users\empir\OneDrive\Desktop\Bachelor\Verbal-Vendetta\Verbal
+    Vendetta Project\RL_DataLink
   isClientLocal: 1
   lastSuccessfulHost: 
   lastTriedHosts: []

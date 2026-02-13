@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// </summary>
 public class FaceAnimator : MonoBehaviour
 {
-    public enum EmotionType { Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty }
+    public enum EmotionType { Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty, BrowLiftTest }
 
     [System.Serializable]
     public struct BlendShapeWeight
@@ -37,9 +37,19 @@ public class FaceAnimator : MonoBehaviour
         ResetToNeutral();
     }
 
+    [Header("Debug")]
+    public EmotionType debugEmotion;
+    public bool applyDebugEmotion;
+
     private void LateUpdate()
     {
         ApplyBlendShapes();
+
+        if (applyDebugEmotion)
+        {
+            applyDebugEmotion = false;
+            SetEmotion(debugEmotion);
+        }
     }
 
     private void InitializeDefaultProfiles()
@@ -123,8 +133,15 @@ public class FaceAnimator : MonoBehaviour
             new BlendShapeWeight { shapeName = "Mouth_Press_R", weight = 40 },
             new BlendShapeWeight { shapeName = "Mouth_Sorrow_L", weight = 40 },
             new BlendShapeWeight { shapeName = "Mouth_Sorrow_R", weight = 40 },
-            new BlendShapeWeight { shapeName = "Brow_Drop_L", weight = 30 },
             new BlendShapeWeight { shapeName = "Brow_Drop_R", weight = 30 }
+        };
+
+        // --- BROW LIFT TEST (Wrinkle Check) ---
+        defaultProfiles[EmotionType.BrowLiftTest] = new List<BlendShapeWeight> {
+            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_R", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_Outer_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_Outer_R", weight = 100 }
         };
     }
 
