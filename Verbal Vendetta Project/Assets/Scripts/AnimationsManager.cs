@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// The "Brain" of the animation system.
@@ -16,16 +17,12 @@ public class AnimationsManager : MonoBehaviour
     public float baseSpeed = 1f;
     public float maxStressSpeedMultiplier = 1.5f;
 
-    [Header("Global Idle Variety")]
-    [Tooltip("The current idle variation index that all suspects should follow.")]
-    public int currentIdleIndex = 0;
-    public float minIdleTime = 4f;
-    public float maxIdleTime = 8f;
-    
-    private float nextIdleSwitchTime;
+
 
     // Reference to the currently active suspect's Animator
     private Animator currentAnimator;
+
+    private Coroutine talkingCoroutine;
 
     private void Awake()
     {
@@ -33,9 +30,10 @@ public class AnimationsManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
+
     private void Update()
     {
-        HandleIdleTimer();
+
         UpdateAnimatorSpeed();
     }
 
@@ -55,20 +53,7 @@ public class AnimationsManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Calculates when to switch the idle variation for the room.
-    /// </summary>
-    private void HandleIdleTimer()
-    {
-        if (Time.time >= nextIdleSwitchTime)
-        {
-            // Pick a new random idle index (0-2)
-            currentIdleIndex = Random.Range(0, 3);
-            
-            // Set the next random interval
-            nextIdleSwitchTime = Time.time + Random.Range(minIdleTime, maxIdleTime);
-        }
-    }
+
 
     /// <summary>
     /// Returns the calculated speed based on the current stress level.
@@ -76,5 +61,32 @@ public class AnimationsManager : MonoBehaviour
     public float GetCalculatedSpeed()
     {
         return baseSpeed + (stressLevel * (maxStressSpeedMultiplier - baseSpeed));
+    }
+
+    /// <summary>
+    /// Sets the "talking" boolean on the current animator for a specific duration.
+    /// </summary>
+    public void SetTalkingState(bool isTalking, float duration = 0f)
+    {
+        if (currentAnimator == null) return;
+
+        if (talkingCoroutine != null) StopCoroutine(talkingCoroutine);
+
+        if (isTalking && duration > 0f)
+        {
+            talkingCoroutine = StartCoroutine(TalkingRoutine(duration));
+        }
+        else
+        {
+            currentAnimator.SetBool("Talking", isTalking);
+        }
+    }
+
+    private IEnumerator TalkingRoutine(float duration)
+    {
+        if (currentAnimator != null) currentAnimator.SetBool("Talking", true);
+        yield return new WaitForSeconds(duration);
+        if (currentAnimator != null) currentAnimator.SetBool("Talking", false);
+        talkingCoroutine = null;
     }
 }

@@ -187,6 +187,11 @@ public class InterrogationManager : MonoBehaviour
                                         faceAnim.PlaySpeechEmotions(startEmotion, endEmotion, clip.length);
                                     }
                                 }
+
+                                if (AnimationsManager.Instance != null)
+                                {
+                                    AnimationsManager.Instance.SetTalkingState(true, clip.length);
+                                }
                             }
                         });
                     }

@@ -1183,6 +1183,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 775691670539781024}
+    - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6370277471815533763}
   m_SourcePrefab: {fileID: 100100000, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
 --- !u!137 &68374221263087623 stripped
 SkinnedMeshRenderer:
@@ -1332,7 +1335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: uLipSync.Runtime::uLipSync.uLipSyncBlendShape
   updateMethod: 0
-  skinnedMeshRenderer: {fileID: 0}
+  skinnedMeshRenderer: {fileID: 68374221263087623}
   blendShapes:
   - phoneme: A
     index: 0
@@ -1569,6 +1572,33 @@ MonoBehaviour:
   maxBlinkInterval: 10
   closeDuration: 0.05
   openDuration: 0.1
+--- !u!114 &6370277471815533763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4912406151670937579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b14eaa954202cf479bbbc01524e648d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EyeTrackingAlternative
+  target: {fileID: 0}
+  headBone: {fileID: 7223433068379129179}
+  targetMesh: {fileID: 68374221263087623}
+  angleLimit: 30
+  smoothSpeed: 10
+  L_LookUp: Eye_L_Look_Up
+  L_LookDown: Eye_L_Look_Down
+  L_LookLeft: Eye_L_Look_L
+  L_LookRight: Eye_L_Look_R
+  R_LookUp: Eye_R_Look_Up
+  R_LookDown: Eye_R_Look_Down
+  R_LookLeft: Eye_R_Look_L
+  R_LookRight: Eye_R_Look_R
+  showDebugRays: 1
+  testForceEyesUp: 0
 --- !u!4 &4959475949363708223 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6308444048576485110, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
@@ -1647,6 +1677,11 @@ Transform:
 --- !u!4 &7221924573684136436 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8603827247165845053, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
+  m_PrefabInstance: {fileID: 1395976698305894345}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7223433068379129179 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8602239722740421266, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
   m_PrefabInstance: {fileID: 1395976698305894345}
   m_PrefabAsset: {fileID: 0}
 --- !u!136 &7279306464255702869 stripped

@@ -1179,6 +1179,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3978924410636056383}
+    - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2317171138756712955}
   m_SourcePrefab: {fileID: 100100000, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
 --- !u!4 &15519517056341566 stripped
 Transform:
@@ -1198,6 +1201,11 @@ Transform:
 --- !u!4 &845131540674964061 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3883261336352453792, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+  m_PrefabInstance: {fileID: 4494204528096386813}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1400366368448184809 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3256532431446023956, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
   m_PrefabInstance: {fileID: 4494204528096386813}
   m_PrefabAsset: {fileID: 0}
 --- !u!136 &1411587609771813307 stripped
@@ -1308,7 +1316,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: uLipSync.Runtime::uLipSync.uLipSyncBlendShape
   updateMethod: 0
-  skinnedMeshRenderer: {fileID: 0}
+  skinnedMeshRenderer: {fileID: 8620798079540423861}
   blendShapes:
   - phoneme: A
     index: 0
@@ -1545,6 +1553,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTest
   faceAnimator: {fileID: 5997806249469941946}
   testEmotion: 0
+--- !u!114 &2317171138756712955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3710276211541570393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 922d3d904167a73498bf79fd090f81a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EyeTracking
+  target: {fileID: 0}
+  headBone: {fileID: 1400366368448184809}
+  targetMesh: {fileID: 8620798079540423861}
+  angleLimit: 30
+  smoothSpeed: 20
+  L_LookUp: Eye_Look_Up_L
+  L_LookDown: Eye_Look_Down_L
+  L_LookIn: Eye_Look_In_L
+  L_LookOut: Eye_Look_Out_L
+  R_LookUp: Eye_Look_Up_R
+  R_LookDown: Eye_Look_Down_R
+  R_LookIn: Eye_Look_In_R
+  R_LookOut: Eye_Look_Out_R
+  showDebugRays: 1
+  testForceEyesUp: 0
 --- !u!4 &3711611270603244941 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 998908503689501552, guid: bd5f652942e669a47b2393d56690c7df, type: 3}

@@ -21,6 +21,118 @@ public class GeminiConnectionManager : MonoBehaviour
 
     public ScenarioData currentScenario;
 
+    public bool testing = false;
+
+    private const string TEST_SCENARIO_JSON = @"
+{
+  ""victim_name"": ""Silas Vance"",
+  ""victim_occupation"": ""Billionaire Tech Recluse"",
+  ""victim_biography"": ""Silas Vance was a ruthless innovator who spent his final years isolated in his Gothic mansion. He was notoriously paranoid and was known for making more legal enemies than friends during his career."",
+  ""victim_discovery_details"": ""Found slumped over his mahogany desk with a single puncture wound in his palm and a spilled bottle of specialty blue ink. The emergency alert on his desk had been disabled."",
+  ""murder_time"": ""11:45 PM"",
+  ""murder_date"": ""October 30th"",
+  ""interrogation_date"": ""October 31st"",
+  ""murder_weapon"": ""Poisoned Vintage Fountain Pen"",
+  ""murder_location"": ""The Mansion Library"",
+  ""suspects"": [
+    {
+      ""name"": ""Julian Thorne"",
+      ""gender"": ""Male"",
+      ""relationship"": ""Business Partner"",
+      ""personality"": ""Nervous, ambitious, debt-ridden"",
+      ""voice_id"": ""Achird"",
+      ""model_id"": 0,
+      ""motive"": ""Julian owed Silas millions in failed tech investments and was about to be sued into bankruptcy."",
+      ""access_to_weapon_description"": null,
+      ""alibi_statement"": ""I was in the smoking room on the west wing, trying to relax and clearing my head after a long day."",
+      ""minor_secret"": ""He has been skimming small amounts from the company payroll for years."",
+      ""rumors"": {
+        ""Elena Vance"": ""I saw Elena taking a key from the butler's station that opens Silas's private stationery cabinet.""
+      },
+      ""has_no_alibi"": true,
+      ""has_motive"": true,
+      ""has_access_to_weapon"": false,
+      ""is_killer"": false
+    },
+    {
+      ""name"": ""Marcus Reed"",
+      ""gender"": ""Male"",
+      ""relationship"": ""Ex-Security Head"",
+      ""personality"": ""Resentful, disciplined, observant"",
+      ""voice_id"": ""Algenib"",
+      ""model_id"": 0,
+      ""motive"": ""Silas fired him without a pension last month after a minor security lapse."",
+      ""access_to_weapon_description"": null,
+      ""alibi_statement"": ""I was at 'The Rusty Anchor' pub downtown until closing time. The bartender can vouch for me."",
+      ""minor_secret"": ""He still has a copy of the mansion's architectural blueprints."",
+      ""rumors"": {
+        ""Clara Hughes"": ""Clara is the only one Silas let handle his pen collection; she was cleaning them with a strange solvent yesterday.""
+      },
+      ""has_no_alibi"": false,
+      ""has_motive"": true,
+      ""has_access_to_weapon"": false,
+      ""is_killer"": false
+    },
+    {
+      ""name"": ""Elena Vance"",
+      ""gender"": ""Female"",
+      ""relationship"": ""Wife"",
+      ""personality"": ""Cold, calculated, elegant"",
+      ""voice_id"": ""Achernar"",
+      ""model_id"": 1,
+      ""motive"": ""Silas was planning to divorce her and update his will to exclude her entirely by morning."",
+      ""access_to_weapon_description"": ""She stole the key to the glass display case and used her knowledge of the library's security bypass to coat the pen nib with a fast-acting toxin."",
+      ""alibi_statement"": ""I had retired to my bedroom early with a migraine and didn't leave until the staff found his body."",
+      ""minor_secret"": ""She has already been in contact with a high-profile divorce attorney."",
+      ""rumors"": {
+        ""Marcus Reed"": ""I heard Silas shouting at Marcus that he was a 'useless failure' just hours before the firing.""
+      },
+      ""has_no_alibi"": true,
+      ""has_motive"": true,
+      ""has_access_to_weapon"": true,
+      ""is_killer"": true
+    },
+    {
+      ""name"": ""Clara Hughes"",
+      ""gender"": ""Female"",
+      ""relationship"": ""Personal Secretary"",
+      ""personality"": ""Efficient, loyal, overworked"",
+      ""voice_id"": ""Aoede"",
+      ""model_id"": 1,
+      ""motive"": null,
+      ""access_to_weapon_description"": ""Clara is responsible for the daily maintenance, ink-filling, and cleaning of Silas's extensive fountain pen collection."",
+      ""alibi_statement"": ""I was in the kitchen preparing the midnight tea tray, which the cook can confirm."",
+      ""minor_secret"": ""She is secretly writing a tell-all memoir about the Vance family."",
+      ""rumors"": {
+        ""Elena Vance"": ""I heard Elena and Silas arguing about a 'new will' and 'signing papers' late last night.""
+      },
+      ""has_no_alibi"": false,
+      ""has_motive"": false,
+      ""has_access_to_weapon"": true,
+      ""is_killer"": false
+    },
+    {
+      ""name"": ""Father Dominic"",
+      ""gender"": ""Male"",
+      ""relationship"": ""Family Priest"",
+      ""personality"": ""Stoic, soft-spoken, judgmental"",
+      ""voice_id"": ""Algieba"",
+      ""model_id"": 0,
+      ""motive"": null,
+      ""access_to_weapon_description"": null,
+      ""alibi_statement"": ""I was in the mansion's chapel performing my nightly prayers. I find the silence there very centering."",
+      ""minor_secret"": ""He was once a professional locksmith before entering the priesthood."",
+      ""rumors"": {
+        ""Julian Thorne"": ""Julian claims he was in the smoking room, but I walked past it at 11:45 PM and the room was completely empty.""
+      },
+      ""has_no_alibi"": false,
+      ""has_motive"": false,
+      ""has_access_to_weapon"": false,
+      ""is_killer"": false
+    }
+  ]
+}";
+
     [Header("Voice Settings")]
     [Tooltip("List of Gemini Voice Names for Male suspects.")]
     [SerializeField] public List<string> maleVoiceIds;
@@ -42,6 +154,21 @@ public class GeminiConnectionManager : MonoBehaviour
     // --- CALL 1: SCENARIO GENERATION ---
     public void GenerateScenario(string maleIndices, string femaleIndices, ScenarioCallback callback)
     {
+        if (testing)
+        {
+            try
+            {
+                currentScenario = JsonConvert.DeserializeObject<ScenarioData>(TEST_SCENARIO_JSON);
+                if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
+                if (notebookManager != null) notebookManager.PopulateVictimPage();
+                callback?.Invoke(currentScenario, null);
+            }
+            catch (Exception ex)
+            {
+                callback?.Invoke(null, "Testing JSON Error: " + ex.Message);
+            }
+            return;
+        }
         if (string.IsNullOrEmpty(apiKey))
         {
             Debug.LogError("API Key is missing!");
