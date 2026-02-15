@@ -1172,16 +1172,19 @@ PrefabInstance:
       addedObject: {fileID: 7691842551605930860}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5997806249469941946}
-    - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1023845799623346997}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3978924410636056383}
+      addedObject: {fileID: 2399034092451946885}
+    - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1938239214334080527}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2317171138756712955}
+    - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5473120200338883143}
   m_SourcePrefab: {fileID: 100100000, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
 --- !u!4 &15519517056341566 stripped
 Transform:
@@ -1489,22 +1492,6 @@ MonoBehaviour:
   maxBlinkInterval: 10
   closeDuration: 0.05
   openDuration: 0.1
---- !u!114 &5997806249469941946
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3710276211541570393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb41fcf25cf5af844bb738abf847e7ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  headMesh: {fileID: 8620798079540423861}
-  transitionSpeed: 3
-  debugEmotion: 0
-  applyDebugEmotion: 0
 --- !u!114 &1023845799623346997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1539,7 +1526,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0, w: 0}
   - {x: 0, y: 0, z: 0, w: 0}
   - {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &3978924410636056383
+--- !u!114 &2399034092451946885
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1548,10 +1535,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 3710276211541570393}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8c5a36daa9d45b459caea05a3428fa5, type: 3}
+  m_Script: {fileID: 11500000, guid: 5fa0f9085fd4593498e6bc0a09d7611e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTest
-  faceAnimator: {fileID: 5997806249469941946}
+  m_EditorClassIdentifier: Assembly-CSharp::FaceAnimatorAlternative
+  headMesh: {fileID: 8620798079540423861}
+  transitionSpeed: 3
+  debugEmotion: 0
+  applyDebugEmotion: 0
+--- !u!114 &1938239214334080527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3710276211541570393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9df5037d8015c3d4dad2c6ec21ee3e31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTestAlternative
+  faceAnimator: {fileID: 0}
   testEmotion: 0
 --- !u!114 &2317171138756712955
 MonoBehaviour:
@@ -1572,14 +1575,27 @@ MonoBehaviour:
   smoothSpeed: 20
   L_LookUp: Eye_Look_Up_L
   L_LookDown: Eye_Look_Down_L
-  L_LookIn: Eye_Look_In_L
-  L_LookOut: Eye_Look_Out_L
+  L_LookLeft: Eye_Look_Left_L
+  L_LookRight: Eye_Look_Right_L
   R_LookUp: Eye_Look_Up_R
   R_LookDown: Eye_Look_Down_R
-  R_LookIn: Eye_Look_In_R
-  R_LookOut: Eye_Look_Out_R
+  R_LookLeft: Eye_Look_Left_R
+  R_LookRight: Eye_Look_Right_R
   showDebugRays: 1
   testForceEyesUp: 0
+--- !u!114 &5473120200338883143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3710276211541570393}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f66a61450035fc9488774be9ca935e13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlendShapeDebugger
+  targetMesh: {fileID: 8620798079540423861}
 --- !u!4 &3711611270603244941 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 998908503689501552, guid: bd5f652942e669a47b2393d56690c7df, type: 3}

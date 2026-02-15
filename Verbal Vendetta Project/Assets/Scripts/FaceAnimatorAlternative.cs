@@ -3,11 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// Manages HD Facial Emotions for CC4/CC5 characters.
-/// Hard-coded with refined technical recommendations for L/R blendshapes.
-/// Fixed: Re-calibrated 'Angry' for aggressive grit and 'Sad' for deeper sorrow.
+/// Alternative version of FaceAnimator using a different set of blend shapes (ARKit/Standards variant).
 /// </summary>
-public class FaceAnimator : MonoBehaviour
+public class FaceAnimatorAlternative : MonoBehaviour
 {
     public enum EmotionType { Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty, BrowLiftTest }
 
@@ -56,54 +54,51 @@ public class FaceAnimator : MonoBehaviour
     {
         defaultProfiles = new Dictionary<EmotionType, List<BlendShapeWeight>>();
 
-        // --- ANGRY (Updated: Maximum furrow and lip pressure) ---
+        // --- ANGRY ---
         defaultProfiles[EmotionType.Angry] = new List<BlendShapeWeight> {
-            new BlendShapeWeight { shapeName = "Brow_Drop_L", weight = 40 },
-            new BlendShapeWeight { shapeName = "Brow_Drop_R", weight = 40 },
-            // Eyes: Eye Squint (50%) + Lower Lid Raise (40%)
-            new BlendShapeWeight { shapeName = "Eye_Squint_L", weight = 50 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_R", weight = 50 },
-            
-            // Nose: Nose Wrinkle (60%) + Nostril Flare (90%)
-            new BlendShapeWeight { shapeName = "Nose_Sneer_L", weight = 60 },
-            new BlendShapeWeight { shapeName = "Nose_Sneer_R", weight = 60 },
+            new BlendShapeWeight { shapeName = "Brow_Down_L", weight = 40 },
+            new BlendShapeWeight { shapeName = "Brow_Down_R", weight = 40 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_L", weight = 50 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_R", weight = 50 },
+            new BlendShapeWeight { shapeName = "Nose_Wrinkle_L", weight = 60 },
+            new BlendShapeWeight { shapeName = "Nose_Wrinkle_R", weight = 60 },
             new BlendShapeWeight { shapeName = "Nose_Nostril_Dilate_L", weight = 90 },
             new BlendShapeWeight { shapeName = "Nose_Nostril_Dilate_R", weight = 90 },
-            
             new BlendShapeWeight { shapeName = "Jaw_Open", weight = 25 },
             new BlendShapeWeight { shapeName = "V_Lip_Open", weight = 15 }
         };
 
         // --- SHOCKED ---
         defaultProfiles[EmotionType.Shocked] = new List<BlendShapeWeight> {
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_L", weight = 100 },
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_R", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_R", weight = 100 },
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_L", weight = 100 },
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_R", weight = 100 },
-            new BlendShapeWeight { shapeName = "Eye_Wide_L", weight = 80 },
-            new BlendShapeWeight { shapeName = "Eye_Wide_R", weight = 80 },
+            new BlendShapeWeight { shapeName = "Eye_Widen_L", weight = 80 },
+            new BlendShapeWeight { shapeName = "Eye_Widen_R", weight = 80 },
             new BlendShapeWeight { shapeName = "Jaw_Open", weight = 25 },
             new BlendShapeWeight { shapeName = "V_Lip_Open", weight = 15 }
         };
 
-        // --- SAD (Updated: Droopy lids and chin shrug) ---
+        // --- SAD ---
         defaultProfiles[EmotionType.Sad] = new List<BlendShapeWeight> {
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_L", weight = 100 },
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_R", weight = 100 },
-            new BlendShapeWeight { shapeName = "Mouth_Frown_L", weight = 100 },
-            new BlendShapeWeight { shapeName = "Mouth_Frown_R", weight = 100 },
-            new BlendShapeWeight { shapeName = "Mouth_Shrug_Lower", weight = 50 }, // Pouting the chin upward
-            new BlendShapeWeight { shapeName = "Eye_Blink_L", weight = 15 }, // Slight lid closure
-            new BlendShapeWeight { shapeName = "Eye_Blink_R", weight = 15 }
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_R", weight = 100 },
+            new BlendShapeWeight { shapeName = "Mouth_Corner_Depress_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Mouth_Corner_Depress_R", weight = 100 },
+            new BlendShapeWeight { shapeName = "Eye_Blink_L", weight = 15 },
+            new BlendShapeWeight { shapeName = "Eye_Blink_R", weight = 15 },
+            new BlendShapeWeight { shapeName = "Mouth_Lips_Push_DL", weight = 50 }, 
+            new BlendShapeWeight { shapeName = "Mouth_Lips_Push_DR", weight = 50 } 
         };
 
-        // --- SMUG (Asymmetric) ---
+        // --- SMUG ---
         defaultProfiles[EmotionType.Smug] = new List<BlendShapeWeight> {
-            new BlendShapeWeight { shapeName = "Mouth_Smile_L", weight = 70 },
-            new BlendShapeWeight { shapeName = "Mouth_Smile_R", weight = 10 },
+            new BlendShapeWeight { shapeName = "Mouth_Corner_Pull_L", weight = 70 },
+            new BlendShapeWeight { shapeName = "Mouth_Corner_Pull_R", weight = 10 },
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_L", weight = 60 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_L", weight = 50 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_R", weight = 50 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_L", weight = 50 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_R", weight = 50 },
             new BlendShapeWeight { shapeName = "Mouth_Dimple_L", weight = 40 }
         };
 
@@ -111,33 +106,33 @@ public class FaceAnimator : MonoBehaviour
         defaultProfiles[EmotionType.Nervous] = new List<BlendShapeWeight> {
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_L", weight = 80 },
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_R", weight = 80 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_L", weight = 60 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_R", weight = 60 },
-            new BlendShapeWeight { shapeName = "Mouth_Press_L", weight = 70 },
-            new BlendShapeWeight { shapeName = "Mouth_Press_R", weight = 70 },
-            new BlendShapeWeight { shapeName = "Brow_Compress_L", weight = 50 },
-            new BlendShapeWeight { shapeName = "Brow_Compress_R", weight = 50 },
-            new BlendShapeWeight { shapeName = "Eye_Wide_L", weight = 20 },
-            new BlendShapeWeight { shapeName = "Eye_Wide_R", weight = 20 }
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_L", weight = 60 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_R", weight = 60 },
+            new BlendShapeWeight { shapeName = "Mouth_Lips_Press_L", weight = 70 },
+            new BlendShapeWeight { shapeName = "Mouth_Lips_Press_R", weight = 70 },
+            new BlendShapeWeight { shapeName = "Brow_Lateral_L", weight = 50 }, 
+            new BlendShapeWeight { shapeName = "Brow_Lateral_R", weight = 50 },
+            new BlendShapeWeight { shapeName = "Eye_Widen_L", weight = 20 },
+            new BlendShapeWeight { shapeName = "Eye_Widen_R", weight = 20 }
         };
 
         // --- GUILTY ---
         defaultProfiles[EmotionType.Guilty] = new List<BlendShapeWeight> {
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_L", weight = 100 },
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_R", weight = 100 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_L", weight = 80 },
-            new BlendShapeWeight { shapeName = "Eye_Squint_R", weight = 80 },
-            new BlendShapeWeight { shapeName = "Mouth_Press_L", weight = 40 },
-            new BlendShapeWeight { shapeName = "Mouth_Press_R", weight = 40 },
-            new BlendShapeWeight { shapeName = "Mouth_Frown_L", weight = 40 },
-            new BlendShapeWeight { shapeName = "Mouth_Frown_R", weight = 40 },
-            new BlendShapeWeight { shapeName = "Brow_Drop_R", weight = 30 }
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_R", weight = 100 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_L", weight = 80 },
+            new BlendShapeWeight { shapeName = "Eye_Squint_Inner_R", weight = 80 },
+            new BlendShapeWeight { shapeName = "Mouth_Lips_Press_L", weight = 40 },
+            new BlendShapeWeight { shapeName = "Mouth_Lips_Press_R", weight = 40 },
+            new BlendShapeWeight { shapeName = "Mouth_Corner_Depress_L", weight = 40 },
+            new BlendShapeWeight { shapeName = "Mouth_Corner_Depress_R", weight = 40 },
+            new BlendShapeWeight { shapeName = "Brow_Down_R", weight = 30 }
         };
 
-        // --- BROW LIFT TEST (Wrinkle Check) ---
+        // --- BROW LIFT TEST ---
         defaultProfiles[EmotionType.BrowLiftTest] = new List<BlendShapeWeight> {
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_L", weight = 100 },
-            new BlendShapeWeight { shapeName = "Brow_Raise_Inner_R", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_L", weight = 100 },
+            new BlendShapeWeight { shapeName = "Brow_Raise_In_R", weight = 100 },
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_L", weight = 100 },
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_R", weight = 100 }
         };
