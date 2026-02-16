@@ -1178,10 +1178,10 @@ PrefabInstance:
       addedObject: {fileID: 2399034092451946885}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1938239214334080527}
+      addedObject: {fileID: 2317171138756712955}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2317171138756712955}
+      addedObject: {fileID: 1938239214334080527}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5473120200338883143}
@@ -1542,20 +1542,6 @@ MonoBehaviour:
   transitionSpeed: 3
   debugEmotion: 0
   applyDebugEmotion: 0
---- !u!114 &1938239214334080527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3710276211541570393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9df5037d8015c3d4dad2c6ec21ee3e31, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTestAlternative
-  faceAnimator: {fileID: 0}
-  testEmotion: 0
 --- !u!114 &2317171138756712955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1583,6 +1569,20 @@ MonoBehaviour:
   R_LookRight: Eye_Look_Right_R
   showDebugRays: 1
   testForceEyesUp: 0
+--- !u!114 &1938239214334080527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3710276211541570393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9df5037d8015c3d4dad2c6ec21ee3e31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTestAlternative
+  faceAnimator: {fileID: 0}
+  testEmotion: 0
 --- !u!114 &5473120200338883143
 MonoBehaviour:
   m_ObjectHideFlags: 0

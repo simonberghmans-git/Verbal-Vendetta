@@ -28,91 +28,48 @@ public class InterrogationManager : MonoBehaviour
     public GameObject newsArticle;
 
     [Header("Suspect Models")]
-    public List<GameObject> allSuspectPrefabs;
-    public List<Sprite> allSuspectImages;
+    // Models and Images are now managed by SuspectManager
 
     [Header("Model Configuration")]
-    [Tooltip("Indices in allSuspectPrefabs that correspond to Male characters.")]
-    public List<int> maleModelIndices;
-    [Tooltip("Indices in allSuspectPrefabs that correspond to Female characters.")]
-    public List<int> femaleModelIndices;
+    // Indices are now managed by GeminiConnectionManager
 
+    private SuspectData activeSuspectData;
     private GameObject currentSuspectModel;
-
-    [Header("Interrogation State")]
-    public int currentSuspectIndex = 0;
 
     private void Start()
     {
         if (newsArticle != null) newsArticle.SetActive(false);
 
-        suspectNameDisplay.text = "Generating scenario...";
-        responseTextField.text = "<i>Please wait while the mystery is prepared...</i>";
+        suspectNameDisplay.text = "Initializing...";
+        responseTextField.text = "<i>Please wait...</i>";
+        
+        // Generation is now handled by GameManager
+    }
 
-        if (connectionManager != null)
+    public void SetActiveSuspect(SuspectData data, GameObject suspectObject)
+    {
+        activeSuspectData = data;
+        currentSuspectModel = suspectObject;
+
+        if (activeSuspectData != null)
         {
-            string maleIndices = string.Join(", ", maleModelIndices);
-            string femaleIndices = string.Join(", ", femaleModelIndices);
+            suspectNameDisplay.text = $"Interrogating: {activeSuspectData.name}";
+            responseTextField.text = $"<i>{activeSuspectData.name} enters the room.</i>";
+        }
+        else
+        {
+            suspectNameDisplay.text = "Select a Suspect";
+            responseTextField.text = "<i>Press 'I' or use Arrows to select.</i>";
+        }
 
-            connectionManager.GenerateScenario(maleIndices, femaleIndices, (data, error) =>
-            {
-                if (data != null)
-                {
-                    UpdateSuspectUI();
-                }
-                else
-                {
-                    suspectNameDisplay.text = "Generation Failed";
-                    responseTextField.text = $"<color=red>Error:</color> {error}";
-                }
-            });
+        // Register Animator
+        if (currentSuspectModel != null && AnimationsManager.Instance != null)
+        {
+            AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
         }
     }
 
-    public void SwitchSuspectUpwards()
-    {
-        if (connectionManager.currentScenario == null) return;
-        currentSuspectIndex = (currentSuspectIndex + 1) % connectionManager.currentScenario.suspects.Count;
-        UpdateSuspectUI();
-    }
-
-    private void UpdateSuspectUI()
-    {
-        if (connectionManager.currentScenario == null) return;
-
-        SuspectData currentSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
-        suspectNameDisplay.text = $"Interrogating: {currentSuspect.name}";
-        responseTextField.text = $"<i>{currentSuspect.name} waits for your first question.</i>";
-
-        UpdateSuspectModel(currentSuspectIndex);
-    }
-
-
-
-    private void UpdateSuspectModel(int index)
-    {
-        if (allSuspectPrefabs == null || allSuspectPrefabs.Count == 0) return;
-
-        if (currentSuspectModel != null)
-        {
-            Destroy(currentSuspectModel);
-        }
-
-        SuspectData currentSuspect = connectionManager.currentScenario.suspects[index];
-        int modelId = currentSuspect.model_id;
-
-        if (index >= 0 && modelId >= 0 && modelId < allSuspectPrefabs.Count && allSuspectPrefabs[modelId] != null)
-        {
-            currentSuspectModel = Instantiate(allSuspectPrefabs[modelId], Vector3.zero, Quaternion.Euler(0, 180, 0));
-            
-            // Register the new animator with the AnimationsManager
-            Animator suspectAnimator = currentSuspectModel.GetComponent<Animator>();
-            if (suspectAnimator != null && AnimationsManager.Instance != null)
-            {
-                AnimationsManager.Instance.SetCurrentAnimator(suspectAnimator);
-            }
-        }
-    }
+    // Removed Internal UpdateSuspectUI and UpdateSuspectModel as they are handled by GameManager now.
 
     public void AskSuspect()
     {
@@ -121,13 +78,22 @@ public class InterrogationManager : MonoBehaviour
         string question = playerInputField.text;
         if (string.IsNullOrWhiteSpace(question)) return;
 
+        if (activeSuspectData == null) return;
         responseTextField.text = "<i>Thinking...</i>";
-        SuspectData activeSuspect = connectionManager.currentScenario.suspects[currentSuspectIndex];
+        SuspectData activeSuspect = activeSuspectData;
         
         // Append the player's question to the suspect's transcript
         if (notebookManager != null)
         {
-            notebookManager.AppendSuspectLine(currentSuspectIndex, $"Player: {question}");
+            // Note: We might want to pass the correct ID if notebook manager uses index. 
+            // For now, assuming appending by subject object reference isn't possible, let's just append to current page 
+            // or we need to pass the index to SetActiveSuspect if NotebookManager relies on it.
+            // Let's check NotebookManager usage below. 
+            // It uses `currentSuspectIndex`. We should probably keep that updated or overload notebook manager.
+            // For safety, let's rely on the activeSuspect object.
+            // Actually, we can just find the index of activeSuspectData in the scenario list.
+            int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspect);
+            notebookManager.AppendSuspectLine(index, $"Player: {question}");
         }
 
         // STEP 1: Immediate Reaction Analysis
@@ -199,7 +165,8 @@ public class InterrogationManager : MonoBehaviour
                     // Append the suspect's response to the notebook transcript
                     if (notebookManager != null)
                     {
-                        notebookManager.AppendSuspectLine(currentSuspectIndex, $"{activeSuspect.name}: {suspectResponse.response}");
+                        int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspect);
+                        notebookManager.AppendSuspectLine(index, $"{activeSuspect.name}: {suspectResponse.response}");
                     }
 
                     // Inform any input manager that an answer was received

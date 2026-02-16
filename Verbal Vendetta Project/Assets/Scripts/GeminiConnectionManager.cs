@@ -133,11 +133,10 @@ public class GeminiConnectionManager : MonoBehaviour
   ]
 }";
 
-    [Header("Voice Settings")]
-    [Tooltip("List of Gemini Voice Names for Male suspects.")]
-    [SerializeField] public List<string> maleVoiceIds;
-    [Tooltip("List of Gemini Voice Names for Female suspects.")]
-    [SerializeField] public List<string> femaleVoiceIds;
+    [Header("Dependencies")]
+    public SuspectManager suspectManager;
+    
+    // Removed local lists for Voices and Model Indices
 
     [Header("Debug Settings")]
     [SerializeField] private TMP_Text debugDisplayField;
@@ -152,7 +151,7 @@ public class GeminiConnectionManager : MonoBehaviour
     public delegate void JudgeCallback(string headline, string article, bool isCorrect, string error);
 
     // --- CALL 1: SCENARIO GENERATION ---
-    public void GenerateScenario(string maleIndices, string femaleIndices, ScenarioCallback callback)
+    public void GenerateScenario(ScenarioCallback callback)
     {
         if (testing)
         {
@@ -175,16 +174,27 @@ public class GeminiConnectionManager : MonoBehaviour
             callback?.Invoke(null, "API Key Missing");
             return;
         }
-        StartCoroutine(PostScenarioRequest(maleIndices, femaleIndices, callback));
+        
+        if (suspectManager == null)
+        {
+             Debug.LogError("SuspectManager reference missing!");
+             callback?.Invoke(null, "SuspectManager Missing");
+             return;
+        }
+        
+        StartCoroutine(PostScenarioRequest(callback));
     }
 
-    private IEnumerator PostScenarioRequest(string maleIndices, string femaleIndices, ScenarioCallback callback)
+    private IEnumerator PostScenarioRequest(ScenarioCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
 
         // Convert lists to strings for the prompt
-        string maleIdsJoined = maleVoiceIds.Count > 0 ? string.Join(", ", maleVoiceIds) : "No Male IDs provided";
-        string femaleIdsJoined = femaleVoiceIds.Count > 0 ? string.Join(", ", femaleVoiceIds) : "No Female IDs provided";
+        string maleIdsJoined = suspectManager.maleVoiceIds.Count > 0 ? string.Join(", ", suspectManager.maleVoiceIds) : "Achird";
+        string femaleIdsJoined = suspectManager.femaleVoiceIds.Count > 0 ? string.Join(", ", suspectManager.femaleVoiceIds) : "Achernar";
+
+        string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
+        string femaleModelIndicesStr = suspectManager.femaleModelIndices != null && suspectManager.femaleModelIndices.Count > 0 ? string.Join(", ", suspectManager.femaleModelIndices) : "0";
 
         // UPDATED SYSTEM PROMPT: Integrates Voice ID assignment logic
         string systemPrompt = $@"You are a master mystery writer. Generate a murder mystery scenario in JSON.
@@ -211,8 +221,8 @@ public class GeminiConnectionManager : MonoBehaviour
             - Available Female IDs: [{femaleIdsJoined}]
             - RULE: Try to ensure each suspect has a unique voice_id. If a list is too short, you may reuse IDs, but prioritize variety across the 5 suspects.
         14. MODEL ASSIGNMENT:
-            - Available Male Model IDs: [ {maleIndices} ]
-            - Available Female Model IDs: [ {femaleIndices} ]
+            - Available Male Model IDs: [ {maleModelIndicesStr} ]
+            - Available Female Model IDs: [ {femaleModelIndicesStr} ]
             - Assign a 'model_id' (integer) to each suspect from the appropriate list based on their gender.
             - RULE: Try to assign a unique model_id for each suspect if possible.
         15. GENDER ASSIGNMENT: Assign a 'gender' ('Male' or 'Female') to each suspect. Ensure it matches the voice_id, model_id, and name.
