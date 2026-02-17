@@ -234,6 +234,34 @@ public class InterrogationManager : MonoBehaviour
             }
         });
     }
+
+    /// <summary>
+    /// Cancel all ongoing interrogation processes (STT, LLM, TTS).
+    /// </summary>
+    public void StopInterrogation()
+    {
+        // 1. Cancel LLM Generation
+        if (connectionManager != null)
+        {
+            connectionManager.CancelCurrentInteraction();
+        }
+
+        // 2. Stop TTS Playback and Generation
+        if (ttsHandler != null)
+        {
+            ttsHandler.StopSpeaking();
+        }
+
+        // 3. Reset Animation State (Stop Lip Sync)
+        if (AnimationsManager.Instance != null)
+        {
+            AnimationsManager.Instance.SetTalkingState(false, 0f);
+        }
+
+        // 4. Reset UI
+        responseTextField.text = "<i>...</i>";
+        // suspectNameDisplay.text = "Select a Suspect"; // Handled by SetActiveSuspect(null) in GM
+    }
     
     private IEnumerator ReturnToMenuRoutine()
     {

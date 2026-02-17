@@ -41,6 +41,22 @@ public class GeminiSTTHandler : MonoBehaviour
         StartCoroutine(PostSTTRequest(wavData, callback));
     }
 
+    private UnityWebRequest currentRequest;
+
+    /// <summary>
+    /// Cancels any ongoing STT request.
+    /// </summary>
+    public void CancelTranscription()
+    {
+        if (currentRequest != null)
+        {
+            currentRequest.Abort();
+            currentRequest.Dispose(); // Ensure it's cleaned up
+            currentRequest = null;
+        }
+        StopAllCoroutines(); // Also stop the polling/waiting
+    }
+
     private IEnumerator PostSTTRequest(byte[] wavData, STTCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
@@ -69,6 +85,8 @@ public class GeminiSTTHandler : MonoBehaviour
         {
             using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
             {
+                currentRequest = request; // Track current request
+
                 byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonPayload);
                 request.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 request.downloadHandler = new DownloadHandlerBuffer();
@@ -76,6 +94,9 @@ public class GeminiSTTHandler : MonoBehaviour
                 request.timeout = 30; // seconds
 
                 yield return request.SendWebRequest();
+
+                // Clear current request ref as it's done (or about to be disposed by 'using')
+                if (currentRequest == request) currentRequest = null;
 
                 // Log some additional diagnostics for intermittent failures
                 long responseCode = request.responseCode;
@@ -125,8 +146,18 @@ public class GeminiSTTHandler : MonoBehaviour
                 else
                 {
                     // Detailed logging to help diagnose intermittent issues
-                    lastError = $"STT API Error: {request.error} (code: {responseCode})";
-                    Debug.LogError($"STT API Error (attempt {attempt}): {request.error} | ResponseCode: {responseCode} | ResponseText: {responseText}");
+                    // Check if aborted manually
+                    if (request.error == "Request aborted") 
+                    {
+                         // Silent fail / Log as info
+                         lastError = "Request Cancelled";
+                         finished = true; // Stop retrying
+                    }
+                    else
+                    {
+                        lastError = $"STT API Error: {request.error} (code: {responseCode})";
+                        Debug.LogError($"STT API Error (attempt {attempt}): {request.error} | ResponseCode: {responseCode} | ResponseText: {responseText}");
+                    }
                 }
             }
 
@@ -138,7 +169,7 @@ public class GeminiSTTHandler : MonoBehaviour
             }
         }
 
-        if (!finished)
+        if (!finished && lastError != "Request Cancelled")
         {
             callback?.Invoke(null, lastError ?? "STT API Error: Unknown");
         }

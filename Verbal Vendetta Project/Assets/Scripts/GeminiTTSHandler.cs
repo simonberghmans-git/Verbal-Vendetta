@@ -42,6 +42,28 @@ public class GeminiTTSHandler : MonoBehaviour
         StartCoroutine(PostTTSRequest(text, voiceName, overrideSource, callback));
     }
 
+    private UnityWebRequest currentRequest;
+
+    /// <summary>
+    /// Stops any active speech and cancels pending generation.
+    /// </summary>
+    public void StopSpeaking()
+    {
+        if (currentRequest != null)
+        {
+            currentRequest.Abort();
+            currentRequest.Dispose();
+            currentRequest = null;
+        }
+        
+        if (voiceSource != null && voiceSource.isPlaying)
+        {
+            voiceSource.Stop();
+        }
+
+        StopAllCoroutines();
+    }
+
     private IEnumerator PostTTSRequest(string text, string voiceName, AudioSource overrideSource, TTSCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelId}:generateContent?key={apiKey.Trim()}";
@@ -68,12 +90,16 @@ public class GeminiTTSHandler : MonoBehaviour
 
         using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
         {
+            currentRequest = request; // Track request
+
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonPayload);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
             yield return request.SendWebRequest();
+            
+            if (currentRequest == request) currentRequest = null; // Clear if completed normally
 
             if (request.result == UnityWebRequest.Result.Success)
             {

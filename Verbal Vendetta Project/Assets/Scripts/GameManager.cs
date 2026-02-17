@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public SelectionManager selectionManager;
     public SuspectManager suspectManager;
     public GeminiConnectionManager connectionManager;
+    public InterrogationInputManager inputManager; // Added reference
     public Camera mainCamera;
 
     [Header("Interrogation Scene")]
@@ -23,6 +24,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        if (inputManager == null) inputManager = FindObjectOfType<InterrogationInputManager>();
+
         // Initial Setup - Camera to Selection
         if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
         {
@@ -126,6 +129,12 @@ public class GameManager : MonoBehaviour
 
     private System.Collections.IEnumerator SwitchToSelection()
     {
+        // 0. Cancel any pending input
+        if (inputManager != null)
+        {
+            inputManager.ForceReset();
+        }
+
         isInputLocked = true;
         currentState = GameState.SubjectSelection;
 
@@ -153,6 +162,7 @@ public class GameManager : MonoBehaviour
         // Reset Interrogation UI text?
         if (interrogationManager != null)
         {
+            interrogationManager.StopInterrogation(); // Cancel All Processes
             interrogationManager.SetActiveSuspect(null, null); // Clear active suspect
         }
 

@@ -64,8 +64,7 @@ public class FaceAnimatorAlternative : MonoBehaviour
             new BlendShapeWeight { shapeName = "Nose_Wrinkle_R", weight = 60 },
             new BlendShapeWeight { shapeName = "Nose_Nostril_Dilate_L", weight = 90 },
             new BlendShapeWeight { shapeName = "Nose_Nostril_Dilate_R", weight = 90 },
-            new BlendShapeWeight { shapeName = "Jaw_Open", weight = 25 },
-            new BlendShapeWeight { shapeName = "V_Lip_Open", weight = 15 }
+
         };
 
         // --- SHOCKED ---
@@ -76,8 +75,7 @@ public class FaceAnimatorAlternative : MonoBehaviour
             new BlendShapeWeight { shapeName = "Brow_Raise_Outer_R", weight = 100 },
             new BlendShapeWeight { shapeName = "Eye_Widen_L", weight = 80 },
             new BlendShapeWeight { shapeName = "Eye_Widen_R", weight = 80 },
-            new BlendShapeWeight { shapeName = "Jaw_Open", weight = 25 },
-            new BlendShapeWeight { shapeName = "V_Lip_Open", weight = 15 }
+
         };
 
         // --- SAD ---

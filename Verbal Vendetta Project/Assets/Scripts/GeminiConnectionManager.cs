@@ -472,9 +472,27 @@ public class GeminiConnectionManager : MonoBehaviour
         }
     }
 
+    // Track current request
+    private UnityWebRequest currentRequest;
+
+    /// <summary>
+    /// Cancels any active logical interaction (Reaction or Speaking).
+    /// </summary>
+    public void CancelCurrentInteraction()
+    {
+        if (currentRequest != null)
+        {
+            currentRequest.Abort();
+            currentRequest.Dispose();
+            currentRequest = null;
+        }
+        StopAllCoroutines();
+    }
+
     private UnityWebRequest CreateRequest(string url, string json)
     {
         UnityWebRequest req = new UnityWebRequest(url, "POST");
+        currentRequest = req; // Track request
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
         req.uploadHandler = new UploadHandlerRaw(bodyRaw);
         req.downloadHandler = new DownloadHandlerBuffer();

@@ -12,6 +12,7 @@ public class InterrogationInputManager : MonoBehaviour
     [Header("Dependencies")]
     public GeminiSTTHandler sttHandler;
     public InterrogationManager interrogationManager;
+    public GameManager gameManager; // Added reference
 
     [Header("UI Feedback")]
     public TMP_Text statusLabel;
@@ -29,6 +30,8 @@ public class InterrogationInputManager : MonoBehaviour
 
     void Start()
     {
+        if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
+
         if (Microphone.devices.Length > 0)
         {
             micName = Microphone.devices[0];
@@ -41,6 +44,9 @@ public class InterrogationInputManager : MonoBehaviour
 
     void Update()
     {
+        // 0. check game state
+        if (gameManager != null && gameManager.currentState != GameManager.GameState.Interrogation) return;
+
         // 1. Press and Hold Space to record
         if (Input.GetKeyDown(KeyCode.Space) && !isRecording && !isReviewing && !isTranscribing)
         {
@@ -146,6 +152,33 @@ public class InterrogationInputManager : MonoBehaviour
         statusLabel.text = "SUBMISSION CANCELLED";
         transcriptionPreview.text = "Ready.";
         pendingTranscript = "";
+    }
+
+    /// <summary>
+    /// Forcefully resets the input manager state. 
+    /// Stops recording, ignores pending transcriptions, and cancels submission.
+    /// </summary>
+    public void ForceReset()
+    {
+        if (isRecording)
+        {
+            StopRecording(); // Stop the mic
+        }
+        
+        isRecording = false;
+        
+        // Cancel actual API request
+        if (sttHandler != null)
+        {
+            sttHandler.CancelTranscription();
+        }
+        
+        isTranscribing = false; 
+
+        CancelSubmission();
+        
+        statusLabel.text = "READY";
+        transcriptionPreview.text = "Ready.";
     }
 
     private AudioClip TrimClip(AudioClip source, int lengthSamples)
