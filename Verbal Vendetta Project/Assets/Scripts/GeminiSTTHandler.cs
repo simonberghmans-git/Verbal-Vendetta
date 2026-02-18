@@ -14,7 +14,7 @@ public class GeminiSTTHandler : MonoBehaviour
     [SerializeField] private string apiKey = "";
 
     // Using the specific preview model that was successfully found previously.
-    private string model = "gemini-2.5-flash-preview-09-2025";
+    private string model = "gemini-2.0-flash";
 
     public delegate void STTCallback(string transcription, string error);
 

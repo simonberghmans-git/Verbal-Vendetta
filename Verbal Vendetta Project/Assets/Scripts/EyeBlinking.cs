@@ -15,16 +15,23 @@ public class EyeBlinking : MonoBehaviour
 
     [Header("Blink Settings")]
     [Tooltip("Minimum time (in seconds) between blinks.")]
-    public float minBlinkInterval = 2.0f;
+    public float minBlinkInterval = 3.0f;
     
     [Tooltip("Maximum time (in seconds) between blinks.")]
-    public float maxBlinkInterval = 5.0f;
+    public float maxBlinkInterval = 10.0f;
     
     [Tooltip("Duration of the closing phase of the blink.")]
     public float closeDuration = 0.05f;
     
     [Tooltip("Duration of the opening phase of the blink.")]
     public float openDuration = 0.1f;
+
+    [Header("Stress Blink Settings")]
+    [Tooltip("Minimum time between blinks at max stress.")]
+    public float minStressBlinkInterval = 0.2f;
+
+    [Tooltip("Maximum time between blinks at max stress.")]
+    public float maxStressBlinkInterval = 3.0f;
 
     private int leftEyeIndex = -1;
     private int rightEyeIndex = -1;
@@ -57,15 +64,22 @@ public class EyeBlinking : MonoBehaviour
     {
         while (true)
         {
+            float stress = 0f;
+
+            if (AnimationsManager.Instance != null)
+            {
+                stress = AnimationsManager.Instance.stressLevel;
+            }
+
+            float currentMin = Mathf.Lerp(minBlinkInterval, minStressBlinkInterval, stress);
+            float currentMax = Mathf.Lerp(maxBlinkInterval, maxStressBlinkInterval, stress);
+
             // Wait for a random interval before blinking
-            float waitTime = Random.Range(minBlinkInterval, maxBlinkInterval);
+            float waitTime = Random.Range(currentMin, currentMax);
             yield return new WaitForSeconds(waitTime);
 
             // Close eyes
             yield return StartCoroutine(AnimateBlink(0f, 100f, closeDuration));
-
-            // Small pause while eyes are closed (optional, very short)
-            // yield return new WaitForSeconds(0.01f);
 
             // Open eyes
             yield return StartCoroutine(AnimateBlink(100f, 0f, openDuration));

@@ -47,6 +47,14 @@ public class InterrogationInputManager : MonoBehaviour
         // 0. check game state
         if (gameManager != null && gameManager.currentState != GameManager.GameState.Interrogation) return;
 
+        // Check if Notebook is open - if so, disable voice input
+        if (interrogationManager != null && 
+            interrogationManager.notebookManager != null && 
+            interrogationManager.notebookManager.IsOpen)
+        {
+            return;
+        }
+
         // 1. Press and Hold Space to record
         if (Input.GetKeyDown(KeyCode.Space) && !isRecording && !isReviewing && !isTranscribing)
         {

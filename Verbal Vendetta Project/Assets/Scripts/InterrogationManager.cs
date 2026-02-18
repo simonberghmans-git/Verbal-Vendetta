@@ -62,6 +62,12 @@ public class InterrogationManager : MonoBehaviour
             responseTextField.text = "<i>Press 'I' or use Arrows to select.</i>";
         }
 
+        // Reset Eye State to Direct (Idle)
+        if (EyePointManager.Instance != null)
+        {
+            EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+        }
+
         // Register Animator
         if (currentSuspectModel != null && AnimationsManager.Instance != null)
         {
@@ -82,6 +88,12 @@ public class InterrogationManager : MonoBehaviour
         responseTextField.text = "<i>Thinking...</i>";
         SuspectData activeSuspect = activeSuspectData;
         
+        // Switch Eye State to Wandering (Thinking)
+        if (EyePointManager.Instance != null)
+        {
+            EyePointManager.Instance.currentState = EyePointManager.EyeState.Thinking;
+        }
+
         // Append the player's question to the suspect's transcript
         if (notebookManager != null)
         {
@@ -158,8 +170,29 @@ public class InterrogationManager : MonoBehaviour
                                 {
                                     AnimationsManager.Instance.SetTalkingState(true, clip.length);
                                 }
+
+                                // Set Eye State to Talking
+                                if (EyePointManager.Instance != null)
+                                {
+                                    EyePointManager.Instance.currentState = EyePointManager.EyeState.Talking;
+                                }
+
+                                // Reset Eye State after speech
+                                StartCoroutine(ResetEyeStateAfterDelay(clip.length));
+                            }
+                            else
+                            {
+                                // If TTS fails, reset eyes immediately or after a short delay
+                                if (EyePointManager.Instance != null)
+                                    EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
                             }
                         });
+                    }
+                    else
+                    {
+                         // No TTS, reset eyes immediately
+                         if (EyePointManager.Instance != null)
+                            EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
                     }
 
                     // Append the suspect's response to the notebook transcript
@@ -179,6 +212,15 @@ public class InterrogationManager : MonoBehaviour
                 }
             });
         });
+    }
+
+    private IEnumerator ResetEyeStateAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (EyePointManager.Instance != null)
+        {
+            EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+        }
     }
 
     /// <summary>
@@ -258,7 +300,13 @@ public class InterrogationManager : MonoBehaviour
             AnimationsManager.Instance.SetTalkingState(false, 0f);
         }
 
-        // 4. Reset UI
+        // 4. Reset Eye State
+        if (EyePointManager.Instance != null)
+        {
+            EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+        }
+
+        // 5. Reset UI
         responseTextField.text = "<i>...</i>";
         // suspectNameDisplay.text = "Select a Suspect"; // Handled by SetActiveSuspect(null) in GM
     }

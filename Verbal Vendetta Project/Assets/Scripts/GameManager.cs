@@ -66,6 +66,14 @@ public class GameManager : MonoBehaviour
             // Check for Toggle
             if (Input.GetKeyDown(KeyCode.I))
             {
+                // Check if Notebook is open - if so, disable mode switching
+                if (interrogationManager != null && 
+                    interrogationManager.notebookManager != null && 
+                    interrogationManager.notebookManager.IsOpen)
+                {
+                    return; 
+                }
+
                 StartCoroutine(SwitchToInterrogation());
             }
 
@@ -81,6 +89,14 @@ public class GameManager : MonoBehaviour
             // Press I to go back
             if (Input.GetKeyDown(KeyCode.I))
             {
+                // Check if Notebook is open - if so, disable mode switching
+                if (interrogationManager != null && 
+                    interrogationManager.notebookManager != null && 
+                    interrogationManager.notebookManager.IsOpen)
+                {
+                    return; 
+                }
+
                 StartCoroutine(SwitchToSelection());
             }
         }
@@ -120,6 +136,12 @@ public class GameManager : MonoBehaviour
             {
                 // 5. Inform InterrogationManager
                 interrogationManager.SetActiveSuspect(activeData, currentActiveHighDetailModel);
+                
+                // Randomize floor point for new interrogation
+                if (EyePointManager.Instance != null)
+                {
+                    EyePointManager.Instance.RandomizeFloorPoint();
+                }
             }
         }
 

@@ -266,7 +266,8 @@ public class GeminiConnectionManager : MonoBehaviour
             generationConfig = new { responseMimeType = "application/json" }
         };
 
-        using (UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload)))
+        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
+        using (request)
         {
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
@@ -286,6 +287,7 @@ public class GeminiConnectionManager : MonoBehaviour
             }
             else { callback?.Invoke(null, "API Error: " + request.error); }
         }
+        if (currentRequest == request) currentRequest = null;
     }
 
     // --- CALL 2: INTERROGATION ---
@@ -323,7 +325,8 @@ public class GeminiConnectionManager : MonoBehaviour
             generationConfig = new { responseMimeType = "application/json" }
         };
 
-        using (UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload)))
+        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
+        using (request)
         {
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
@@ -346,6 +349,7 @@ public class GeminiConnectionManager : MonoBehaviour
             }
             else { callback?.Invoke(FaceAnimator.EmotionType.Neutral, 0f, request.error); }
         }
+        if (currentRequest == request) currentRequest = null;
     }
 
     public void SpeakWithSuspect(string question, SuspectData suspect, InterrogationCallback callback)
@@ -392,7 +396,8 @@ public class GeminiConnectionManager : MonoBehaviour
             generationConfig = new { responseMimeType = "application/json" }
         };
 
-        using (UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload)))
+        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
+        using (request)
         {
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
@@ -406,6 +411,7 @@ public class GeminiConnectionManager : MonoBehaviour
             }
             else { callback?.Invoke(null, request.error); }
         }
+        if (currentRequest == request) currentRequest = null;
     }
 
     // --- CALL 3: THE JUDGE ---
@@ -459,7 +465,8 @@ public class GeminiConnectionManager : MonoBehaviour
             }
         };
 
-        using (UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload)))
+        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
+        using (request)
         {
             yield return request.SendWebRequest();
             if (request.result == UnityWebRequest.Result.Success)
@@ -470,6 +477,7 @@ public class GeminiConnectionManager : MonoBehaviour
             }
             else { callback?.Invoke(null, null, false, request.error); }
         }
+        if (currentRequest == request) currentRequest = null;
     }
 
     // Track current request

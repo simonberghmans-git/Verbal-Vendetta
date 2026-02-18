@@ -10,6 +10,9 @@ public class NotebookManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
+    
+    [Header("Debug")]
+    public bool testing = false;
 
     [Header("Page 1: The Victim File")]
     [SerializeField] private TMP_Text victimNameText;
@@ -26,10 +29,18 @@ public class NotebookManager : MonoBehaviour
     [SerializeField] private TMP_Text discoveryDetailsText;
 
     [Header("Transcripts")]
-    [Tooltip("TMP_Text fields for each suspect's full transcript. Order must match suspects in the scenario.")]
-    public List<TMP_Text> suspectTranscriptTexts = new List<TMP_Text>();
+    [Tooltip("Containers (Content of ScrollViews) for each suspect's transcript. Order must match suspects in the scenario.")]
+    public List<Transform> suspectTranscriptContainers = new List<Transform>();
+    
     [Tooltip("Separate TMP_Text fields for each suspect's name/header. Order must match suspects in the scenario.")]
     public List<TMP_Text> suspectHeaderTexts = new List<TMP_Text>();
+
+    [Header("Transcript Prefabs")]
+    public GameObject transcriptEntryPrefab;
+
+    [Header("Player Notes / Key Statements")]
+    [Tooltip("List of InputFields where copied statements will be appended. Order must match suspects.")]
+    public List<TMP_Text> keyStatementInputs = new List<TMP_Text>();
 
     [Header("Notebook Pages")]
     [Tooltip("Root GameObject for the Notebook UI. This will be toggled with Tab.")]
@@ -44,7 +55,9 @@ public class NotebookManager : MonoBehaviour
     // currently active page index, -1 when none
     private int currentPageIndex = -1;
 
-    // internal transcript storage
+    public bool IsOpen { get; private set; }
+
+    // internal transcript storage (backup/data)
     private List<string> suspectTranscripts = new List<string>();
 
     /// <summary>
@@ -91,6 +104,28 @@ public class NotebookManager : MonoBehaviour
     public void InitializeTranscripts(ScenarioData scenario)
     {
         suspectTranscripts.Clear();
+        suspectKeyStatementLists.Clear();
+        
+        // Clear existing UI entries
+        foreach (var container in suspectTranscriptContainers)
+        {
+            if (container != null)
+            {
+                foreach (Transform child in container)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+        }
+        
+        // Setup Placeholder for Key Inputs if needed?
+        // Assuming user has set them up in Inspector.
+        // We can clear them here if desired:
+        foreach(var input in keyStatementInputs)
+        {
+            if(input != null) input.text = "";
+        }
+
         if (scenario == null || scenario.suspects == null) return;
 
         int count = scenario.suspects.Count;
@@ -102,17 +137,19 @@ public class NotebookManager : MonoBehaviour
             {
                 suspectHeaderTexts[i].text = $"<b>{scenario.suspects[i].name}</b>";
             }
+        }
 
-            // Initialize the transcript body placeholder independently
-            if (i < suspectTranscriptTexts.Count && suspectTranscriptTexts[i] != null)
-            {
-                suspectTranscriptTexts[i].text = "No questions asked yet";
-            }
+        // --- TESTING: Add dummy data for Suspect 1 (Index 0) ---
+        if (testing && count > 0)
+        {
+            AppendQuestionAndAnswer(0, "Where were you last night?", "I was at the bar, like I told the police.");
+            AppendQuestionAndAnswer(0, "Can anyone verify that?", "The bartender, Joe. He knows me.");
+            AppendQuestionAndAnswer(0, "Did you know the victim?", "Never seen him before in my life.");
         }
     }
 
     /// <summary>
-    /// Append a single line to the specified suspect's transcript and update the associated TMP_Text.
+    /// Append a single line to the specified suspect's transcript and update the associated UI.
     /// </summary>
     public void AppendSuspectLine(int suspectIndex, string line)
     {
@@ -127,11 +164,8 @@ public class NotebookManager : MonoBehaviour
         else
             suspectTranscripts[suspectIndex] = toAdd;
 
-        if (suspectIndex < suspectTranscriptTexts.Count && suspectTranscriptTexts[suspectIndex] != null)
-        {
-            // Transcript body is kept separate from header; show placeholder if empty
-            suspectTranscriptTexts[suspectIndex].text = string.IsNullOrEmpty(suspectTranscripts[suspectIndex]) ? "No questions asked yet" : suspectTranscripts[suspectIndex];
-        }
+        // Add to UI
+        AddTranscriptEntryToUI(suspectIndex, toAdd);
     }
 
     public string GetTranscript(int suspectIndex)
@@ -163,10 +197,67 @@ public class NotebookManager : MonoBehaviour
         else
             suspectTranscripts[suspectIndex] = combined;
 
-        if (suspectIndex < suspectTranscriptTexts.Count && suspectTranscriptTexts[suspectIndex] != null)
+        // Add to UI as a single entry
+        AddTranscriptEntryToUI(suspectIndex, combined);
+    }
+
+    private void AddTranscriptEntryToUI(int suspectIndex, string text)
+    {
+        if (suspectIndex < 0 || suspectIndex >= suspectTranscriptContainers.Count) return;
+
+        Transform container = suspectTranscriptContainers[suspectIndex];
+        if (container != null && transcriptEntryPrefab != null)
         {
-            // Transcript body is separate from header; show placeholder if empty
-            suspectTranscriptTexts[suspectIndex].text = string.IsNullOrEmpty(suspectTranscripts[suspectIndex]) ? "No questions asked yet" : suspectTranscripts[suspectIndex];
+            GameObject entryObj = Instantiate(transcriptEntryPrefab, container);
+            TranscriptEntryUI entryUI = entryObj.GetComponent<TranscriptEntryUI>();
+            if (entryUI != null)
+            {
+                entryUI.Setup(text, this, suspectIndex);
+            }
+        }
+    }
+
+    // List of lists to store key statements per suspect index
+    private List<List<string>> suspectKeyStatementLists = new List<List<string>>();
+
+    /// <summary>
+    /// Toggles a string in the Key Statements / Notes field for a specific suspect.
+    /// If it exists, remove it. If not, add it.
+    /// </summary>
+    public void ToggleKeyStatement(int suspectIndex, string statement)
+    {
+        if (suspectIndex < 0) return;
+
+        // Ensure internal list structure exists
+        while (suspectIndex >= suspectKeyStatementLists.Count)
+        {
+            suspectKeyStatementLists.Add(new List<string>());
+        }
+
+        List<string> currentList = suspectKeyStatementLists[suspectIndex];
+        
+        if (currentList.Contains(statement))
+        {
+            currentList.Remove(statement);
+        }
+        else
+        {
+            currentList.Add(statement);
+        }
+
+        RebuildKeyStatementsText(suspectIndex);
+    }
+
+    private void RebuildKeyStatementsText(int suspectIndex)
+    {
+        if (suspectIndex < 0 || suspectIndex >= keyStatementInputs.Count || suspectIndex >= suspectKeyStatementLists.Count) return;
+
+        TMP_Text targetInput = keyStatementInputs[suspectIndex];
+        List<string> statements = suspectKeyStatementLists[suspectIndex];
+
+        if (targetInput != null)
+        {
+            targetInput.text = string.Join("\n\n", statements);
         }
     }
 
@@ -202,6 +293,7 @@ public class NotebookManager : MonoBehaviour
         }
 
         currentPageIndex = -1;
+        IsOpen = false;
     }
 
     // Toggle notebook visibility with Tab and allow simple page navigation
@@ -222,6 +314,7 @@ public class NotebookManager : MonoBehaviour
     {
         if (notebookRoot == null) return;
         notebookRoot.SetActive(true);
+        IsOpen = true;
         // always show the first page when opened
         if (notebookPages.Count > 0)
             ShowPage(0);
@@ -231,6 +324,7 @@ public class NotebookManager : MonoBehaviour
     {
         if (notebookRoot == null) return;
         notebookRoot.SetActive(false);
+        IsOpen = false;
         // deactivate any active page
         if (currentPageIndex >= 0 && currentPageIndex < notebookPages.Count && notebookPages[currentPageIndex] != null)
             notebookPages[currentPageIndex].SetActive(false);
