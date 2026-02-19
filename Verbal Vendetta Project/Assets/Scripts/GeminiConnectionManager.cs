@@ -384,7 +384,8 @@ public class GeminiConnectionManager : MonoBehaviour
         {{
             ""response"": ""Your verifiable in-character response string."",
             ""end_emotion"": ""EmotionType (Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty)"",
-            ""stress_change"": 0.0 // Optional refinement
+            ""stress_change"": 0.0, // Optional refinement
+            ""requires_thinking"": true // Boolean: TRUE if the question is hard/complex/requires memory. FALSE if easy/immediate.
         }}";
 
         suspect.chatHistory.Add(new GeminiContent { role = "user", parts = new List<GeminiPart> { new GeminiPart { text = question } } });
@@ -514,5 +515,5 @@ public class GeminiConnectionManager : MonoBehaviour
     [Serializable] public class GeminiPart { public string text; }
     [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
     [Serializable] private class ReactionResult { public string emotion; public float stress_change; }
-    [Serializable] public class SuspectResponse { public string response; public string end_emotion; public float stress_change; }
+    [Serializable] public class SuspectResponse { public string response; public string end_emotion; public float stress_change; public bool requires_thinking; }
 }

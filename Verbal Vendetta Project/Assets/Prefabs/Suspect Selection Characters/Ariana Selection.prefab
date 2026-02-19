@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_CullingMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5803151738876390756, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7243839175509810226, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       propertyPath: currentEditType
       value: 8

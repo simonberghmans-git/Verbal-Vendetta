@@ -21051,7 +21051,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   sttHandler: {fileID: 1901994334}
   interrogationManager: {fileID: 1844292941}
-  gameManager: {fileID: 0}
+  gameManager: {fileID: 63643235}
   statusLabel: {fileID: 1549858847}
   transcriptionPreview: {fileID: 1973882886}
   cancellationTime: 3

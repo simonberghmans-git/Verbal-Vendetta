@@ -78,15 +78,24 @@ public class AnimationsManager : MonoBehaviour
         }
         else
         {
+            currentAnimator.SetInteger("AnimationNr", Random.Range(0, 2));
             currentAnimator.SetBool("Talking", isTalking);
         }
     }
 
     private IEnumerator TalkingRoutine(float duration)
     {
-        if (currentAnimator != null) currentAnimator.SetBool("Talking", true);
+        if (currentAnimator != null)
+        {
+            currentAnimator.SetInteger("AnimationNr", Random.Range(0, 2));
+            currentAnimator.SetBool("Talking", true);
+        }
         yield return new WaitForSeconds(duration);
-        if (currentAnimator != null) currentAnimator.SetBool("Talking", false);
+        if (currentAnimator != null)
+        {
+            currentAnimator.SetInteger("AnimationNr", Random.Range(0, 2));
+            currentAnimator.SetBool("Talking", false);
+        }
         talkingCoroutine = null;
     }
 }

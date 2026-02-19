@@ -71,6 +71,7 @@ public class InterrogationManager : MonoBehaviour
         // Register Animator
         if (currentSuspectModel != null && AnimationsManager.Instance != null)
         {
+            AnimationsManager.Instance.stressLevel = 0f;
             AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
         }
     }
@@ -142,6 +143,14 @@ public class InterrogationManager : MonoBehaviour
                     // Parse End Emotion
                     FaceAnimator.EmotionType endEmotion = FaceAnimator.ParseEmotion(suspectResponse.end_emotion);
                     FaceAnimator.EmotionType startEmotion = reactionEmotion; // We are currently at this emotion
+
+                    // Apply Eye Contact Logic
+                    if (EyePointManager.Instance != null)
+                    {
+                        // If requires_thinking is TRUE, we do NOT force direct eye contact (allow wandering/floor looking)
+                        // If requires_thinking is FALSE (easy), we FORCE direct eye contact
+                        EyePointManager.Instance.forceDirectEyeContact = !suspectResponse.requires_thinking;
+                    }
 
                     // Only play TTS if we actually received text
                     if (!string.IsNullOrEmpty(suspectResponse.response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))

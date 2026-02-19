@@ -16,7 +16,7 @@ public class EyeTracking : MonoBehaviour
     [Tooltip("The angle (in degrees) at which the blend shape reaches 100% weight.")]
     public float angleLimit = 30f;
     [Tooltip("Smooth speed for eye movement.")]
-    public float smoothSpeed = 10f;
+    public float smoothSpeed = 25f;
 
     [Header("Blend Shape Names (CC Standard)")]
     // Left Eye

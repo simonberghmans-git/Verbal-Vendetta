@@ -14,6 +14,9 @@ public class EyePointManager : MonoBehaviour
     public Transform cameraPoint;
     public Transform notebook;
     private double glanceChance = 0;
+    
+    // New flag to force direct eye contact (for easy questions)
+    public bool forceDirectEyeContact = false;
 
     public static EyePointManager Instance;
 
@@ -105,6 +108,14 @@ public class EyePointManager : MonoBehaviour
         wanderingTimer -= Time.deltaTime;
         if (wanderingTimer <= 0)
         {
+            // If forced direct eye contact is enabled (easy question), prioritize camera
+            if (forceDirectEyeContact)
+            {
+                 transform.position = cameraPoint.position;
+                 wanderingTimer = Random.Range(1.5f, 3.0f); // Maintain contact
+                 return;
+            }
+
             // 20% chance to look at camera (approx 1 in 5)
             if (glanceChance == 0) // Changed logic: if chance hits specific number (e.g. 0), look at camera
             {
@@ -122,7 +133,7 @@ public class EyePointManager : MonoBehaviour
                 wanderingTimer = Random.Range(2.0f, 4.0f);
             }
             
-            glanceChance = Random.Range(0, 5);
+            glanceChance = Random.Range(0, 3);
         }
     }
 }
