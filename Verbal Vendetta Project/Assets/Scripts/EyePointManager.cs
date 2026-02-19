@@ -122,7 +122,7 @@ public class EyePointManager : MonoBehaviour
                 transform.position = cameraPoint.position;
                 
                 // Hold gaze for a bit (look up mid-sentence)
-                wanderingTimer = Random.Range(1.0f, 2.5f);
+                wanderingTimer = Random.Range(1f, 2.5f);
             }
             else
             {
@@ -130,10 +130,10 @@ public class EyePointManager : MonoBehaviour
                 transform.position = floorPoint;
 
                 // Stay looking down for a bit
-                wanderingTimer = Random.Range(2.0f, 4.0f);
+                wanderingTimer = Random.Range(2f, 4f);
             }
             
-            glanceChance = Random.Range(0, 3);
+            glanceChance = Random.Range(0, 4);
         }
     }
 }

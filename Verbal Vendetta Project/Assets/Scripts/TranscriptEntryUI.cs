@@ -34,6 +34,15 @@ public class TranscriptEntryUI : MonoBehaviour
         }
     }
 
+    public void UpdateText(string newText)
+    {
+        fullText = newText;
+        if (dialogueText != null)
+        {
+            dialogueText.text = newText;
+        }
+    }
+
     private void OnCopyClicked()
     {
         if (notebookManager != null)

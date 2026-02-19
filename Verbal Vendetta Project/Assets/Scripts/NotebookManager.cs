@@ -168,6 +168,53 @@ public class NotebookManager : MonoBehaviour
         AddTranscriptEntryToUI(suspectIndex, toAdd);
     }
 
+    public void UpdateLastSuspectLine(int suspectIndex, string newText)
+    {
+        if (suspectIndex < 0 || suspectIndex >= suspectTranscripts.Count) return;
+
+        // Update internal data
+        string currentTranscript = suspectTranscripts[suspectIndex];
+        // We need to adhere to the format. Usually we append. 
+        // But here we are REPLACING the last entry.
+        // The internal "suspectTranscripts" string is a giant blob. 
+        // This is tricky because we just appended to it.
+        // Let's assume for now we just want to update the UI primarily. 
+        // But to keep internal data consistent, we should try to replace the last part.
+        // A simple way is to keep a list of strings instead of one big string, but refactoring that now is risky.
+        // Let's just append the cutoff text to the internal string for now if possible, or just ignore internal string consistency if it's only for display?
+        // Actually, looking at AppendSuspectLine: suspectTranscripts[suspectIndex] += "\n" + toAdd;
+        // The internal string is the FULL transcript.
+        
+        // Simpler approach: Just update the UI entry. The internal string might be slightly off (lacking the interruption marker) or we can try to fix it.
+        // Let's find the last newline and replace active text.
+        
+        int lastNewline = currentTranscript.LastIndexOf('\n');
+        if (lastNewline >= 0)
+        {
+            suspectTranscripts[suspectIndex] = currentTranscript.Substring(0, lastNewline + 1) + newText;
+        }
+        else
+        {
+            suspectTranscripts[suspectIndex] = newText;
+        }
+
+        // Update UI
+        if (suspectIndex < suspectTranscriptContainers.Count)
+        {
+            Transform container = suspectTranscriptContainers[suspectIndex];
+            if (container != null && container.childCount > 0)
+            {
+                // Get last child
+                Transform lastChild = container.GetChild(container.childCount - 1);
+                TranscriptEntryUI entryUI = lastChild.GetComponent<TranscriptEntryUI>();
+                if (entryUI != null)
+                {
+                    entryUI.UpdateText(newText);
+                }
+            }
+        }
+    }
+
     public string GetTranscript(int suspectIndex)
     {
         if (suspectIndex < 0 || suspectIndex >= suspectTranscripts.Count) return "";

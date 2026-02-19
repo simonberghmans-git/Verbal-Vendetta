@@ -80,6 +80,9 @@ public class InterrogationManager : MonoBehaviour
 
     public void AskSuspect()
     {
+        currentFullResponse = "";
+        activeSuspectIndex = -1;
+
         if (connectionManager.currentScenario == null) return;
 
         string question = playerInputField.text;
@@ -188,6 +191,10 @@ public class InterrogationManager : MonoBehaviour
 
                                 // Reset Eye State after speech
                                 StartCoroutine(ResetEyeStateAfterDelay(clip.length));
+                                
+                                // Start delayed transcript coroutine
+                                if (speechCompletionCoroutine != null) StopCoroutine(speechCompletionCoroutine);
+                                speechCompletionCoroutine = StartCoroutine(WaitForSpeechCompletion(clip.length));
                             }
                             else
                             {
@@ -207,8 +214,10 @@ public class InterrogationManager : MonoBehaviour
                     // Append the suspect's response to the notebook transcript
                     if (notebookManager != null)
                     {
-                        int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspect);
-                        notebookManager.AppendSuspectLine(index, $"{activeSuspect.name}: {suspectResponse.response}");
+                        activeSuspectIndex = connectionManager.currentScenario.suspects.IndexOf(activeSuspect); // Track index
+                        currentFullResponse = suspectResponse.response; // Track full text
+                        // DELAYED transcript update: Wait for speech to finish or be interrupted
+                        // notebookManager.AppendSuspectLine(...); // REMOVED
                     }
 
                     // Inform any input manager that an answer was received
@@ -286,11 +295,43 @@ public class InterrogationManager : MonoBehaviour
         });
     }
 
+    // Track current speech for interruption cutoff
+    private string currentFullResponse = "";
+    private int activeSuspectIndex = -1;
+    private Coroutine speechCompletionCoroutine;
+
     /// <summary>
     /// Cancel all ongoing interrogation processes (STT, LLM, TTS).
     /// </summary>
     public void StopInterrogation()
     {
+        // 0. Handle Transcript Cutoff
+        // If we have a pending speech completion, we must finalize the transcript now.
+        if (speechCompletionCoroutine != null)
+        {
+            StopCoroutine(speechCompletionCoroutine);
+            string textToPost = currentFullResponse;
+
+            // If still speaking, calculate cutoff. 
+            // If not speaking (finished?), default to full text (textToPost).
+            if (ttsHandler != null && ttsHandler.IsSpeaking && !string.IsNullOrEmpty(currentFullResponse))
+            {
+                float percentage = ttsHandler.GetPlaybackPercentage();
+                
+                // Calculate cutoff index based on percentage of text length
+                int cutoffIndex = Mathf.FloorToInt(currentFullResponse.Length * percentage);
+                cutoffIndex = Mathf.Clamp(cutoffIndex, 0, currentFullResponse.Length);
+                
+                // Create cutoff string
+                textToPost = currentFullResponse.Substring(0, cutoffIndex) + " ... [INTERRUPTED]";
+            }
+            
+            if (!string.IsNullOrEmpty(textToPost))
+            {
+                FinalizeTranscript(textToPost);
+            }
+        }
+
         // 1. Cancel LLM Generation
         if (connectionManager != null)
         {
@@ -317,7 +358,30 @@ public class InterrogationManager : MonoBehaviour
 
         // 5. Reset UI
         responseTextField.text = "<i>...</i>";
+        playerInputField.text = "";
         // suspectNameDisplay.text = "Select a Suspect"; // Handled by SetActiveSuspect(null) in GM
+        
+        currentFullResponse = "";
+        activeSuspectIndex = -1;
+        speechCompletionCoroutine = null;
+    }
+
+    private void FinalizeTranscript(string textToAppend)
+    {
+        if (notebookManager != null && activeSuspectIndex != -1)
+        {
+            notebookManager.AppendSuspectLine(activeSuspectIndex, $"{activeSuspectData.name}: {textToAppend}");
+        }
+    }
+
+    private IEnumerator WaitForSpeechCompletion(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        FinalizeTranscript(currentFullResponse);
+        speechCompletionCoroutine = null;
+        
+        // Also handling Eye State reset here if needed, but the original code had its own coroutine 'ResetEyeStateAfterDelay'
+        // We can consolidate or keep separate. The existing 'ResetEyeStateAfterDelay' is fine for eyes.
     }
     
     private IEnumerator ReturnToMenuRoutine()

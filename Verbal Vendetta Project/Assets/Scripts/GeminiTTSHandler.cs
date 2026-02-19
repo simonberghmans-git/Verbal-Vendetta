@@ -43,6 +43,21 @@ public class GeminiTTSHandler : MonoBehaviour
     }
 
     private UnityWebRequest currentRequest;
+    private AudioSource currentSource; // Track the currently playing source
+
+    public bool IsSpeaking
+    {
+        get { return currentSource != null && currentSource.isPlaying; }
+    }
+
+    public float GetPlaybackPercentage()
+    {
+        if (currentSource != null && currentSource.clip != null && currentSource.isPlaying)
+        {
+            return currentSource.time / currentSource.clip.length;
+        }
+        return 0f;
+    }
 
     /// <summary>
     /// Stops any active speech and cancels pending generation.
@@ -56,7 +71,14 @@ public class GeminiTTSHandler : MonoBehaviour
             currentRequest = null;
         }
         
-        if (voiceSource != null && voiceSource.isPlaying)
+        // Stop whatever source was last used to play voice
+        if (currentSource != null && currentSource.isPlaying)
+        {
+            currentSource.Stop();
+        }
+        
+        // Also stop the default source just in case
+        if (voiceSource != null && voiceSource.isPlaying && voiceSource != currentSource)
         {
             voiceSource.Stop();
         }
@@ -144,6 +166,7 @@ public class GeminiTTSHandler : MonoBehaviour
 
                             if (clip != null && sourceToUse != null)
                             {
+                                currentSource = sourceToUse; // Track it so we can stop it later
                                 sourceToUse.clip = clip;
                                 sourceToUse.Play();
                                 callback?.Invoke(clip, null);

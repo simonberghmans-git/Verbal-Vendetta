@@ -55,9 +55,24 @@ public class InterrogationInputManager : MonoBehaviour
             return;
         }
 
-        // 1. Press and Hold Space to record
-        if (Input.GetKeyDown(KeyCode.Space) && !isRecording && !isReviewing && !isTranscribing)
+        // 1. Press and Hold Space to record (Allows Interruption)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
+            // INTERRUPTION LOGIC:
+            // If we are currently doing anything else (reviewing, transcribing, or AI is speaking/thinking),
+            // we must cancel it immediately to start a new recording.
+            
+            if (isRecording || isReviewing || isTranscribing)
+            {
+                ForceReset();
+            }
+
+            // Also cancel any external AI processes (TTS, LLM generation)
+            if (interrogationManager != null)
+            {
+                interrogationManager.StopInterrogation();
+            }
+
             StartRecording();
         }
 
