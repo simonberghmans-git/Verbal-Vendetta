@@ -65,7 +65,7 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
+  - m_ConditionMode: 2
     m_ConditionEvent: Talking
     m_EventTreshold: 0
   - m_ConditionMode: 6
@@ -136,7 +136,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: 282de1006a849b444b528eb7f4d2f830, type: 3}
+  m_Motion: {fileID: -203655887218126122, guid: 8e72de60fe2917d47a9689c231426916, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -266,7 +266,7 @@ AnimatorController:
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
-    m_DefaultBool: 0
+    m_DefaultBool: 1
     m_Controller: {fileID: 9100000}
   - m_Name: AnimationNr
     m_Type: 3
@@ -421,7 +421,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: ed84ca67b7a4cee45bb67bf42fdb3a8c, type: 3}
+  m_Motion: {fileID: -203655887218126122, guid: 08a99b6fd987d0042833ba2d06a3eea4, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
