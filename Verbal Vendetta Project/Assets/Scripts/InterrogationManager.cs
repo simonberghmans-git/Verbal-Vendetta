@@ -10,7 +10,7 @@ public class InterrogationManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
-    public GeminiTTSHandler ttsHandler; // Updated to Gemini TTS
+    public GeminiLiveConnection liveConnection; // Replaces TTS/STT handlers
     public NotebookManager notebookManager;
     public ScenesManager scenesManager;
 
@@ -33,8 +33,11 @@ public class InterrogationManager : MonoBehaviour
     [Header("Model Configuration")]
     // Indices are now managed by GeminiConnectionManager
 
+    // Internal State
     private SuspectData activeSuspectData;
     private GameObject currentSuspectModel;
+    private bool isModelSpeaking = false;
+    private string currentModelTranscript = "";
 
     private void Start()
     {
@@ -74,162 +77,91 @@ public class InterrogationManager : MonoBehaviour
             AnimationsManager.Instance.stressLevel = 0f;
             AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
         }
+
+        // Initialize Live Connection
+        if (liveConnection != null && activeSuspectData != null)
+        {
+            AudioSource suspectAudioSource = null;
+            if (currentSuspectModel != null)
+            {
+                suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
+            }
+
+            liveConnection.ConnectSession(activeSuspectData, connectionManager.currentScenario, suspectAudioSource);
+            
+            // Unsubscribe just in case, then subscribe to events
+            liveConnection.OnTranscriptionReceived -= HandleTranscription;
+            liveConnection.OnMetadataReceived -= HandleMetadata;
+            
+            liveConnection.OnTranscriptionReceived += HandleTranscription;
+            liveConnection.OnMetadataReceived += HandleMetadata;
+        }
     }
 
     // Removed Internal UpdateSuspectUI and UpdateSuspectModel as they are handled by GameManager now.
 
     public void AskSuspect()
     {
-        currentFullResponse = "";
-        activeSuspectIndex = -1;
+        // Now handled via real-time stream.
+        // InterrogationInputManager will call liveConnection.StartRecording() / StopRecording().
+    }
 
-        if (connectionManager.currentScenario == null) return;
-
-        string question = playerInputField.text;
-        if (string.IsNullOrWhiteSpace(question)) return;
-
-        if (activeSuspectData == null) return;
-        responseTextField.text = "<i>Thinking...</i>";
-        SuspectData activeSuspect = activeSuspectData;
-        
-        // Switch Eye State to Wandering (Thinking)
-        if (EyePointManager.Instance != null)
+    private void HandleTranscription(string speaker, string text)
+    {
+        // Update UI
+        if (speaker == "Player")
         {
-            EyePointManager.Instance.currentState = EyePointManager.EyeState.Thinking;
+            playerInputField.text = text;
         }
-
-        // Append the player's question to the suspect's transcript
-        if (notebookManager != null)
+        else
         {
-            // Note: We might want to pass the correct ID if notebook manager uses index. 
-            // For now, assuming appending by subject object reference isn't possible, let's just append to current page 
-            // or we need to pass the index to SetActiveSuspect if NotebookManager relies on it.
-            // Let's check NotebookManager usage below. 
-            // It uses `currentSuspectIndex`. We should probably keep that updated or overload notebook manager.
-            // For safety, let's rely on the activeSuspect object.
-            // Actually, we can just find the index of activeSuspectData in the scenario list.
-            int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspect);
-            notebookManager.AppendSuspectLine(index, $"Player: {question}");
-        }
-
-        // STEP 1: Immediate Reaction Analysis
-        connectionManager.AnalyzeSuspectReaction(question, activeSuspect, (reactionEmotion, stressChange, reactionError) => 
-        {
-            if (reactionError == null)
+            // Model
+            isModelSpeaking = !string.IsNullOrEmpty(text);
+            currentModelTranscript = text;
+            responseTextField.text = $"<b>{speaker}:</b> {text}";
+            
+            // Check if Model is speaking to trigger animations
+            if (AnimationsManager.Instance != null && !string.IsNullOrEmpty(text))
             {
-                // Immediate Transition: Apply the reaction emotion NOW
-                if (AnimationsManager.Instance != null)
-                {
-                    AnimationsManager.Instance.stressLevel = Mathf.Clamp01(AnimationsManager.Instance.stressLevel + stressChange);
-                    
-                    // We need to access the current animator's FaceAnimator component
-                    // Assuming the currentSuspectModel has the FaceAnimator
-                    if (currentSuspectModel != null)
-                    {
-                        var faceAnim = currentSuspectModel.GetComponent<FaceAnimator>();
-                        if (faceAnim != null)
-                        {
-                            faceAnim.SetEmotion(reactionEmotion);
-                        }
-                    }
-                }
+                // Note: The length is an estimate because streaming is real-time.
+                // We could derive length from the audio stream itself, but sticking to a basic true while receiving text.
+                AnimationsManager.Instance.SetTalkingState(true, 1f); 
             }
-        
-            // STEP 2: Get Verbal Response
-            connectionManager.SpeakWithSuspect(question, activeSuspect, (suspectResponse, error) =>
+            
+            if (EyePointManager.Instance != null)
             {
-                if (string.IsNullOrEmpty(error))
-                {
-                    responseTextField.text = $"<b>{activeSuspect.name}:</b> {suspectResponse.response}";
-                    playerInputField.text = "";
+                EyePointManager.Instance.currentState = EyePointManager.EyeState.Talking;
+                // We'll reset it to Waiting when they finish (StopInterrogation or explicit end message)
+            }
+        }
+        
+        // Notebook transcript append
+        if (notebookManager != null && activeSuspectData != null)
+        {
+            int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspectData);
+            notebookManager.AppendSuspectLine(index, $"{speaker}: {text}");
+        }
+    }
 
-                    // Parse End Emotion
-                    FaceAnimator.EmotionType endEmotion = FaceAnimator.ParseEmotion(suspectResponse.end_emotion);
-                    FaceAnimator.EmotionType startEmotion = reactionEmotion; // We are currently at this emotion
+    private void HandleMetadata(string startEmotionString, string endEmotionString, float stressLevel)
+    {
+        FaceAnimator.EmotionType startEmotion = FaceAnimator.ParseEmotion(startEmotionString);
+        FaceAnimator.EmotionType endEmotion = FaceAnimator.ParseEmotion(endEmotionString);
 
-                    // Apply Eye Contact Logic
-                    if (EyePointManager.Instance != null)
-                    {
-                        // If requires_thinking is TRUE, we do NOT force direct eye contact (allow wandering/floor looking)
-                        // If requires_thinking is FALSE (easy), we FORCE direct eye contact
-                        EyePointManager.Instance.forceDirectEyeContact = !suspectResponse.requires_thinking;
-                    }
+        if (AnimationsManager.Instance != null)
+        {
+            AnimationsManager.Instance.stressLevel = Mathf.Clamp01(stressLevel);
+        }
 
-                    // Only play TTS if we actually received text
-                    if (!string.IsNullOrEmpty(suspectResponse.response) && ttsHandler != null && !string.IsNullOrEmpty(activeSuspect.voice_id))
-                    {
-                        AudioSource suspectAudioSource = null;
-                        if (currentSuspectModel != null)
-                        {
-                            suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
-                        }
-
-                        // STEP 3: Play TTS and Animate Speech Transition
-                        ttsHandler.PlayVoice(suspectResponse.response, activeSuspect.voice_id, suspectAudioSource, (clip, ttsError) => 
-                        {
-                            if (clip != null)
-                            {
-                                if (currentSuspectModel != null)
-                                {
-                                    var faceAnim = currentSuspectModel.GetComponent<FaceAnimator>();
-                                    if (faceAnim != null)
-                                    {
-                                        faceAnim.PlaySpeechEmotions(startEmotion, endEmotion, clip.length);
-                                    }
-                                }
-
-                                if (AnimationsManager.Instance != null)
-                                {
-                                    AnimationsManager.Instance.SetTalkingState(true, clip.length);
-                                }
-
-                                // Set Eye State to Talking
-                                if (EyePointManager.Instance != null)
-                                {
-                                    EyePointManager.Instance.currentState = EyePointManager.EyeState.Talking;
-                                }
-
-                                // Reset Eye State after speech
-                                StartCoroutine(ResetEyeStateAfterDelay(clip.length));
-                                
-                                // Start delayed transcript coroutine
-                                if (speechCompletionCoroutine != null) StopCoroutine(speechCompletionCoroutine);
-                                speechCompletionCoroutine = StartCoroutine(WaitForSpeechCompletion(clip.length));
-                            }
-                            else
-                            {
-                                // If TTS fails, reset eyes immediately or after a short delay
-                                if (EyePointManager.Instance != null)
-                                    EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
-                            }
-                        });
-                    }
-                    else
-                    {
-                         // No TTS, reset eyes immediately
-                         if (EyePointManager.Instance != null)
-                            EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
-                    }
-
-                    // Append the suspect's response to the notebook transcript
-                    if (notebookManager != null)
-                    {
-                        activeSuspectIndex = connectionManager.currentScenario.suspects.IndexOf(activeSuspect); // Track index
-                        currentFullResponse = suspectResponse.response; // Track full text
-                        // DELAYED transcript update: Wait for speech to finish or be interrupted
-                        // notebookManager.AppendSuspectLine(...); // REMOVED
-                    }
-
-                    // Inform any input manager that an answer was received
-                    var inputMgr = FindObjectOfType<InterrogationInputManager>();
-                    if (inputMgr != null) inputMgr.OnAnswerReceived();
-                }
-                else
-                {
-                    responseTextField.text = $"<color=red>Error:</color> {error}";
-                }
-            });
-        });
+        if (currentSuspectModel != null)
+        {
+            var faceAnim = currentSuspectModel.GetComponent<FaceAnimator>();
+            if (faceAnim != null)
+            {
+                // Play transition for a generic 2 seconds since we don't know the full length yet in live mode
+                faceAnim.PlaySpeechEmotions(startEmotion, endEmotion, 2f); 
+            }
+        }
     }
 
     private IEnumerator ResetEyeStateAfterDelay(float delay)
@@ -295,53 +227,26 @@ public class InterrogationManager : MonoBehaviour
         });
     }
 
-    // Track current speech for interruption cutoff
-    private string currentFullResponse = "";
-    private int activeSuspectIndex = -1;
-    private Coroutine speechCompletionCoroutine;
+    // Track current speech for transition states
+    // (Legacy tracking removed)
 
-    /// <summary>
-    /// Cancel all ongoing interrogation processes (STT, LLM, TTS).
-    /// </summary>
     public void StopInterrogation()
     {
-        // 0. Handle Transcript Cutoff
-        // If we have a pending speech completion, we must finalize the transcript now.
-        if (speechCompletionCoroutine != null)
+        // Handle interruption marker in transcript
+        if (isModelSpeaking && notebookManager != null && activeSuspectData != null)
         {
-            StopCoroutine(speechCompletionCoroutine);
-            string textToPost = currentFullResponse;
-
-            // If still speaking, calculate cutoff. 
-            // If not speaking (finished?), default to full text (textToPost).
-            if (ttsHandler != null && ttsHandler.IsSpeaking && !string.IsNullOrEmpty(currentFullResponse))
-            {
-                float percentage = ttsHandler.GetPlaybackPercentage();
-                
-                // Calculate cutoff index based on percentage of text length
-                int cutoffIndex = Mathf.FloorToInt(currentFullResponse.Length * percentage);
-                cutoffIndex = Mathf.Clamp(cutoffIndex, 0, currentFullResponse.Length);
-                
-                // Create cutoff string
-                textToPost = currentFullResponse.Substring(0, cutoffIndex) + " ... [INTERRUPTED]";
-            }
-            
-            if (!string.IsNullOrEmpty(textToPost))
-            {
-                FinalizeTranscript(textToPost);
-            }
+            int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspectData);
+            notebookManager.AppendSuspectLine(index, "[INTERRUPTED]");
         }
+        isModelSpeaking = false;
+        currentModelTranscript = "";
 
-        // 1. Cancel LLM Generation
-        if (connectionManager != null)
+        // Cancel LLM Generation and Socket Connection
+        if (liveConnection != null)
         {
-            connectionManager.CancelCurrentInteraction();
-        }
-
-        // 2. Stop TTS Playback and Generation
-        if (ttsHandler != null)
-        {
-            ttsHandler.StopSpeaking();
+            liveConnection.OnTranscriptionReceived -= HandleTranscription;
+            liveConnection.OnMetadataReceived -= HandleMetadata;
+            _ = liveConnection.DisconnectSessionAsync();
         }
 
         // 3. Reset Animation State (Stop Lip Sync)
@@ -359,30 +264,9 @@ public class InterrogationManager : MonoBehaviour
         // 5. Reset UI
         responseTextField.text = "<i>...</i>";
         playerInputField.text = "";
-        // suspectNameDisplay.text = "Select a Suspect"; // Handled by SetActiveSuspect(null) in GM
-        
-        currentFullResponse = "";
-        activeSuspectIndex = -1;
-        speechCompletionCoroutine = null;
     }
 
-    private void FinalizeTranscript(string textToAppend)
-    {
-        if (notebookManager != null && activeSuspectIndex != -1)
-        {
-            notebookManager.AppendSuspectLine(activeSuspectIndex, $"{activeSuspectData.name}: {textToAppend}");
-        }
-    }
-
-    private IEnumerator WaitForSpeechCompletion(float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        FinalizeTranscript(currentFullResponse);
-        speechCompletionCoroutine = null;
-        
-        // Also handling Eye State reset here if needed, but the original code had its own coroutine 'ResetEyeStateAfterDelay'
-        // We can consolidate or keep separate. The existing 'ResetEyeStateAfterDelay' is fine for eyes.
-    }
+    // Removed legacy transcript helpers
     
     private IEnumerator ReturnToMenuRoutine()
     {

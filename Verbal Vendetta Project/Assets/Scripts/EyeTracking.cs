@@ -86,7 +86,6 @@ public class EyeTracking : MonoBehaviour
     {
         int index = m.GetBlendShapeIndex(name);
         if (index == -1) Debug.LogWarning($"EyeTracking: BlendShape '{name}' NOT found on mesh '{m.name}'");
-        else Debug.Log($"EyeTracking: Found BlendShape '{name}' at index {index}");
         return index;
     }
 

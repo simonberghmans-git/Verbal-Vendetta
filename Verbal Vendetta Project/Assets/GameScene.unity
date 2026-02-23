@@ -880,7 +880,7 @@ MonoBehaviour:
   selectionManager: {fileID: 2013707293}
   suspectManager: {fileID: 1436198405}
   connectionManager: {fileID: 1524535818}
-  inputManager: {fileID: 0}
+  inputManager: {fileID: 1856740769}
   mainCamera: {fileID: 1823688466}
   interrogationSpot: {fileID: 170990120}
   interrogationCameraPos: {fileID: 1371408116}
@@ -15390,8 +15390,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 492064c287f0a5d49bd5aaebc912cd42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GeminiTTSHandler
-  apiKey: AIzaSyDdiTJIuIlisJsp24wHtFq8Y2TH8Swi2RE
-  voiceSource: {fileID: 1800052908}
 --- !u!4 &1284266239
 Transform:
   m_ObjectHideFlags: 0
@@ -20420,6 +20418,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1844292940}
   - component: {fileID: 1844292941}
+  - component: {fileID: 1844292943}
+  - component: {fileID: 1844292942}
   m_Layer: 0
   m_Name: InterrogationManager
   m_TagString: Untagged
@@ -20455,7 +20455,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationManager
   connectionManager: {fileID: 1524535818}
-  ttsHandler: {fileID: 1284266238}
+  liveConnection: {fileID: 0}
   notebookManager: {fileID: 1560289931}
   scenesManager: {fileID: 1362225889}
   playerInputField: {fileID: 27584541}
@@ -20467,6 +20467,118 @@ MonoBehaviour:
   accusationResultDisplay: {fileID: 439700038}
   endScreen: {fileID: 2139242140}
   newsArticle: {fileID: 2038357198}
+--- !u!114 &1844292942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844292939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 813449937fc211947a043788e66eb21e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GeminiLiveConnection
+  apiKey: AIzaSyDdiTJIuIlisJsp24wHtFq8Y2TH8Swi2RE
+  voiceSource: {fileID: 1800052908}
+  alwaysListening: 1
+--- !u!82 &1844292943
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844292939}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1845206438
 GameObject:
   m_ObjectHideFlags: 0
@@ -20837,12 +20949,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006e63cbf1fb2544d8ba5b20c38d9515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  sttHandler: {fileID: 1901994334}
   interrogationManager: {fileID: 1844292941}
+  liveConnection: {fileID: 0}
   gameManager: {fileID: 63643235}
   statusLabel: {fileID: 1549858847}
   transcriptionPreview: {fileID: 1973882886}
-  cancellationTime: 3
 --- !u!1 &1866078070
 GameObject:
   m_ObjectHideFlags: 0
@@ -21060,7 +21171,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8ec8a4f6e63d9b40a982ddf378397ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  apiKey: AIzaSyDdiTJIuIlisJsp24wHtFq8Y2TH8Swi2RE
 --- !u!4 &1901994335
 Transform:
   m_ObjectHideFlags: 0

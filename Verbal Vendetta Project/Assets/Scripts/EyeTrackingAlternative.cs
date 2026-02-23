@@ -51,7 +51,6 @@ public class EyeTrackingAlternative : MonoBehaviour
             if (eyePointObj != null)
             {
                 target = eyePointObj.transform;
-                Debug.Log($"EyeTrackingAlternative: Found and assigned target '{target.name}'");
             }
         }
 
@@ -86,7 +85,6 @@ public class EyeTrackingAlternative : MonoBehaviour
     {
         int index = m.GetBlendShapeIndex(name);
         if (index == -1) Debug.LogWarning($"EyeTrackingAlternative: BlendShape '{name}' NOT found on mesh '{m.name}'");
-        else Debug.Log($"EyeTrackingAlternative: Found BlendShape '{name}' at index {index}");
         return index;
     }
 

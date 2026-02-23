@@ -14,7 +14,7 @@ using TMPro;
 /// </summary>
 public class GeminiConnectionManager : MonoBehaviour
 {
-    [SerializeField] private string apiKey = "";
+    public string apiKey = ""; // Made public for sync
 
     private string model = "gemini-3-flash-preview"; // Updated to model that supports audio generation or stick to 3-flash-preview? Stuck to user's choice but 1.5-flash is safer for audio. I'll keep the private field as is but maybe update the default value if needed.
     // User had "gemini-3-flash-preview". I should probably leave 'model' alone unless necessary, but the lists need update.
@@ -146,8 +146,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
     // --- DELEGATES ---
     public delegate void ScenarioCallback(ScenarioData data, string error);
-    public delegate void InterrogationCallback(SuspectResponse response, string error);
-    public delegate void ReactionCallback(FaceAnimator.EmotionType emotion, float stressChange, string error);
+    // public delegate void JudgeCallback(string headline, string article, bool isCorrect, string error);
     public delegate void JudgeCallback(string headline, string article, bool isCorrect, string error);
 
     // --- CALL 1: SCENARIO GENERATION ---
@@ -291,129 +290,7 @@ public class GeminiConnectionManager : MonoBehaviour
     }
 
     // --- CALL 2: INTERROGATION ---
-    public void AnalyzeSuspectReaction(string question, SuspectData suspect, ReactionCallback callback)
-    {
-        StartCoroutine(PostReactionRequest(question, suspect, callback));
-    }
 
-    private IEnumerator PostReactionRequest(string question, SuspectData suspect, ReactionCallback callback)
-    {
-        string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-        
-        string systemPrompt = $@"You are the emotional core of {suspect.name}.
-        Analyze the incoming question and determine your immediate emotional reaction and stress level change.
-        
-        CONTEXT:
-        Personality: {suspect.personality}
-        Motive: {(suspect.has_motive ? suspect.motive : "None")}
-        Guilt: {(suspect.is_killer ? "Guilty" : "Innocent")}
-        
-        QUESTION: ""{question}""
-        
-        Possible Emotions: Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty
-        
-        Output JSON:
-        {{
-            ""emotion"": ""EmotionType"",
-            ""stress_change"": 0.1  // Value between -0.2 (calming down) and 0.5 (very stressful)
-        }}";
-
-        var payload = new
-        {
-            contents = new[] { new { parts = new[] { new { text = "Analyze reaction." } } } },
-            systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
-            generationConfig = new { responseMimeType = "application/json" }
-        };
-
-        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
-        using (request)
-        {
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                try
-                {
-                    var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                    var reaction = JsonConvert.DeserializeObject<ReactionResult>(res.candidates[0].content.parts[0].text);
-                    
-                    if (Enum.TryParse<FaceAnimator.EmotionType>(reaction.emotion, true, out FaceAnimator.EmotionType emotionEnum))
-                    {
-                        callback?.Invoke(emotionEnum, reaction.stress_change, null);
-                    }
-                    else
-                    {
-                        callback?.Invoke(FaceAnimator.EmotionType.Neutral, 0f, "Failed to parse emotion");
-                    }
-                }
-                catch (Exception ex) { callback?.Invoke(FaceAnimator.EmotionType.Neutral, 0f, ex.Message); }
-            }
-            else { callback?.Invoke(FaceAnimator.EmotionType.Neutral, 0f, request.error); }
-        }
-        if (currentRequest == request) currentRequest = null;
-    }
-
-    public void SpeakWithSuspect(string question, SuspectData suspect, InterrogationCallback callback)
-    {
-        StartCoroutine(PostInterrogationRequest(question, suspect, callback));
-    }
-
-    private IEnumerator PostInterrogationRequest(string question, SuspectData suspect, InterrogationCallback callback)
-    {
-        string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-
-        string timelineContext = $"TODAY IS: {currentScenario.interrogation_date}. THE MURDER HAPPENED ON: {currentScenario.murder_date} AT {currentScenario.murder_time}.";
-
-        string systemPrompt = $@"You are roleplaying as {suspect.name}.
-        {timelineContext}
-        RELATIONSHIP: {suspect.relationship}.
-        TRAITS: {suspect.personality}.
-        ALIBI: {suspect.alibi_statement}.
-        MOTIVE: {(suspect.has_motive ? suspect.motive : "None.")}.
-        ACCESS: {(suspect.has_access_to_weapon ? suspect.access_to_weapon_description : "None.")}.
-        GUILT: {(suspect.is_killer ? "YOU ARE THE KILLER." : "INNOCENT.")}.
-        RUMORS YOU KNOW: {JsonConvert.SerializeObject(suspect.rumors)}.
-        RULES: 
-        1. Stay in character. 
-        2. 1-2 sentences. 
-        3. Refer only to what your character knows as described in the JSON file
-        4. Do not use any colon symbols when referring to time, but say things like 3 45PM as to keep TTS models capable of repeating your response properly
-        5. When asked about things that do not at all relate to the case, point out the absurdidy of the question
-        6. When pressured about their false alibi, only the suspect with no motive and a false alibi (= Red Herring) will reveal their minor secret, explaining why they would fake their alibi
-        
-        Output JSON:
-        {{
-            ""response"": ""Your verifiable in-character response string."",
-            ""end_emotion"": ""EmotionType (Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty)"",
-            ""stress_change"": 0.0, // Optional refinement
-            ""requires_thinking"": true // Boolean: TRUE if the question is hard/complex/requires memory. FALSE if easy/immediate.
-        }}";
-
-        suspect.chatHistory.Add(new GeminiContent { role = "user", parts = new List<GeminiPart> { new GeminiPart { text = question } } });
-
-        var payload = new
-        {
-            contents = suspect.chatHistory.ToArray(),
-            systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
-            generationConfig = new { responseMimeType = "application/json" }
-        };
-
-        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
-        using (request)
-        {
-            yield return request.SendWebRequest();
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                var jsonText = res.candidates[0].content.parts[0].text;
-                var suspectResponse = JsonConvert.DeserializeObject<SuspectResponse>(jsonText);
-                
-                suspect.chatHistory.Add(new GeminiContent { role = "model", parts = new List<GeminiPart> { new GeminiPart { text = suspectResponse.response } } });
-                callback?.Invoke(suspectResponse, null);
-            }
-            else { callback?.Invoke(null, request.error); }
-        }
-        if (currentRequest == request) currentRequest = null;
-    }
 
     // --- CALL 3: THE JUDGE ---
     public void JudgeAccusation(string accusedName, string motiveReasoning, string accessReasoning, JudgeCallback callback)
@@ -514,6 +391,5 @@ public class GeminiConnectionManager : MonoBehaviour
     [Serializable] public class GeminiContent { public string role; public List<GeminiPart> parts; }
     [Serializable] public class GeminiPart { public string text; }
     [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
-    [Serializable] private class ReactionResult { public string emotion; public float stress_change; }
-    [Serializable] public class SuspectResponse { public string response; public string end_emotion; public float stress_change; public bool requires_thinking; }
+    // [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
 }
