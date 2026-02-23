@@ -161,6 +161,7 @@ public class GeminiLiveConnection : MonoBehaviour
         isRecording = true;
         lastSamplePosition = 0;
         recordingClip = Microphone.Start(micName, true, 10, inputSampleRate);
+        Debug.Log($"GeminiLiveConnection: Microphone [{micName}] is OPEN and ready for use.");
     }
 
     public void StopRecording()
@@ -316,6 +317,7 @@ public class GeminiLiveConnection : MonoBehaviour
     {
         try
         {
+            Debug.Log($"GeminiLiveConnection RECV: \n{jsonResponse}");
             var msg = JsonConvert.DeserializeObject<LiveServerMessage>(jsonResponse);
 
             if (msg.server_content != null && msg.server_content.model_turn != null)
@@ -426,33 +428,50 @@ public class GeminiLiveConnection : MonoBehaviour
             }
         };
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        string jsonPayload = JsonConvert.SerializeObject(payload);
+        
+        int maxRetries = 2;
+        int currentTry = 0;
+        bool success = false;
+
+        while (currentTry < maxRetries && !success)
         {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload));
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
+            currentTry++;
+            using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
             {
-                try
-                {
-                    var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                    string transcript = res.candidates[0].content.parts[0].text.Trim();
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.uploadHandler.contentType = "application/json";
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.timeout = 30;
 
-                    OnTranscriptionReceived?.Invoke(speakerName, transcript);
-                    AppendToChatHistory("model", transcript);
-                }
-                catch (Exception e)
+                yield return request.SendWebRequest();
+
+                if (request.result == UnityWebRequest.Result.Success)
                 {
-                    Debug.LogWarning("GeminiLiveConnection STT Parse Error: " + e.Message);
+                    success = true;
+                    try
+                    {
+                        var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                        string transcript = res.candidates[0].content.parts[0].text.Trim();
+
+                        OnTranscriptionReceived?.Invoke(speakerName, transcript);
+                        AppendToChatHistory("model", transcript);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogWarning("GeminiLiveConnection STT Parse Error: " + e.Message);
+                    }
                 }
-            }
-            else
-            {
-                Debug.LogWarning("GeminiLiveConnection STT API Error: " + request.error);
+                else
+                {
+                    Debug.LogWarning($"GeminiLiveConnection STT API Error (Try {currentTry}): {request.error}");
+                    if (currentTry < maxRetries)
+                    {
+                        yield return new WaitForSeconds(1.5f); // Brief hold before retry
+                    }
+                }
             }
         }
     }
