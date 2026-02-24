@@ -22,14 +22,44 @@ public class FaceAnimator : MonoBehaviour
     [Tooltip("The SkinnedMeshRenderer for the character's head.")]
     public SkinnedMeshRenderer headMesh;
 
+    [Header("Settings")]
+    public float transitionSpeed = 5f;
+    
     // Internal dictionary for the hard-coded profiles
     private Dictionary<EmotionType, List<BlendShapeWeight>> defaultProfiles;
+    private float[] targetWeights;
 
     private void Awake()
     {
         if (headMesh == null) headMesh = GetComponentInChildren<SkinnedMeshRenderer>();
+        if (headMesh != null && headMesh.sharedMesh != null)
+        {
+            targetWeights = new float[headMesh.sharedMesh.blendShapeCount];
+        }
+        
         InitializeDefaultProfiles();
         ResetToNeutral();
+    }
+
+    private void LateUpdate()
+    {
+        if (headMesh == null || headMesh.sharedMesh == null || targetWeights == null) return;
+
+        for (int i = 0; i < headMesh.sharedMesh.blendShapeCount; i++)
+        {
+            float current = headMesh.GetBlendShapeWeight(i);
+            float target = targetWeights[i];
+            
+            if (Mathf.Abs(current - target) > 0.1f)
+            {
+                float next = Mathf.Lerp(current, target, Time.deltaTime * transitionSpeed);
+                headMesh.SetBlendShapeWeight(i, next);
+            }
+            else if (current != target)
+            {
+                headMesh.SetBlendShapeWeight(i, target);
+            }
+        }
     }
 
     private void InitializeDefaultProfiles()
@@ -126,12 +156,12 @@ public class FaceAnimator : MonoBehaviour
         Debug.Log($"FaceAnimator: Setting emotion to {emotion}");
         EmotionType type = ParseEmotion(emotion);
         
-        if (headMesh == null || headMesh.sharedMesh == null) return;
+        if (headMesh == null || headMesh.sharedMesh == null || targetWeights == null) return;
 
-        // Reset all active blendshapes to 0
-        for (int i = 0; i < headMesh.sharedMesh.blendShapeCount; i++)
+        // Clear target weights
+        for (int i = 0; i < targetWeights.Length; i++)
         {
-            headMesh.SetBlendShapeWeight(i, 0f);
+            targetWeights[i] = 0f;
         }
 
         // Apply new target blendshapes
@@ -142,7 +172,7 @@ public class FaceAnimator : MonoBehaviour
                 int index = headMesh.sharedMesh.GetBlendShapeIndex(pose.shapeName);
                 if (index != -1)
                 {
-                    headMesh.SetBlendShapeWeight(index, pose.weight);
+                    targetWeights[index] = pose.weight;
                 }
             }
         }
