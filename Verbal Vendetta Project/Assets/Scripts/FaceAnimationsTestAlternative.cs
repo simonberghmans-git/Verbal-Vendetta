@@ -27,7 +27,7 @@ public class FaceAnimationsTestAlternative : MonoBehaviour
         if (faceAnimator != null)
         {
             lastEmotion = testEmotion;
-            faceAnimator.SetEmotion(testEmotion);
+            faceAnimator.SetEmotion(testEmotion.ToString());
         }
     }
 
@@ -38,7 +38,7 @@ public class FaceAnimationsTestAlternative : MonoBehaviour
         // Check if the emotion was changed in the Unity Inspector
         if (testEmotion != lastEmotion)
         {
-            faceAnimator.SetEmotion(testEmotion);
+            faceAnimator.SetEmotion(testEmotion.ToString());
             lastEmotion = testEmotion;
             Debug.Log($"FaceAnimationsTestAlternative: Applied {testEmotion} profile.");
         }

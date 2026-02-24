@@ -85,6 +85,16 @@ public class InterrogationManager : MonoBehaviour
             if (currentSuspectModel != null)
             {
                 suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
+                liveConnection.faceAnimator = currentSuspectModel.GetComponent<FaceAnimator>();
+                if (liveConnection.faceAnimator == null) liveConnection.faceAnimator = currentSuspectModel.GetComponentInChildren<FaceAnimator>();
+                
+                liveConnection.faceAnimatorAlt = currentSuspectModel.GetComponent<FaceAnimatorAlternative>();
+                if (liveConnection.faceAnimatorAlt == null) liveConnection.faceAnimatorAlt = currentSuspectModel.GetComponentInChildren<FaceAnimatorAlternative>();
+            }
+            else
+            {
+                liveConnection.faceAnimator = null;
+                liveConnection.faceAnimatorAlt = null;
             }
 
             liveConnection.ConnectSession(activeSuspectData, connectionManager.currentScenario, suspectAudioSource);
@@ -145,9 +155,6 @@ public class InterrogationManager : MonoBehaviour
 
     private void HandleMetadata(string startEmotionString, string endEmotionString, float stressLevel)
     {
-        FaceAnimator.EmotionType startEmotion = FaceAnimator.ParseEmotion(startEmotionString);
-        FaceAnimator.EmotionType endEmotion = FaceAnimator.ParseEmotion(endEmotionString);
-
         if (AnimationsManager.Instance != null)
         {
             AnimationsManager.Instance.stressLevel = Mathf.Clamp01(stressLevel);
@@ -156,10 +163,19 @@ public class InterrogationManager : MonoBehaviour
         if (currentSuspectModel != null)
         {
             var faceAnim = currentSuspectModel.GetComponent<FaceAnimator>();
+            if (faceAnim == null) faceAnim = currentSuspectModel.GetComponentInChildren<FaceAnimator>();
+            
             if (faceAnim != null)
             {
-                // Play transition for a generic 2 seconds since we don't know the full length yet in live mode
-                faceAnim.PlaySpeechEmotions(startEmotion, endEmotion, 2f); 
+                faceAnim.SetEmotion(startEmotionString); 
+            }
+
+            var faceAnimAlt = currentSuspectModel.GetComponent<FaceAnimatorAlternative>();
+            if (faceAnimAlt == null) faceAnimAlt = currentSuspectModel.GetComponentInChildren<FaceAnimatorAlternative>();
+            
+            if (faceAnimAlt != null)
+            {
+                faceAnimAlt.SetEmotion(startEmotionString);
             }
         }
     }

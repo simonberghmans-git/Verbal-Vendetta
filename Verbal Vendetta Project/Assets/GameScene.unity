@@ -20455,7 +20455,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationManager
   connectionManager: {fileID: 1524535818}
-  liveConnection: {fileID: 0}
+  liveConnection: {fileID: 1844292942}
   notebookManager: {fileID: 1560289931}
   scenesManager: {fileID: 1362225889}
   playerInputField: {fileID: 27584541}
@@ -20950,7 +20950,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   interrogationManager: {fileID: 1844292941}
-  liveConnection: {fileID: 0}
+  liveConnection: {fileID: 1844292942}
   gameManager: {fileID: 63643235}
   statusLabel: {fileID: 1549858847}
   transcriptionPreview: {fileID: 1973882886}

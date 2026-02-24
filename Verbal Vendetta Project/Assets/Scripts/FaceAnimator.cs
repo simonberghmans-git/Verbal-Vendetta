@@ -22,34 +22,14 @@ public class FaceAnimator : MonoBehaviour
     [Tooltip("The SkinnedMeshRenderer for the character's head.")]
     public SkinnedMeshRenderer headMesh;
 
-    [Header("Settings")]
-    public float transitionSpeed = 3f;
-    
     // Internal dictionary for the hard-coded profiles
     private Dictionary<EmotionType, List<BlendShapeWeight>> defaultProfiles;
-    private Dictionary<int, float> targetWeights = new Dictionary<int, float>();
-    private Coroutine speechTransitionCoroutine;
 
     private void Awake()
     {
         if (headMesh == null) headMesh = GetComponentInChildren<SkinnedMeshRenderer>();
         InitializeDefaultProfiles();
         ResetToNeutral();
-    }
-
-    [Header("Debug")]
-    public EmotionType debugEmotion;
-    public bool applyDebugEmotion;
-
-    private void LateUpdate()
-    {
-        ApplyBlendShapes();
-
-        if (applyDebugEmotion)
-        {
-            applyDebugEmotion = false;
-            SetEmotion(debugEmotion);
-        }
     }
 
     private void InitializeDefaultProfiles()
@@ -141,64 +121,34 @@ public class FaceAnimator : MonoBehaviour
         };
     }
 
-    private void ApplyBlendShapes()
+    public void SetEmotion(string emotion)
     {
-        if (headMesh == null) return;
-
-        foreach (var entry in targetWeights)
-        {
-            float current = headMesh.GetBlendShapeWeight(entry.Key);
-            float next = Mathf.Lerp(current, entry.Value, Time.deltaTime * transitionSpeed);
-            headMesh.SetBlendShapeWeight(entry.Key, next);
-        }
-    }
-
-    public void SetEmotion(EmotionType type)
-    {
-        if (speechTransitionCoroutine != null) StopCoroutine(speechTransitionCoroutine);
-        UpdateTargetWeights(type);
-    }
-
-    public void PlaySpeechEmotions(EmotionType startEmotion, EmotionType endEmotion, float duration)
-    {
-        if (speechTransitionCoroutine != null) StopCoroutine(speechTransitionCoroutine);
-        speechTransitionCoroutine = StartCoroutine(SpeechTransitionRoutine(startEmotion, endEmotion, duration));
-    }
-
-    private IEnumerator SpeechTransitionRoutine(EmotionType start, EmotionType end, float duration)
-    {
-        UpdateTargetWeights(start);
-        float transitionPoint = duration * 0.4f;
-        yield return new WaitForSeconds(transitionPoint);
-        UpdateTargetWeights(end);
-        speechTransitionCoroutine = null;
-    }
-
-    private void UpdateTargetWeights(EmotionType type)
-    {
-        if (defaultProfiles == null || !defaultProfiles.ContainsKey(type))
-        {
-            List<int> currentKeys = new List<int>(targetWeights.Keys);
-            foreach (int key in currentKeys) targetWeights[key] = 0f;
-            return;
-        }
-
-        List<BlendShapeWeight> activePoses = defaultProfiles[type];
+        Debug.Log($"FaceAnimator: Setting emotion to {emotion}");
+        EmotionType type = ParseEmotion(emotion);
         
-        List<int> keys = new List<int>(targetWeights.Keys);
-        foreach (int key in keys) targetWeights[key] = 0f;
+        if (headMesh == null || headMesh.sharedMesh == null) return;
 
-        foreach (var pose in activePoses)
+        // Reset all active blendshapes to 0
+        for (int i = 0; i < headMesh.sharedMesh.blendShapeCount; i++)
         {
-            int index = headMesh.sharedMesh.GetBlendShapeIndex(pose.shapeName);
-            if (index != -1)
+            headMesh.SetBlendShapeWeight(i, 0f);
+        }
+
+        // Apply new target blendshapes
+        if (defaultProfiles != null && defaultProfiles.ContainsKey(type))
+        {
+            foreach (var pose in defaultProfiles[type])
             {
-                targetWeights[index] = pose.weight;
+                int index = headMesh.sharedMesh.GetBlendShapeIndex(pose.shapeName);
+                if (index != -1)
+                {
+                    headMesh.SetBlendShapeWeight(index, pose.weight);
+                }
             }
         }
     }
 
-    public void ResetToNeutral() => SetEmotion(EmotionType.Neutral);
+    public void ResetToNeutral() => SetEmotion("Neutral");
 
     public static EmotionType ParseEmotion(string emotionName)
     {
@@ -206,6 +156,7 @@ public class FaceAnimator : MonoBehaviour
         {
             return result;
         }
+        Debug.LogWarning($"FaceAnimator: Unknown emotion '{emotionName}', falling back to Neutral.");
         return EmotionType.Neutral;
     }
 }
