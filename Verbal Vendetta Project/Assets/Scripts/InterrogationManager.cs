@@ -85,16 +85,6 @@ public class InterrogationManager : MonoBehaviour
             if (currentSuspectModel != null)
             {
                 suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
-                liveConnection.faceAnimator = currentSuspectModel.GetComponent<FaceAnimator>();
-                if (liveConnection.faceAnimator == null) liveConnection.faceAnimator = currentSuspectModel.GetComponentInChildren<FaceAnimator>();
-                
-                liveConnection.faceAnimatorAlt = currentSuspectModel.GetComponent<FaceAnimatorAlternative>();
-                if (liveConnection.faceAnimatorAlt == null) liveConnection.faceAnimatorAlt = currentSuspectModel.GetComponentInChildren<FaceAnimatorAlternative>();
-            }
-            else
-            {
-                liveConnection.faceAnimator = null;
-                liveConnection.faceAnimatorAlt = null;
             }
 
             liveConnection.ConnectSession(activeSuspectData, connectionManager.currentScenario, suspectAudioSource);
@@ -102,9 +92,11 @@ public class InterrogationManager : MonoBehaviour
             // Unsubscribe just in case, then subscribe to events
             liveConnection.OnTranscriptionReceived -= HandleTranscription;
             liveConnection.OnMetadataReceived -= HandleMetadata;
+            liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
             
             liveConnection.OnTranscriptionReceived += HandleTranscription;
             liveConnection.OnMetadataReceived += HandleMetadata;
+            liveConnection.OnSpeakStateChanged += HandleSpeakStateChanged;
         }
     }
 
@@ -126,23 +118,8 @@ public class InterrogationManager : MonoBehaviour
         else
         {
             // Model
-            isModelSpeaking = !string.IsNullOrEmpty(text);
             currentModelTranscript = text;
             responseTextField.text = $"<b>{speaker}:</b> {text}";
-            
-            // Check if Model is speaking to trigger animations
-            if (AnimationsManager.Instance != null && !string.IsNullOrEmpty(text))
-            {
-                // Note: The length is an estimate because streaming is real-time.
-                // We could derive length from the audio stream itself, but sticking to a basic true while receiving text.
-                AnimationsManager.Instance.SetTalkingState(true, 1f); 
-            }
-            
-            if (EyePointManager.Instance != null)
-            {
-                EyePointManager.Instance.currentState = EyePointManager.EyeState.Talking;
-                // We'll reset it to Waiting when they finish (StopInterrogation or explicit end message)
-            }
         }
         
         // Notebook transcript append
@@ -150,6 +127,30 @@ public class InterrogationManager : MonoBehaviour
         {
             int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspectData);
             notebookManager.AppendSuspectLine(index, $"{speaker}: {text}");
+        }
+    }
+
+    private void HandleSpeakStateChanged(bool isSpeaking)
+    {
+        isModelSpeaking = isSpeaking;
+
+        // Note: isSpeaking = true when the character begins responding.
+        // False when they have finished playing audio.
+        if (AnimationsManager.Instance != null)
+        {
+            AnimationsManager.Instance.SetTalkingState(isSpeaking, 0f); 
+        }
+        
+        if (EyePointManager.Instance != null)
+        {
+            if (isSpeaking)
+            {
+                EyePointManager.Instance.currentState = EyePointManager.EyeState.Talking;
+            }
+            else
+            {
+                EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+            }
         }
     }
 
@@ -262,6 +263,7 @@ public class InterrogationManager : MonoBehaviour
         {
             liveConnection.OnTranscriptionReceived -= HandleTranscription;
             liveConnection.OnMetadataReceived -= HandleMetadata;
+            liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
             _ = liveConnection.DisconnectSessionAsync();
         }
 

@@ -21,10 +21,6 @@ public class GeminiLiveConnection : MonoBehaviour
     private string model = "models/gemini-2.5-flash-native-audio-preview-12-2025";
     private string wsUrl => $"wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key={apiKey}";
 
-    [Header("Animation Targets")]
-    public FaceAnimator faceAnimator;
-    public FaceAnimatorAlternative faceAnimatorAlt;
-
     [Header("Audio Output")]
     [HideInInspector] public AudioSource voiceSource;
     private int outputSampleRate = 24000;
@@ -50,6 +46,12 @@ public class GeminiLiveConnection : MonoBehaviour
 
     public delegate void MetadataReceivedHandler(string startEmotion, string endEmotion, float stressLevel);
     public event MetadataReceivedHandler OnMetadataReceived;
+
+    public delegate void SpeakStateChangedHandler(bool isSpeaking);
+    public event SpeakStateChangedHandler OnSpeakStateChanged;
+
+    private float lastAudioTime = 0f;
+    private bool isModelCurrentlySpeaking = false;
 
     private SuspectData currentSuspect;
     private bool isConnecting = false;
@@ -179,6 +181,29 @@ public class GeminiLiveConnection : MonoBehaviour
 
     void Update()
     {
+        // 1. Check if model is playing audio to trigger animations
+        bool hasAudio = false;
+        lock (audioJitterBuffer)
+        {
+            hasAudio = audioJitterBuffer.Count > 0;
+        }
+
+        if (hasAudio)
+        {
+            lastAudioTime = Time.time;
+            if (!isModelCurrentlySpeaking)
+            {
+                isModelCurrentlySpeaking = true;
+                OnSpeakStateChanged?.Invoke(true);
+            }
+        }
+        else if (isModelCurrentlySpeaking && Time.time - lastAudioTime > 0.3f)
+        {
+            isModelCurrentlySpeaking = false;
+            OnSpeakStateChanged?.Invoke(false);
+        }
+
+        // 2. Microphone Recording
         if (isRecording && Microphone.IsRecording(micName))
         {
             int currentPosition = Microphone.GetPosition(micName);
@@ -398,10 +423,6 @@ public class GeminiLiveConnection : MonoBehaviour
                         
                         // Fire the Unity Event
                         OnMetadataReceived?.Invoke(emotionStr, emotionStr, 0.5f);
-                        
-                        // Trigger the Animators directly
-                        if (faceAnimator != null) faceAnimator.SetEmotion(emotionStr);
-                        if (faceAnimatorAlt != null) faceAnimatorAlt.SetEmotion(emotionStr);
                         
                         // Send the required response back to the socket
                         _ = SendToolResponse(call.id, call.name);
