@@ -69,6 +69,7 @@ public class InterrogationManager : MonoBehaviour
         if (EyePointManager.Instance != null)
         {
             EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+            EyePointManager.Instance.forceDirectEyeContact = false;
         }
 
         // Register Animator
@@ -94,11 +95,13 @@ public class InterrogationManager : MonoBehaviour
             liveConnection.OnMetadataReceived -= HandleMetadata;
             liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
             liveConnection.OnBodyAnimationTriggered -= HandleBodyAnimationTriggered;
+            liveConnection.OnForceDirectEyeContact -= HandleForceDirectEyeContact;
             
             liveConnection.OnTranscriptionReceived += HandleTranscription;
             liveConnection.OnMetadataReceived += HandleMetadata;
             liveConnection.OnSpeakStateChanged += HandleSpeakStateChanged;
             liveConnection.OnBodyAnimationTriggered += HandleBodyAnimationTriggered;
+            liveConnection.OnForceDirectEyeContact += HandleForceDirectEyeContact;
         }
     }
 
@@ -152,6 +155,7 @@ public class InterrogationManager : MonoBehaviour
             else
             {
                 EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+                EyePointManager.Instance.forceDirectEyeContact = false;
             }
         }
     }
@@ -161,6 +165,14 @@ public class InterrogationManager : MonoBehaviour
         if (AnimationsManager.Instance != null)
         {
             AnimationsManager.Instance.TriggerBodyAnimation(animationName);
+        }
+    }
+
+    private void HandleForceDirectEyeContact()
+    {
+        if (EyePointManager.Instance != null)
+        {
+            EyePointManager.Instance.forceDirectEyeContact = true;
         }
     }
 
@@ -275,6 +287,7 @@ public class InterrogationManager : MonoBehaviour
             liveConnection.OnMetadataReceived -= HandleMetadata;
             liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
             liveConnection.OnBodyAnimationTriggered -= HandleBodyAnimationTriggered;
+            liveConnection.OnForceDirectEyeContact -= HandleForceDirectEyeContact;
             _ = liveConnection.DisconnectSessionAsync();
         }
 
@@ -288,6 +301,7 @@ public class InterrogationManager : MonoBehaviour
         if (EyePointManager.Instance != null)
         {
             EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
+            EyePointManager.Instance.forceDirectEyeContact = false;
         }
 
         // 5. Reset UI

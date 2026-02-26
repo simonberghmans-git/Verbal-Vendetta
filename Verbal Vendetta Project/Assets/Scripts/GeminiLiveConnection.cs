@@ -12,7 +12,6 @@ using Newtonsoft.Json;
 /// <summary>
 /// Manages a persistent WebSocket connection to the Gemini Multimodal Live API.
 /// Handles recording mic input, streaming it to the API, and receiving audio.
-/// Uses REST API for flawless STT, and WebSocket Function Calling for zero-latency emotions.
 /// </summary>
 public class GeminiLiveConnection : MonoBehaviour
 {
@@ -50,11 +49,14 @@ public class GeminiLiveConnection : MonoBehaviour
     public delegate void BodyAnimationTriggerHandler(string animationName);
     public event BodyAnimationTriggerHandler OnBodyAnimationTriggered;
 
+    public event Action OnForceDirectEyeContact;
+
     public delegate void SpeakStateChangedHandler(bool isSpeaking);
     public event SpeakStateChangedHandler OnSpeakStateChanged;
 
     private float lastAudioTime = 0f;
     private bool isModelCurrentlySpeaking = false;
+    private int playedSamplesCount = 0; 
 
     private SuspectData currentSuspect;
     private bool isConnecting = false;
@@ -67,9 +69,6 @@ public class GeminiLiveConnection : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Opens the WebSocket connection and initializes the session with suspect data and history.
-    /// </summary>
     public async void ConnectSession(SuspectData suspect, ScenarioData scenario, AudioSource suspectVoiceSource)
     {
         if (isConnecting) return;
@@ -159,7 +158,6 @@ public class GeminiLiveConnection : MonoBehaviour
         _ = DisconnectSessionAsync("OnDestroy");
     }
 
-    // --- AUDIO INPUT STREAMING ---
     public void StartRecording()
     {
         if (string.IsNullOrEmpty(micName) || webSocket == null || webSocket.State != WebSocketState.Open) return;
@@ -184,7 +182,6 @@ public class GeminiLiveConnection : MonoBehaviour
 
     void Update()
     {
-        // 1. Check if model is playing audio to trigger animations
         bool hasAudio = false;
         lock (audioJitterBuffer)
         {
@@ -197,6 +194,7 @@ public class GeminiLiveConnection : MonoBehaviour
             if (!isModelCurrentlySpeaking)
             {
                 isModelCurrentlySpeaking = true;
+                playedSamplesCount = 0; 
                 OnSpeakStateChanged?.Invoke(true);
             }
         }
@@ -206,23 +204,73 @@ public class GeminiLiveConnection : MonoBehaviour
             OnSpeakStateChanged?.Invoke(false);
         }
 
-        // 2. Microphone Recording
         if (isRecording && Microphone.IsRecording(micName))
         {
             int currentPosition = Microphone.GetPosition(micName);
             if (currentPosition < 0 || lastSamplePosition == currentPosition) return;
 
             int sampleDiff = currentPosition - lastSamplePosition;
-            if (sampleDiff < 0) sampleDiff = (recordingClip.samples - lastSamplePosition) + currentPosition;
+            if (sampleDiff < 0) sampleDiff += recordingClip.samples;
 
             if (sampleDiff > inputSampleRate * 0.1f) 
             {
                 float[] samples = new float[sampleDiff];
-                recordingClip.GetData(samples, lastSamplePosition);
+                
+                if (lastSamplePosition + sampleDiff > recordingClip.samples)
+                {
+                    int endLength = recordingClip.samples - lastSamplePosition;
+                    float[] endSamples = new float[endLength];
+                    recordingClip.GetData(endSamples, lastSamplePosition);
+                    
+                    int wrapLength = sampleDiff - endLength;
+                    float[] wrapSamples = new float[wrapLength];
+                    recordingClip.GetData(wrapSamples, 0);
+                    
+                    endSamples.CopyTo(samples, 0);
+                    wrapSamples.CopyTo(samples, endLength);
+                }
+                else
+                {
+                    recordingClip.GetData(samples, lastSamplePosition);
+                }
+
                 lastSamplePosition = currentPosition;
+                
+                float sum = 0f;
+                for (int i = 0; i < samples.Length; i++) sum += samples[i] * samples[i];
+                float rmsValue = Mathf.Sqrt(sum / samples.Length);
+                
+                float volumeThreshold = 0.02f;
+                bool isPlayerSpeaking = rmsValue > volumeThreshold;
+
+                if (isModelCurrentlySpeaking && isPlayerSpeaking)
+                {
+                    // Local visual logging only. We rely on the continuous SendAudioChunk 
+                    // below to trigger the server's VAD, which handles the real interruption.
+                    Debug.Log("GeminiLiveConnection: Player speaking loudly, expecting server interrupt...");
+                }
+                
+                // Keep streaming audio to the server. The server's VAD will automatically 
+                // cut off the model when it hears this audio feed and send the interrupted flag.
                 SendAudioChunk(samples);
             }
         }
+    }
+
+    public void HandleServerInterruption()
+    {
+        Debug.Log("GeminiLiveConnection: Server confirmed interruption. Halting playback.");
+        
+        lock (audioJitterBuffer)
+        {
+            audioJitterBuffer.Clear();
+        }
+        
+        // Let the AudioSource keep running the OnAudioRead loop, but feeding it 0s (since buffer is clear)
+        // This is smoother than hard-stopping the AudioSource component and avoids Unity audio popping.
+
+        isModelCurrentlySpeaking = false;
+        OnSpeakStateChanged?.Invoke(false);
     }
 
     private async void SendAudioChunk(float[] samples)
@@ -252,7 +300,6 @@ public class GeminiLiveConnection : MonoBehaviour
         await SendClientContent(payload, cts.Token);
     }
 
-    // --- SETUP & HISTORY ---
     private async Task SendSetupMessage(SuspectData suspect, ScenarioData scenario)
     {
         string timelineContext = $"TODAY IS: {scenario.interrogation_date}. THE MURDER HAPPENED ON: {scenario.murder_date} AT {scenario.murder_time}.";
@@ -271,7 +318,8 @@ public class GeminiLiveConnection : MonoBehaviour
         2. Keep answers concise (1-3 sentences) suited for natural conversation.
         3. Do not use colon symbols when referring to time, say '3 45 PM'.
         4. CRITICAL: Before you speak, you MUST ALWAYS call the 'SetEmotion' tool to reflect your current emotional state.
-        5. You MUST ONLY use one of the exact following emotions: Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty. Do NOT use any other words or synonyms.";
+        5. You MUST ONLY use one of the exact following emotions: Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty. Do NOT use any other words or synonyms.
+        6. CRITICAL: If the question is very easy to answer without remembering details, you MUST call the 'ForceDirectEyeContact' tool.";
 
         var setupMsg = new
         {
@@ -308,7 +356,7 @@ public class GeminiLiveConnection : MonoBehaviour
                             },
                             new {
                                 name = "TriggerBodyAnimation",
-                                description = "Triggers a specific body animation to emphasize your response. Use this sparingly, only when appropriate.",
+                                description = "Triggers a specific body animation to emphasize your response. Use this only when appropriate.",
                                 parameters = new {
                                     type = "OBJECT",
                                     properties = new Dictionary<string, object> {
@@ -319,6 +367,15 @@ public class GeminiLiveConnection : MonoBehaviour
                                         } }
                                     },
                                     required = new[] { "animationName" }
+                                }
+                            },
+                            new {
+                                name = "ForceDirectEyeContact",
+                                description = "Triggers direct eye contact with the detective. Use this ONLY when the question is very easy to answer without needing to remember details.",
+                                parameters = new {
+                                    type = "OBJECT",
+                                    properties = new Dictionary<string, object>(),
+                                    required = new string[] {}
                                 }
                             }
                         }
@@ -352,7 +409,6 @@ public class GeminiLiveConnection : MonoBehaviour
         await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, token);
     }
 
-    // Let the API know the tool was executed so it continues streaming audio
     private async Task SendToolResponse(string callId, string functionName)
     {
         var payload = new
@@ -373,7 +429,6 @@ public class GeminiLiveConnection : MonoBehaviour
         await SendClientContent(payload, cts.Token);
     }
 
-    // --- WEBSOCKET RECEIVE LOOP ---
     private async Task ReceiveLoop()
     {
         var buffer = new byte[1024 * 64];
@@ -407,7 +462,32 @@ public class GeminiLiveConnection : MonoBehaviour
         {
             var msg = JsonConvert.DeserializeObject<LiveServerMessage>(jsonResponse);
 
-            // 1. Handle Audio & Text Streaming from the model
+            if (msg.server_content != null && msg.server_content.interrupted)
+            {
+                HandleServerInterruption();
+
+                byte[] audioToTranscribe = null;
+                lock (currentTurnAudioBuffer)
+                {
+                    if (currentTurnAudioBuffer.Count > 0)
+                    {
+                        int playedBytesCount = playedSamplesCount * 2;
+                        if (playedBytesCount > currentTurnAudioBuffer.Count) playedBytesCount = currentTurnAudioBuffer.Count;
+                             
+                        audioToTranscribe = currentTurnAudioBuffer.GetRange(0, playedBytesCount).ToArray();
+                        currentTurnAudioBuffer.Clear();
+                    }
+                }
+                     
+                if (audioToTranscribe != null && audioToTranscribe.Length > 0)
+                {
+                    StartCoroutine(TranscribeAudioRoutine(currentSuspect?.name ?? "Model", audioToTranscribe));
+                }
+                
+                // Keep returning to discard any model turn chunks in this exact interrupted payload
+                return;
+            }
+
             if (msg.server_content != null && msg.server_content.model_turn != null)
             {
                 foreach (var part in msg.server_content.model_turn.parts)
@@ -417,7 +497,6 @@ public class GeminiLiveConnection : MonoBehaviour
                         byte[] pcmBytes = Convert.FromBase64String(part.inline_data.data);
                         QueueAudio(pcmBytes);
                         
-                        // Buffer for STT
                         lock (currentTurnAudioBuffer)
                         {
                             currentTurnAudioBuffer.AddRange(pcmBytes);
@@ -430,7 +509,6 @@ public class GeminiLiveConnection : MonoBehaviour
                 setupCompletedTcs?.TrySetResult(true);
             }
             
-            // 2. Catch Function Calls for Emotion Animation
             if (msg.tool_call != null && msg.tool_call.functionCalls != null)
             {
                 foreach (var call in msg.tool_call.functionCalls)
@@ -438,50 +516,44 @@ public class GeminiLiveConnection : MonoBehaviour
                     if (call.name == "SetEmotion" && call.args != null && call.args.ContainsKey("emotion"))
                     {
                         string emotionStr = call.args["emotion"].ToString();
-                        
-                        // Fire the Unity Event
                         OnMetadataReceived?.Invoke(emotionStr, emotionStr, 0.5f);
-                        
-                        // Send the required response back to the socket
                         _ = SendToolResponse(call.id, call.name);
                     }
                     else if (call.name == "TriggerBodyAnimation" && call.args != null && call.args.ContainsKey("animationName"))
                     {
                         string animName = call.args["animationName"].ToString();
-                        
-                        // Fire a new event to handle the body animation
                         OnBodyAnimationTriggered?.Invoke(animName);
-
-                        // Send the required response back to the socket
+                        _ = SendToolResponse(call.id, call.name);
+                    }
+                    else if (call.name == "ForceDirectEyeContact")
+                    {
+                        OnForceDirectEyeContact?.Invoke();
                         _ = SendToolResponse(call.id, call.name);
                     }
                 }
             }
             
-            // 3. Turn Complete -> Transcribe
             if (msg.server_content != null && msg.server_content.turnComplete)
             {
-                 // STT the entire turn audio
-                 byte[] audioToTranscribe = null;
-                 lock (currentTurnAudioBuffer)
-                 {
-                     if (currentTurnAudioBuffer.Count > 0)
-                     {
-                         audioToTranscribe = currentTurnAudioBuffer.ToArray();
-                         currentTurnAudioBuffer.Clear();
-                     }
-                 }
-                 
-                 if (audioToTranscribe != null && audioToTranscribe.Length > 0)
-                 {
-                     StartCoroutine(TranscribeAudioRoutine(currentSuspect?.name ?? "Model", audioToTranscribe));
-                 }
+                byte[] audioToTranscribe = null;
+                lock (currentTurnAudioBuffer)
+                {
+                    if (currentTurnAudioBuffer.Count > 0)
+                    {
+                        audioToTranscribe = currentTurnAudioBuffer.ToArray();
+                        currentTurnAudioBuffer.Clear();
+                    }
+                }
+                     
+                if (audioToTranscribe != null && audioToTranscribe.Length > 0)
+                {
+                    StartCoroutine(TranscribeAudioRoutine(currentSuspect?.name ?? "Model", audioToTranscribe));
+                }
             }
         }
         catch (Exception) { }
     }
 
-    // --- STT TRANSCRIPTION VIA REST ---
     private IEnumerator TranscribeAudioRoutine(string speakerName, byte[] pcm16Data)
     {
         byte[] wavBytes = AppendWavHeader(pcm16Data, 24000);
@@ -550,7 +622,6 @@ public class GeminiLiveConnection : MonoBehaviour
         }
     }
     
-    // --- DICTATION RECOGNIZER FOR PLAYER MIC --- 
     public void AppendPlayerTextToHistory(string playerText)
     {
         OnTranscriptionReceived?.Invoke("Player", playerText);
@@ -589,7 +660,14 @@ public class GeminiLiveConnection : MonoBehaviour
         {
             for (int i = 0; i < data.Length; i++)
             {
-                if (audioJitterBuffer.Count > 0) data[i] = audioJitterBuffer.Dequeue();
+                if (audioJitterBuffer.Count > 0) 
+                {
+                    data[i] = audioJitterBuffer.Dequeue();
+                    if (isModelCurrentlySpeaking)
+                    {
+                        playedSamplesCount++; 
+                    }
+                }
                 else data[i] = 0f;
             }
         }
@@ -602,21 +680,17 @@ public class GeminiLiveConnection : MonoBehaviour
         int dataLen = pcmData.Length;
         int riffLen = dataLen + 36;
         
-        // RIFF
         header[0] = (byte)'R'; header[1] = (byte)'I'; header[2] = (byte)'F'; header[3] = (byte)'F';
         header[4] = (byte)(riffLen & 0xff); header[5] = (byte)((riffLen >> 8) & 0xff); header[6] = (byte)((riffLen >> 16) & 0xff); header[7] = (byte)((riffLen >> 24) & 0xff);
-        // WAVE
         header[8] = (byte)'W'; header[9] = (byte)'A'; header[10] = (byte)'V'; header[11] = (byte)'E';
-        // fmt 
         header[12] = (byte)'f'; header[13] = (byte)'m'; header[14] = (byte)'t'; header[15] = (byte)' ';
         header[16] = 16; header[17] = 0; header[18] = 0; header[19] = 0;
-        header[20] = 1; header[21] = 0; // PCM format
-        header[22] = 1; header[23] = 0; // 1 channel
+        header[20] = 1; header[21] = 0; 
+        header[22] = 1; header[23] = 0; 
         header[24] = (byte)(sampleRate & 0xff); header[25] = (byte)((sampleRate >> 8) & 0xff); header[26] = (byte)((sampleRate >> 16) & 0xff); header[27] = (byte)((sampleRate >> 24) & 0xff);
         header[28] = (byte)(byteRate & 0xff); header[29] = (byte)((byteRate >> 8) & 0xff); header[30] = (byte)((byteRate >> 16) & 0xff); header[31] = (byte)((byteRate >> 24) & 0xff);
-        header[32] = 2; header[33] = 0; // block align
-        header[34] = 16; header[35] = 0; // 16 bits per sample
-        // data
+        header[32] = 2; header[33] = 0; 
+        header[34] = 16; header[35] = 0; 
         header[36] = (byte)'d'; header[37] = (byte)'a'; header[38] = (byte)'t'; header[39] = (byte)'a';
         header[40] = (byte)(dataLen & 0xff); header[41] = (byte)((dataLen >> 8) & 0xff); header[42] = (byte)((dataLen >> 16) & 0xff); header[43] = (byte)((dataLen >> 24) & 0xff);
 
@@ -626,11 +700,10 @@ public class GeminiLiveConnection : MonoBehaviour
         return wavBlock;
     }
 
-    // --- JSON STRUCTS ---
     [Serializable] private class LiveServerMessage {
         [JsonProperty("serverContent")] public ServerContent server_content;
         [JsonProperty("setupComplete")] public ReceiveSetupResponse setup_complete;
-        [JsonProperty("toolCall")] public ToolCallMessage tool_call; // Added for Function Calling
+        [JsonProperty("toolCall")] public ToolCallMessage tool_call; 
     }
     [Serializable] private class ServerContent {
         [JsonProperty("modelTurn")] public ModelTurn model_turn;
@@ -649,7 +722,6 @@ public class GeminiLiveConnection : MonoBehaviour
     }
     [Serializable] private class ReceiveSetupResponse { }
     
-    // --- Added Structs for Function Calling ---
     [Serializable] private class ToolCallMessage {
         [JsonProperty("functionCalls")] public List<FunctionCall> functionCalls;
     }
@@ -659,7 +731,6 @@ public class GeminiLiveConnection : MonoBehaviour
         [JsonProperty("args")] public Dictionary<string, object> args;
     }
 
-    // --- Transcribe Rest API Structs ---
     [Serializable] private class GeminiResponseWrapper { public List<GeminiCandidate> candidates; }
     [Serializable] private class GeminiCandidate { public GeminiContent content; }
     [Serializable] private class GeminiContent { public List<GeminiPart> parts; }
