@@ -47,6 +47,9 @@ public class GeminiLiveConnection : MonoBehaviour
     public delegate void MetadataReceivedHandler(string startEmotion, string endEmotion, float stressLevel);
     public event MetadataReceivedHandler OnMetadataReceived;
 
+    public delegate void BodyAnimationTriggerHandler(string animationName);
+    public event BodyAnimationTriggerHandler OnBodyAnimationTriggered;
+
     public delegate void SpeakStateChangedHandler(bool isSpeaking);
     public event SpeakStateChangedHandler OnSpeakStateChanged;
 
@@ -302,6 +305,21 @@ public class GeminiLiveConnection : MonoBehaviour
                                     },
                                     required = new[] { "emotion" }
                                 }
+                            },
+                            new {
+                                name = "TriggerBodyAnimation",
+                                description = "Triggers a specific body animation to emphasize your response. Use this sparingly, only when appropriate.",
+                                parameters = new {
+                                    type = "OBJECT",
+                                    properties = new Dictionary<string, object> {
+                                        { "animationName", new { 
+                                            type = "STRING", 
+                                            description = "One of: RubArm, Dissaproval, Disbelief, Fist",
+                                            @enum = new[] { "RubArm", "Dissaproval", "Disbelief", "Fist" }
+                                        } }
+                                    },
+                                    required = new[] { "animationName" }
+                                }
                             }
                         }
                     }
@@ -424,6 +442,16 @@ public class GeminiLiveConnection : MonoBehaviour
                         // Fire the Unity Event
                         OnMetadataReceived?.Invoke(emotionStr, emotionStr, 0.5f);
                         
+                        // Send the required response back to the socket
+                        _ = SendToolResponse(call.id, call.name);
+                    }
+                    else if (call.name == "TriggerBodyAnimation" && call.args != null && call.args.ContainsKey("animationName"))
+                    {
+                        string animName = call.args["animationName"].ToString();
+                        
+                        // Fire a new event to handle the body animation
+                        OnBodyAnimationTriggered?.Invoke(animName);
+
                         // Send the required response back to the socket
                         _ = SendToolResponse(call.id, call.name);
                     }

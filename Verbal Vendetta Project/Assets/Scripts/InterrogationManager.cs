@@ -93,10 +93,12 @@ public class InterrogationManager : MonoBehaviour
             liveConnection.OnTranscriptionReceived -= HandleTranscription;
             liveConnection.OnMetadataReceived -= HandleMetadata;
             liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
+            liveConnection.OnBodyAnimationTriggered -= HandleBodyAnimationTriggered;
             
             liveConnection.OnTranscriptionReceived += HandleTranscription;
             liveConnection.OnMetadataReceived += HandleMetadata;
             liveConnection.OnSpeakStateChanged += HandleSpeakStateChanged;
+            liveConnection.OnBodyAnimationTriggered += HandleBodyAnimationTriggered;
         }
     }
 
@@ -151,6 +153,14 @@ public class InterrogationManager : MonoBehaviour
             {
                 EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
             }
+        }
+    }
+
+    private void HandleBodyAnimationTriggered(string animationName)
+    {
+        if (AnimationsManager.Instance != null)
+        {
+            AnimationsManager.Instance.TriggerBodyAnimation(animationName);
         }
     }
 
@@ -264,6 +274,7 @@ public class InterrogationManager : MonoBehaviour
             liveConnection.OnTranscriptionReceived -= HandleTranscription;
             liveConnection.OnMetadataReceived -= HandleMetadata;
             liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
+            liveConnection.OnBodyAnimationTriggered -= HandleBodyAnimationTriggered;
             _ = liveConnection.DisconnectSessionAsync();
         }
 

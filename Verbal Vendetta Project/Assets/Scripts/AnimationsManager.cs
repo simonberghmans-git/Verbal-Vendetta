@@ -98,4 +98,16 @@ public class AnimationsManager : MonoBehaviour
         }
         talkingCoroutine = null;
     }
+
+    /// <summary>
+    /// Triggers a specific one-shot animation via string name.
+    /// Expected names: RubArm, Dissaproval, Disbelief, Fist
+    /// </summary>
+    public void TriggerBodyAnimation(string animationName)
+    {
+        if (currentAnimator != null && !string.IsNullOrEmpty(animationName))
+        {
+            currentAnimator.SetTrigger(animationName);
+        }
+    }
 }
