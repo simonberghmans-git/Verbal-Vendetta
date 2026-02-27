@@ -319,7 +319,10 @@ public class GeminiLiveConnection : MonoBehaviour
         3. Do not use colon symbols when referring to time, say '3 45 PM'.
         4. CRITICAL: Before you speak, you MUST ALWAYS call the 'SetEmotion' tool to reflect your current emotional state.
         5. You MUST ONLY use one of the exact following emotions: Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty. Do NOT use any other words or synonyms.
-        6. CRITICAL: If the question is very easy to answer without remembering details, you MUST call the 'ForceDirectEyeContact' tool.";
+        6. CRITICAL: If the question is very easy to answer without remembering details, you MUST call the 'ForceDirectEyeContact' tool.
+        7. When asked about things that do not at all relate to the case, point out the absurdidy of the question.
+        8. When pressured about their false alibi, only the suspect with no motive and a false alibi (= Red Herring) will reveal their minor secret, explaining why they would fake their alibi.
+        9. Refer only to what your character knows as described in the JSON file.";
 
         var setupMsg = new
         {
@@ -409,25 +412,7 @@ public class GeminiLiveConnection : MonoBehaviour
         await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, token);
     }
 
-    private async Task SendToolResponse(string callId, string functionName)
-    {
-        var payload = new
-        {
-            toolResponse = new
-            {
-                functionResponses = new[]
-                {
-                    new
-                    {
-                        id = callId,
-                        name = functionName,
-                        response = new { result = "success" }
-                    }
-                }
-            }
-        };
-        await SendClientContent(payload, cts.Token);
-    }
+
 
     private async Task ReceiveLoop()
     {
@@ -511,25 +496,33 @@ public class GeminiLiveConnection : MonoBehaviour
             
             if (msg.tool_call != null && msg.tool_call.functionCalls != null)
             {
+                var functionResponses = new List<object>();
+
                 foreach (var call in msg.tool_call.functionCalls)
                 {
                     if (call.name == "SetEmotion" && call.args != null && call.args.ContainsKey("emotion"))
                     {
                         string emotionStr = call.args["emotion"].ToString();
                         OnMetadataReceived?.Invoke(emotionStr, emotionStr, 0.5f);
-                        _ = SendToolResponse(call.id, call.name);
+                        functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
                     }
                     else if (call.name == "TriggerBodyAnimation" && call.args != null && call.args.ContainsKey("animationName"))
                     {
                         string animName = call.args["animationName"].ToString();
                         OnBodyAnimationTriggered?.Invoke(animName);
-                        _ = SendToolResponse(call.id, call.name);
+                        functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
                     }
                     else if (call.name == "ForceDirectEyeContact")
                     {
                         OnForceDirectEyeContact?.Invoke();
-                        _ = SendToolResponse(call.id, call.name);
+                        functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
                     }
+                }
+
+                if (functionResponses.Count > 0)
+                {
+                    var payload = new { toolResponse = new { functionResponses = functionResponses.ToArray() } };
+                    _ = SendClientContent(payload, cts.Token);
                 }
             }
             
