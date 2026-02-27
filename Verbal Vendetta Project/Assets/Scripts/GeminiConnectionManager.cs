@@ -79,7 +79,7 @@ public class GeminiConnectionManager : MonoBehaviour
       ""relationship"": ""Wife"",
       ""personality"": ""Cold, calculated, elegant"",
       ""voice_id"": ""Achernar"",
-      ""model_id"": 2,
+      ""model_id"": 3,
       ""motive"": ""Silas was planning to divorce her and update his will to exclude her entirely by morning."",
       ""access_to_weapon_description"": ""She stole the key to the glass display case and used her knowledge of the library's security bypass to coat the pen nib with a fast-acting toxin."",
       ""alibi_statement"": ""I had retired to my bedroom early with a migraine and didn't leave until the staff found his body."",
@@ -97,8 +97,8 @@ public class GeminiConnectionManager : MonoBehaviour
       ""gender"": ""Female"",
       ""relationship"": ""Personal Secretary"",
       ""personality"": ""Efficient, loyal, overworked"",
-      ""voice_id"": ""Aoede"",
-      ""model_id"": 3,
+      ""voice_id"": ""Autonoe"",
+      ""model_id"": 4,
       ""motive"": null,
       ""access_to_weapon_description"": ""Clara is responsible for the daily maintenance, ink-filling, and cleaning of Silas's extensive fountain pen collection."",
       ""alibi_statement"": ""I was in the kitchen preparing the midnight tea tray, which the cook can confirm."",
@@ -117,7 +117,7 @@ public class GeminiConnectionManager : MonoBehaviour
       ""relationship"": ""Family Priest"",
       ""personality"": ""Stoic, soft-spoken, judgmental"",
       ""voice_id"": ""Algieba"",
-      ""model_id"": 1,
+      ""model_id"": 2,
       ""motive"": null,
       ""access_to_weapon_description"": null,
       ""alibi_statement"": ""I was in the mansion's chapel performing my nightly prayers. I find the silence there very centering."",
@@ -199,7 +199,7 @@ public class GeminiConnectionManager : MonoBehaviour
         string systemPrompt = $@"You are a master mystery writer. Generate a murder mystery scenario in JSON.
         
         LOGIC RULES (The Triple-Filter):
-        1. Exactly 5 suspects.
+        1. Exactly 5 suspects (3 males, 2 females).
         2. The Liars (No Alibi): Exactly 2 suspects have has_no_alibi = true (Killer + Red Herring).
         3. The Motivated: Exactly 2 to 3 suspects have has_motive = true (Must include the Killer).
         4. The Capable (Access): Exactly 2 to 3 suspects have has_access_to_weapon = true (Must include the Killer).

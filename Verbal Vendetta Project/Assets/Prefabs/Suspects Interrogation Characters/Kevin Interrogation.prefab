@@ -90,6 +90,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8185507896658987715, guid: 7449566900ce05a458690c078a114803, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6949725271514801407}
+    - targetCorrespondingSourceObject: {fileID: 8185507896658987715, guid: 7449566900ce05a458690c078a114803, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7209415028118051685}
   m_SourcePrefab: {fileID: 100100000, guid: 7449566900ce05a458690c078a114803, type: 3}
 --- !u!137 &3399404918289632185 stripped
 SkinnedMeshRenderer:
@@ -418,3 +421,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTest
   faceAnimator: {fileID: 5017149463439853085}
   testEmotion: 0
+--- !u!114 &-7209415028118051685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778748314831983701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f66a61450035fc9488774be9ca935e13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlendShapeDebugger
+  targetMesh: {fileID: 3399404918289632185}

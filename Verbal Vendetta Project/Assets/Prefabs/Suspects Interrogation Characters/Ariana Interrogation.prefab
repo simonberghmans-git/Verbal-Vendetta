@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       propertyPath: m_Name
-      value: Ariana Suspect
+      value: Ariana Interrogation
       objectReference: {fileID: 0}
     - target: {fileID: 1458866324339330890, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       propertyPath: m_BlendShapeWeights.Array.size
@@ -1546,8 +1546,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FaceAnimatorAlternative
   headMesh: {fileID: 8620798079540423861}
   transitionSpeed: 3
-  debugEmotion: 0
-  applyDebugEmotion: 0
 --- !u!114 &2317171138756712955
 MonoBehaviour:
   m_ObjectHideFlags: 0
