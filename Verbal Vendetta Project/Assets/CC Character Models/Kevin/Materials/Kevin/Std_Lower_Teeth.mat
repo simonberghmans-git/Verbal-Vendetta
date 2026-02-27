@@ -8,13 +8,14 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Std_Lower_Teeth
-  m_Shader: {fileID: -6465566751694194690, guid: 9363784f4317684439cdadf35650c2e1, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: b7eaf60a1f4049c40b5432e480a10ae9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _DISABLE_SSR_TRANSPARENT
   - _MATERIAL_FEATURE_SUBSURFACE_SCATTERING
   - _MATERIAL_FEATURE_TRANSMISSION
+  - _TESSELLATION_PHONG
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -134,6 +135,14 @@ Material:
     - _TeethSSS: 0.406
     - _TeethSaturation: 0.684
     - _TeethThickness: 0.37739998
+    - _TessellationBackFaceCullEpsilon: -0.25
+    - _TessellationFactor: 3
+    - _TessellationFactorMaxDistance: 50
+    - _TessellationFactorMinDistance: 20
+    - _TessellationFactorTriangleSize: 25
+    - _TessellationMaxDisplacement: 0.01
+    - _TessellationMode: 1
+    - _TessellationShapeFactor: 0.75
     - _TransmissionEnable: 1
     - _TransparentBackfaceEnable: 0
     - _TransparentCullMode: 2

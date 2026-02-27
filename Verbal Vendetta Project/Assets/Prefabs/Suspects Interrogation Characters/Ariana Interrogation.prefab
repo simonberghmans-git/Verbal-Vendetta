@@ -1176,9 +1176,6 @@ PrefabInstance:
       addedObject: {fileID: 7691842551605930860}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1023845799623346997}
-    - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 2399034092451946885}
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
@@ -1186,9 +1183,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1938239214334080527}
-    - targetCorrespondingSourceObject: {fileID: 946622038589009316, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5473120200338883143}
   m_SourcePrefab: {fileID: 100100000, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
 --- !u!4 &15519517056341566 stripped
 Transform:
@@ -1498,40 +1492,6 @@ MonoBehaviour:
   openDuration: 0.1
   minStressBlinkInterval: 0.2
   maxStressBlinkInterval: 1
---- !u!114 &1023845799623346997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3710276211541570393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b5cb24c253b98b4e9afc39d87056d5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: soupday.cc3_unity_tools.project_runtime::Reallusion.Runtime.WrinkleManager
-  skinnedMeshRenderer: {fileID: 8620798079540423861}
-  headMaterial: {fileID: 2100000, guid: 9b7e43a8e0c858d499f7e7a96e114ac4, type: 2}
-  blendScale: 1
-  blendCurve: 1.5
-  blendFalloff: 4
-  falloffMethod: 1
-  updateFrequency: 30
-  config: []
-  profile: 1
-  valueSets:
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &2399034092451946885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1580,26 +1540,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3710276211541570393}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9df5037d8015c3d4dad2c6ec21ee3e31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTestAlternative
   faceAnimator: {fileID: 0}
   testEmotion: 0
---- !u!114 &5473120200338883143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3710276211541570393}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f66a61450035fc9488774be9ca935e13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BlendShapeDebugger
-  targetMesh: {fileID: 8620798079540423861}
 --- !u!4 &3711611270603244941 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 998908503689501552, guid: bd5f652942e669a47b2393d56690c7df, type: 3}

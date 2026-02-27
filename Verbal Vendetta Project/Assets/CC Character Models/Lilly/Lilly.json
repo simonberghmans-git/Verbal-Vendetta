@@ -646,10 +646,10 @@
                             },
                             "Real_Hair": {
                                 "Materials": {
-                                    "Hair2_Transparency": {
+                                    "Hair1_Transparency": {
                                         "Activate Physics": true,
                                         "Use Global Gravity": true,
-                                        "Weight Map Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_WeightMap.png",
+                                        "Weight Map Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_WeightMap.png",
                                         "Mass": 2.0,
                                         "Friction": 0.0,
                                         "Damping": 0.25,
@@ -674,10 +674,10 @@
                             },
                             "Bang": {
                                 "Materials": {
-                                    "Hair1_Transparency": {
+                                    "Hair_Transparency": {
                                         "Activate Physics": true,
                                         "Use Global Gravity": true,
-                                        "Weight Map Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_WeightMap.png",
+                                        "Weight Map Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_WeightMap.png",
                                         "Mass": 1.0,
                                         "Friction": 0.10000000149011612,
                                         "Damping": 0.30000001192092898,
@@ -1810,10 +1810,10 @@
                                 },
                                 "Resource Textures": {
                                     "Position": {
-                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_Position.png"
+                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_Position.png"
                                     },
                                     "WSNormal": {
-                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_WSNormal.png"
+                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_WSNormal.png"
                                     }
                                 },
                                 "Custom Shader": {
@@ -2739,10 +2739,10 @@
                                 },
                                 "Resource Textures": {
                                     "Position": {
-                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_Position.png"
+                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_Position.png"
                                     },
                                     "WSNormal": {
-                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_WSNormal.png"
+                                        "Texture Path": "./textures/Lilly/Lilly/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_WSNormal.png"
                                     }
                                 },
                                 "Custom Shader": {
@@ -4907,7 +4907,7 @@
                     "Hair_Base": {
                         "SubD Level": 0,
                         "Materials": {
-                            "Hair3_Transparency": {
+                            "Hair2_Transparency": {
                                 "Material Type": "Pbr",
                                 "MultiUV Index": 0,
                                 "Node Type": "Hair",
@@ -4943,7 +4943,7 @@
                                         ]
                                     },
                                     "Base Color": {
-                                        "Texture Path": "Hair3_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair2_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -4979,7 +4979,7 @@
                                         ]
                                     },
                                     "Opacity": {
-                                        "Texture Path": "Hair3_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair2_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -4991,7 +4991,7 @@
                                         ]
                                     },
                                     "Blend": {
-                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_blend_multiply.jpg",
+                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_blend_multiply.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5004,7 +5004,7 @@
                                         "Blend Mode": "Multiply"
                                     },
                                     "AO": {
-                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_ao.jpg",
+                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_ao.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5016,10 +5016,10 @@
                                         ]
                                     },
                                     "MetallicAlpha": {
-                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_MetallicAlpha.png"
+                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_MetallicAlpha.png"
                                     },
                                     "HDRP": {
-                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_HDRP.png"
+                                        "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_HDRP.png"
                                     }
                                 },
                                 "Resource Textures": {},
@@ -5027,13 +5027,13 @@
                                     "Shader Name": "RLHair",
                                     "Image": {
                                         "Hair Root Map": {
-                                            "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_Hair Root Map.jpg"
+                                            "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_Hair Root Map.jpg"
                                         },
                                         "Hair ID Map": {
-                                            "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_Hair ID Map.png"
+                                            "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_Hair ID Map.png"
                                         },
                                         "Hair Flow Map": {
-                                            "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair3_Transparency/Hair3_Transparency_Hair Flow Map.png"
+                                            "Texture Path": "./textures/Lilly/Hair_Base/Hair_Base/Hair2_Transparency/Hair2_Transparency_Hair Flow Map.png"
                                         }
                                     },
                                     "Variable": {
@@ -5205,7 +5205,7 @@
                     "Bun": {
                         "SubD Level": 0,
                         "Materials": {
-                            "Hair_Transparency": {
+                            "Hair3_Transparency": {
                                 "Material Type": "Pbr",
                                 "MultiUV Index": 0,
                                 "Node Type": "Hair",
@@ -5241,7 +5241,7 @@
                                         ]
                                     },
                                     "Base Color": {
-                                        "Texture Path": "Hair_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair3_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5277,7 +5277,7 @@
                                         ]
                                     },
                                     "Opacity": {
-                                        "Texture Path": "Hair_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair3_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5289,7 +5289,7 @@
                                         ]
                                     },
                                     "Blend": {
-                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_blend_multiply.jpg",
+                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_blend_multiply.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5302,7 +5302,7 @@
                                         "Blend Mode": "Multiply"
                                     },
                                     "AO": {
-                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_ao.jpg",
+                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_ao.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5314,10 +5314,10 @@
                                         ]
                                     },
                                     "MetallicAlpha": {
-                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_MetallicAlpha.png"
+                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_MetallicAlpha.png"
                                     },
                                     "HDRP": {
-                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_HDRP.png"
+                                        "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_HDRP.png"
                                     }
                                 },
                                 "Resource Textures": {},
@@ -5325,13 +5325,13 @@
                                     "Shader Name": "RLHair",
                                     "Image": {
                                         "Hair Root Map": {
-                                            "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_Hair Root Map.jpg"
+                                            "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_Hair Root Map.jpg"
                                         },
                                         "Hair ID Map": {
-                                            "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_Hair ID Map.png"
+                                            "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_Hair ID Map.png"
                                         },
                                         "Hair Flow Map": {
-                                            "Texture Path": "./textures/Lilly/Bun/Bun/Hair_Transparency/Hair_Transparency_Hair Flow Map.png"
+                                            "Texture Path": "./textures/Lilly/Bun/Bun/Hair3_Transparency/Hair3_Transparency_Hair Flow Map.png"
                                         }
                                     },
                                     "Variable": {
@@ -5423,7 +5423,7 @@
                     "Real_Hair": {
                         "SubD Level": 0,
                         "Materials": {
-                            "Hair2_Transparency": {
+                            "Hair1_Transparency": {
                                 "Material Type": "Pbr",
                                 "MultiUV Index": 0,
                                 "Node Type": "Hair",
@@ -5459,7 +5459,7 @@
                                         ]
                                     },
                                     "Base Color": {
-                                        "Texture Path": "Hair2_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair1_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5495,7 +5495,7 @@
                                         ]
                                     },
                                     "Opacity": {
-                                        "Texture Path": "Hair2_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair1_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5507,7 +5507,7 @@
                                         ]
                                     },
                                     "Blend": {
-                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_blend_multiply.jpg",
+                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_blend_multiply.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5520,7 +5520,7 @@
                                         "Blend Mode": "Multiply"
                                     },
                                     "AO": {
-                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_ao.jpg",
+                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_ao.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5532,10 +5532,10 @@
                                         ]
                                     },
                                     "MetallicAlpha": {
-                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_MetallicAlpha.png"
+                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_MetallicAlpha.png"
                                     },
                                     "HDRP": {
-                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_HDRP.png"
+                                        "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_HDRP.png"
                                     }
                                 },
                                 "Resource Textures": {},
@@ -5543,13 +5543,13 @@
                                     "Shader Name": "RLHair",
                                     "Image": {
                                         "Hair Root Map": {
-                                            "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_Hair Root Map.jpg"
+                                            "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_Hair Root Map.jpg"
                                         },
                                         "Hair ID Map": {
-                                            "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_Hair ID Map.png"
+                                            "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_Hair ID Map.png"
                                         },
                                         "Hair Flow Map": {
-                                            "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair2_Transparency/Hair2_Transparency_Hair Flow Map.png"
+                                            "Texture Path": "./textures/Lilly/Real_Hair/Real_Hair/Hair1_Transparency/Hair1_Transparency_Hair Flow Map.png"
                                         }
                                     },
                                     "Variable": {
@@ -5641,7 +5641,7 @@
                     "Bang": {
                         "SubD Level": 0,
                         "Materials": {
-                            "Hair1_Transparency": {
+                            "Hair_Transparency": {
                                 "Material Type": "Pbr",
                                 "MultiUV Index": 0,
                                 "Node Type": "Hair",
@@ -5677,7 +5677,7 @@
                                         ]
                                     },
                                     "Base Color": {
-                                        "Texture Path": "Hair1_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5713,7 +5713,7 @@
                                         ]
                                     },
                                     "Opacity": {
-                                        "Texture Path": "Hair1_Transparency_Diffuse.png",
+                                        "Texture Path": "Hair_Transparency_Diffuse.png",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5725,7 +5725,7 @@
                                         ]
                                     },
                                     "AO": {
-                                        "Texture Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_ao.jpg",
+                                        "Texture Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_ao.jpg",
                                         "Strength": 100.0,
                                         "Offset": [
                                             0.0,
@@ -5737,10 +5737,10 @@
                                         ]
                                     },
                                     "MetallicAlpha": {
-                                        "Texture Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_MetallicAlpha.png"
+                                        "Texture Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_MetallicAlpha.png"
                                     },
                                     "HDRP": {
-                                        "Texture Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_HDRP.png"
+                                        "Texture Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_HDRP.png"
                                     }
                                 },
                                 "Resource Textures": {},
@@ -5748,13 +5748,13 @@
                                     "Shader Name": "RLHair",
                                     "Image": {
                                         "Hair Root Map": {
-                                            "Texture Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_Hair Root Map.jpg"
+                                            "Texture Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_Hair Root Map.jpg"
                                         },
                                         "Hair ID Map": {
-                                            "Texture Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_Hair ID Map.png"
+                                            "Texture Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_Hair ID Map.png"
                                         },
                                         "Hair Flow Map": {
-                                            "Texture Path": "./textures/Lilly/Bang/Bang/Hair1_Transparency/Hair1_Transparency_Hair Flow Map.png"
+                                            "Texture Path": "./textures/Lilly/Bang/Bang/Hair_Transparency/Hair_Transparency_Hair Flow Map.png"
                                         }
                                     },
                                     "Variable": {

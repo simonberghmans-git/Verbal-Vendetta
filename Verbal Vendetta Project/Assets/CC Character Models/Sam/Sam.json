@@ -1836,10 +1836,10 @@
                                 },
                                 "Resource Textures": {
                                     "Position": {
-                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_Position.png"
+                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_Position.png"
                                     },
                                     "WSNormal": {
-                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_WSNormal.png"
+                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_WSNormal.png"
                                     }
                                 },
                                 "Custom Shader": {
@@ -2765,10 +2765,10 @@
                                 },
                                 "Resource Textures": {
                                     "Position": {
-                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_Position.png"
+                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_Position.png"
                                     },
                                     "WSNormal": {
-                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Skin_Head/Std_Skin_Head_ResourceMap_WSNormal.png"
+                                        "Texture Path": "./textures/Sam/Sam/CC_Base_Body/CC_Base_Tear_Ducts/CC_Base_Tear_Ducts_ResourceMap_WSNormal.png"
                                     }
                                 },
                                 "Custom Shader": {
@@ -2955,10 +2955,10 @@
                                             "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Cornea_L/Std_Cornea_L_ScleraN.png"
                                         },
                                         "Gradient AO": {
-                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Upper_Teeth/Std_Upper_Teeth_GradAO.jpg"
+                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Lower_Teeth/Std_Lower_Teeth_GradAO.jpg"
                                         },
                                         "Gums Mask": {
-                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Upper_Teeth/Std_Upper_Teeth_GumsMask.jpg"
+                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Lower_Teeth/Std_Lower_Teeth_GumsMask.jpg"
                                         }
                                     },
                                     "Variable": {
@@ -3097,10 +3097,10 @@
                                             "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Cornea_L/Std_Cornea_L_ScleraN.png"
                                         },
                                         "Gradient AO": {
-                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Upper_Teeth/Std_Upper_Teeth_GradAO.jpg"
+                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Lower_Teeth/Std_Lower_Teeth_GradAO.jpg"
                                         },
                                         "Gums Mask": {
-                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Upper_Teeth/Std_Upper_Teeth_GumsMask.jpg"
+                                            "Texture Path": "./textures/Sam/Sam/CC_Base_Body/Std_Lower_Teeth/Std_Lower_Teeth_GumsMask.jpg"
                                         }
                                     },
                                     "Variable": {

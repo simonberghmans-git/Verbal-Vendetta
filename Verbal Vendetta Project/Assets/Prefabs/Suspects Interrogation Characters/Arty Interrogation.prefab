@@ -26,7 +26,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       propertyPath: m_Name
-      value: Arty Suspect
+      value: Arty Interrogation
       objectReference: {fileID: 0}
     - target: {fileID: 6645077311303760536, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1180,9 +1180,6 @@ PrefabInstance:
       addedObject: {fileID: 3715028574012910014}
     - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8342026533438001348}
-    - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 775691670539781024}
     - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       insertIndex: -1
@@ -1190,9 +1187,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7515508434852875636}
-    - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -1435863047703902421}
   m_SourcePrefab: {fileID: 100100000, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
 --- !u!137 &68374221263087623 stripped
 SkinnedMeshRenderer:
@@ -1510,42 +1504,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   headMesh: {fileID: 68374221263087623}
   transitionSpeed: 3
-  debugEmotion: 0
-  applyDebugEmotion: 0
---- !u!114 &8342026533438001348
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4912406151670937579}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b5cb24c253b98b4e9afc39d87056d5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: soupday.cc3_unity_tools.project_runtime::Reallusion.Runtime.WrinkleManager
-  skinnedMeshRenderer: {fileID: 68374221263087623}
-  headMaterial: {fileID: 2100000, guid: a91366ac6cf9dbd4981f5d57a36c5572, type: 2}
-  blendScale: 1
-  blendCurve: 1.5
-  blendFalloff: 4
-  falloffMethod: 1
-  updateFrequency: 30
-  config: []
-  profile: 1
-  valueSets:
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
-  - {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &775691670539781024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1608,19 +1566,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTest
   faceAnimator: {fileID: 3715028574012910014}
   testEmotion: 0
---- !u!114 &-1435863047703902421
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4912406151670937579}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f66a61450035fc9488774be9ca935e13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
-  targetMesh: {fileID: 68374221263087623}
 --- !u!4 &4959475949363708223 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6308444048576485110, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
