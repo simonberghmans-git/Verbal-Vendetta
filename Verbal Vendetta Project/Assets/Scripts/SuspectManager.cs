@@ -50,7 +50,7 @@ public class SuspectManager : MonoBehaviour
         GameObject prefab = GetHighDetailPrefab(modelId);
         if (prefab == null) return null;
 
-        Transform targetSpot = spawnLocation != null ? spawnLocation : interrogationSpot;
+        Transform targetSpot = interrogationSpot;
         if (targetSpot == null) 
         {
             Debug.LogError("SuspectManager: No spawn location provided!");
@@ -59,8 +59,8 @@ public class SuspectManager : MonoBehaviour
 
         Vector3 finalPosition = targetSpot.position;
         
-        // Combine target rotation with offset and the 180 flip
-        Quaternion finalRotation = targetSpot.rotation * Quaternion.Euler(0, 180, 0);
+        // Combine target rotation with offset
+        Quaternion finalRotation = targetSpot.rotation * Quaternion.Euler(0, -90, 0);
 
         return Instantiate(prefab, finalPosition, finalRotation);
     }
@@ -70,8 +70,8 @@ public class SuspectManager : MonoBehaviour
         GameObject prefab = GetLowDetailPrefab(modelId);
         if (prefab == null) return null;
 
-        // Apply 180 degree rotation for lineup suspects too
-        Quaternion finalRotation = spawnLocation.rotation * Quaternion.Euler(0, 180, 0);
+        // Match spawn location rotation
+        Quaternion finalRotation = spawnLocation.rotation;
 
         return Instantiate(prefab, spawnLocation.position, finalRotation);
     }

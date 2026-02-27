@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
         if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
         {
             mainCamera.transform.position = selectionManager.cameraPosition.position;
-            mainCamera.transform.rotation = selectionManager.cameraPosition.rotation;
+            mainCamera.transform.rotation = selectionManager.cameraPosition.rotation * Quaternion.Euler(0, 180, 0);
         }
 
         // Wait for Generation, then Spawn Lineup
@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
         if (mainCamera != null && interrogationCameraPos != null)
         {
             mainCamera.transform.position = interrogationCameraPos.position;
-            mainCamera.transform.rotation = interrogationCameraPos.rotation;
+            mainCamera.transform.rotation = interrogationCameraPos.rotation * Quaternion.Euler(0, 90, 0);
         }
 
         // 4. Spawn High Detail Model at Interrogation Spot
@@ -171,7 +171,7 @@ public class GameManager : MonoBehaviour
         if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
         {
             mainCamera.transform.position = selectionManager.cameraPosition.position;
-            mainCamera.transform.rotation = selectionManager.cameraPosition.rotation;
+            mainCamera.transform.rotation = selectionManager.cameraPosition.rotation * Quaternion.Euler(0, 180, 0);
         }
 
         // 3. Show Lineup
