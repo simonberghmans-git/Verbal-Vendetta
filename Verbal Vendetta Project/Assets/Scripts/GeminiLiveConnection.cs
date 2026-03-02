@@ -320,9 +320,10 @@ public class GeminiLiveConnection : MonoBehaviour
         4. CRITICAL: Before you speak, you MUST ALWAYS call the 'SetEmotion' tool to reflect your current emotional state.
         5. You MUST ONLY use one of the exact following emotions: Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty. Do NOT use any other words or synonyms.
         6. CRITICAL: If the question is very easy to answer without remembering details, you MUST call the 'ForceDirectEyeContact' tool.
-        7. When asked about things that do not at all relate to the case, point out the absurdidy of the question.
+        7. When asked about things that do not at all relate to the case, point out the absurdity of the question.
         8. When pressured about their false alibi, only the suspect with no motive and a false alibi (= Red Herring) will reveal their minor secret, explaining why they would fake their alibi.
-        9. Refer only to what your character knows as described in the JSON file.";
+        9. Refer only to what your character knows as described in the JSON file.
+        10. You MUST call the 'TriggerBodyAnimation' tool whenever your response is applicable to one of the animation options.";
 
         var setupMsg = new
         {
@@ -365,8 +366,8 @@ public class GeminiLiveConnection : MonoBehaviour
                                     properties = new Dictionary<string, object> {
                                         { "animationName", new { 
                                             type = "STRING", 
-                                            description = "One of: RubArm, Dissaproval, Disbelief, Fist",
-                                            @enum = new[] { "RubArm", "Dissaproval", "Disbelief", "Fist" }
+                                            description = "One of:Dissaproval, Disbelief, Fist",
+                                            @enum = new[] { "Dissaproval", "Disbelief", "Fist" }
                                         } }
                                     },
                                     required = new[] { "animationName" }
