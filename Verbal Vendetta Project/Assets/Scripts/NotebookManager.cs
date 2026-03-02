@@ -35,6 +35,10 @@ public class NotebookManager : MonoBehaviour
     [Tooltip("Separate TMP_Text fields for each suspect's name/header. Order must match suspects in the scenario.")]
     public List<TMP_Text> suspectHeaderTexts = new List<TMP_Text>();
 
+    [Header("Suspect Portraits")]
+    [Tooltip("UI Images for each suspect's portrait/mugshot. Order must match suspects in the scenario.")]
+    public List<UnityEngine.UI.Image> suspectPortraits = new List<UnityEngine.UI.Image>();
+
     [Header("Transcript Prefabs")]
     public GameObject transcriptEntryPrefab;
 
@@ -128,6 +132,8 @@ public class NotebookManager : MonoBehaviour
 
         if (scenario == null || scenario.suspects == null) return;
 
+        SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
+
         int count = scenario.suspects.Count;
         for (int i = 0; i < count; i++)
         {
@@ -136,6 +142,29 @@ public class NotebookManager : MonoBehaviour
             if (i < suspectHeaderTexts.Count && suspectHeaderTexts[i] != null)
             {
                 suspectHeaderTexts[i].text = $"<b>{scenario.suspects[i].name}</b>";
+            }
+
+            // Set suspect portrait if available
+            if (i < suspectPortraits.Count && suspectPortraits[i] != null && suspectManager != null)
+            {
+                if (scenario.suspects[i] != null)
+                {
+                    Sprite mugshot = suspectManager.GetSuspectImage(scenario.suspects[i].model_id);
+                    if (mugshot != null)
+                    {
+                        suspectPortraits[i].sprite = mugshot;
+                        suspectPortraits[i].enabled = true;
+                        Debug.Log($"[NotebookManager] Set portrait for suspect {i} (model_id {scenario.suspects[i].model_id})");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[NotebookManager] No mugshot returned for suspect {i} (model_id {scenario.suspects[i].model_id}) from SuspectManager");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[NotebookManager] Skipping portrait for suspect {i}. suspectPortraits setup correctly? count: {suspectPortraits.Count}, suspectManager null? {suspectManager == null}");
             }
         }
 

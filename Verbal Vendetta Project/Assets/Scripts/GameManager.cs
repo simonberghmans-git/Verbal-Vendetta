@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { SubjectSelection, Interrogation }
+    public enum GameState { SubjectSelection, Interrogation, Ending}
     public GameState currentState = GameState.SubjectSelection;
 
     [Header("Dependencies")]

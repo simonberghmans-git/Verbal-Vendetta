@@ -13,6 +13,7 @@ public class InterrogationManager : MonoBehaviour
     public GeminiLiveConnection liveConnection; // Replaces TTS/STT handlers
     public NotebookManager notebookManager;
     public ScenesManager scenesManager;
+    public GameManager gameManager; // Need this to access GameState
 
     [Header("Interrogation UI")]
     public TMP_InputField playerInputField;
@@ -23,7 +24,11 @@ public class InterrogationManager : MonoBehaviour
     public TMP_InputField accusedNameInput;
     public TMP_InputField motiveInput;
     public TMP_InputField accessInput;
-    public TMP_Text accusationResultDisplay;
+
+    [Header("End Game Newspaper UI")]
+    public TMP_Text articleHeadlineDisplay;
+    public TMP_Text articleBodyDisplay;
+    public UnityEngine.UI.Image killerPortraitDisplay;
     public GameObject endScreen;
     public GameObject newsArticle;
 
@@ -219,8 +224,8 @@ public class InterrogationManager : MonoBehaviour
     {
         if (connectionManager.currentScenario == null)
         {
-            if (accusationResultDisplay != null)
-                accusationResultDisplay.text = "Error: No scenario loaded.";
+            if (articleBodyDisplay != null)
+                articleBodyDisplay.text = "Error: No scenario loaded.";
             return;
         }
 
@@ -230,28 +235,56 @@ public class InterrogationManager : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(motive) || string.IsNullOrWhiteSpace(access))
         {
-            if (accusationResultDisplay != null)
-                accusationResultDisplay.text = "Please fill in all fields of the report.";
+            if (articleBodyDisplay != null)
+                articleBodyDisplay.text = "Please fill in all fields of the report.";
             return;
+        }
+
+        // STOP interrogation right away so the suspect doesn't keep talking
+        StopInterrogation();
+
+        // Inform GameManager
+        if (gameManager != null)
+        {
+            gameManager.currentState = GameManager.GameState.Ending;
         }
 
         if (endScreen != null) endScreen.SetActive(true);
 
-        if (accusationResultDisplay != null)
-            accusationResultDisplay.text = "<i>Submitting report to the Editor...</i>";
+        if (articleHeadlineDisplay != null)
+            articleHeadlineDisplay.text = "HOT OFF THE PRESS";
+        if (articleBodyDisplay != null)
+            articleBodyDisplay.text = "<i>Submitting report to the Editor...</i>";
 
         connectionManager.JudgeAccusation(name, motive, access, (headline, article, isCorrect, error) =>
         {
             if (string.IsNullOrEmpty(error))
             {
                 string color = isCorrect ? "green" : "red";
-                // Formatting: Bold Headline (Larger) + Article Body
-                string finalOutput = $"<size=120%><b><color={color}>{headline}</color></b></size>\n\n" +
-                                     $"{article}";
-
-                if (accusationResultDisplay != null)
+                
+                if (articleHeadlineDisplay != null)
                 {
-                    accusationResultDisplay.text = finalOutput;
+                    articleHeadlineDisplay.text = $"<color={color}>{headline}</color>";
+                }
+                
+                if (articleBodyDisplay != null)
+                {
+                    articleBodyDisplay.text = article;
+                }
+
+                // Show killer's portrait
+                if (killerPortraitDisplay != null && connectionManager.currentScenario != null)
+                {
+                    SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
+                    if (suspectManager != null)
+                    {
+                        var killer = connectionManager.currentScenario.suspects.Find(s => s.is_killer);
+                        if (killer != null)
+                        {
+                            killerPortraitDisplay.sprite = suspectManager.GetSuspectImage(killer.model_id);
+                            killerPortraitDisplay.enabled = true;
+                        }
+                    }
                 }
 
                 if (newsArticle != null) newsArticle.SetActive(true);
@@ -260,8 +293,11 @@ public class InterrogationManager : MonoBehaviour
             }
             else
             {
-                if (accusationResultDisplay != null)
-                    accusationResultDisplay.text = $"<color=red>Newsroom Error:</color> {error}";
+                if (articleHeadlineDisplay != null)
+                    articleHeadlineDisplay.text = "Newsroom Error";
+                
+                if (articleBodyDisplay != null)
+                    articleBodyDisplay.text = $"<color=red>Error:</color> {error}";
             }
         });
     }
