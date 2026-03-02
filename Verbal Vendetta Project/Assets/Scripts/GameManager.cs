@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,22 @@ public class GameManager : MonoBehaviour
     public GeminiConnectionManager connectionManager;
     public InterrogationInputManager inputManager; // Added reference
     public Camera mainCamera;
+
+    [Header("Loading Screen")]
+    public GameObject loadingScreen;
+    public TMP_Text loadingText;
+
+    public void ShowLoadingScreen(string message)
+    {
+        if (loadingScreen != null) loadingScreen.SetActive(true);
+        if (loadingText != null) loadingText.text = message;
+    }
+
+    public void HideLoadingScreen()
+    {
+        if (loadingScreen != null) loadingScreen.SetActive(false);
+        if (loadingText != null) loadingText.text = "";
+    }
 
     [Header("Interrogation Scene")]
     public Transform interrogationSpot;
@@ -36,8 +53,10 @@ public class GameManager : MonoBehaviour
         // Wait for Generation, then Spawn Lineup
         if (connectionManager != null)
         {
+             ShowLoadingScreen("Generating Scenario...");
              connectionManager.GenerateScenario((data, error) =>
              {
+                 HideLoadingScreen();
                  if (data != null)
                  {
                      // Delegate Spawning to SelectionManager

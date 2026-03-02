@@ -249,15 +249,14 @@ public class InterrogationManager : MonoBehaviour
             gameManager.currentState = GameManager.GameState.Ending;
         }
 
-        if (endScreen != null) endScreen.SetActive(true);
-
-        if (articleHeadlineDisplay != null)
-            articleHeadlineDisplay.text = "HOT OFF THE PRESS";
-        if (articleBodyDisplay != null)
-            articleBodyDisplay.text = "<i>Submitting report to the Editor...</i>";
+        if (gameManager != null) gameManager.ShowLoadingScreen("Submitting Accusation...");
 
         connectionManager.JudgeAccusation(name, motive, access, (headline, article, isCorrect, error) =>
         {
+            if (gameManager != null) gameManager.HideLoadingScreen();
+
+            if (endScreen != null) endScreen.SetActive(true);
+
             if (string.IsNullOrEmpty(error))
             {
                 string color = isCorrect ? "green" : "red";
