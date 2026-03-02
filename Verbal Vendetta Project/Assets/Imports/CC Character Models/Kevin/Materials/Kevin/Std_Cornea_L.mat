@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Std_Cornea_L
-  m_Shader: {fileID: -6465566751694194690, guid: 747c44e21771c7a4895e068ed2ca6771, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 63646206e98aefd4abca6f9f2c0dfb84, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -17,7 +17,6 @@ Material:
   - _ENABLE_FOG_ON_TRANSPARENT
   - _REFRACTION_PLANE
   - _SURFACE_TYPE_TRANSPARENT
-  - _TESSELLATION_PHONG
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -140,14 +139,6 @@ Material:
     - _StencilWriteMaskMV: 41
     - _SupportDecals: 1
     - _SurfaceType: 1
-    - _TessellationBackFaceCullEpsilon: -0.25
-    - _TessellationFactor: 3
-    - _TessellationFactorMaxDistance: 50
-    - _TessellationFactorMinDistance: 20
-    - _TessellationFactorTriangleSize: 25
-    - _TessellationMaxDisplacement: 0.01
-    - _TessellationMode: 1
-    - _TessellationShapeFactor: 0.75
     - _TransmissionEnable: 1
     - _TransparentBackfaceEnable: 0
     - _TransparentCullMode: 2
@@ -172,7 +163,7 @@ Material:
     - _LimbusColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2260293771881223764
+--- !u!114 &1191001344317203058
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
