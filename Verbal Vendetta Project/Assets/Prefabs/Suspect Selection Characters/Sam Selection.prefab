@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 22100000, guid: 7f37cb5215f515542a256c54deaaf5c0, type: 2}
+    - target: {fileID: 2706798699176636128, guid: ad7f1c16264944b48ac7acfaca8f85a1, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8318245027647354010, guid: ad7f1c16264944b48ac7acfaca8f85a1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -54,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8663667202901421600, guid: ad7f1c16264944b48ac7acfaca8f85a1, type: 3}
       propertyPath: m_Name
-      value: Sam Variant
+      value: Sam Selection
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
