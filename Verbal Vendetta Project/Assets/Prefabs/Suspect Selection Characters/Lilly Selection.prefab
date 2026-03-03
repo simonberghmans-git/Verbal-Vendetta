@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1138924477404797276, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
       propertyPath: manipulator
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1138924477404797276, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
       propertyPath: currentEditType

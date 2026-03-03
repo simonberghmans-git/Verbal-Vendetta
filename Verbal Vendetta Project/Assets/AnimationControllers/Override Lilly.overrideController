@@ -6,7 +6,7 @@ AnimatorOverrideController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Override 2
+  m_Name: Override Lilly
   m_Controller: {fileID: 9100000, guid: b52582084b6581145b1614614e9b0f93, type: 2}
   m_Clips:
   - m_OriginalClip: {fileID: -7881739814215078984, guid: eb76e676124b99a47b2dbaa18787b08f, type: 3}
