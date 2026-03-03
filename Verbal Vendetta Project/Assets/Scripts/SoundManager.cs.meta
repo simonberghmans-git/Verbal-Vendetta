@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: a20eaff736498704b860ef2930b6a5f0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - typewriterKeySound: {fileID: 8300000, guid: 59e0699ea3c65d440a70830215b98478, type: 3}
+  - uiAudioSource: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

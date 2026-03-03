@@ -10,6 +10,7 @@ public class NotebookManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
+    public SoundManager soundManager;
     
     [Header("Debug")]
     public bool testing = false;
@@ -45,6 +46,8 @@ public class NotebookManager : MonoBehaviour
     [Header("Player Notes / Key Statements")]
     [Tooltip("List of InputFields where copied statements will be appended. Order must match suspects.")]
     public List<TMP_Text> keyStatementInputs = new List<TMP_Text>();
+    [Tooltip("List of InputFields for the player's own manual notes. Order must match suspects.")]
+    public List<TMP_InputField> playerNotesInputs = new List<TMP_InputField>();
 
     [Header("Notebook Pages")]
     [Tooltip("Root GameObject for the Notebook UI. This will be toggled with Tab.")]
@@ -366,6 +369,18 @@ public class NotebookManager : MonoBehaviour
         {
             if (notebookPages[i] != null)
                 notebookPages[i].SetActive(false);
+        }
+        
+        // Subscribe the manual player notes inputs to play the typewriter sound
+        if (soundManager != null)
+        {
+            foreach (var input in playerNotesInputs)
+            {
+                if (input != null)
+                {
+                    input.onValueChanged.AddListener(delegate { soundManager.PlayUISound(); });
+                }
+            }
         }
 
         currentPageIndex = -1;
