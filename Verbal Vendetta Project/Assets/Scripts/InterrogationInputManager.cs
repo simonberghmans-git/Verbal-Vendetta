@@ -11,12 +11,13 @@ public class InterrogationInputManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public InterrogationManager interrogationManager;
-    public GeminiLiveConnection liveConnection;
-    public GameManager gameManager; // Added reference
 
     [Header("UI Feedback")]
-    public TMP_Text statusLabel;
-    public TMP_Text transcriptionPreview;
+    public UnityEngine.UI.Image micImage;
+    public Sprite micOnSprite;
+    public Sprite micOffSprite;
+    public GeminiLiveConnection liveConnection;
+    public GameManager gameManager; // Added reference
 
     [Header("Settings")]
     private bool isRecording = false;
@@ -40,9 +41,16 @@ public class InterrogationInputManager : MonoBehaviour
         }
 
         // Always-listening: Just keep status updated
-        if (liveConnection != null && liveConnection.alwaysListening)
+        if (liveConnection != null && liveConnection.alwaysListening && micImage != null)
         {
-            statusLabel.text = "<color=green>LISTENING...</color>";
+            if (liveConnection.isMuted)
+            {
+                if (micOffSprite != null) micImage.sprite = micOffSprite;
+            }
+            else
+            {
+                if (micOnSprite != null) micImage.sprite = micOnSprite;
+            }
         }
     }
 
@@ -62,7 +70,7 @@ public class InterrogationInputManager : MonoBehaviour
     /// </summary>
     public void OnAnswerReceived()
     {
-        statusLabel.text = "READY";
+        // Handled automatically via Update loop showing the right sprite
     }
 
     /// <summary>
@@ -78,7 +86,20 @@ public class InterrogationInputManager : MonoBehaviour
         
         isRecording = false;
         
-        statusLabel.text = "READY";
-        transcriptionPreview.text = "Ready.";
+        if (micImage != null && micOffSprite != null)
+        {
+            micImage.sprite = micOffSprite;
+        }
+    }
+
+    /// <summary>
+    /// Toggles the microphone mute state. Can be linked to a UI Button's OnClick event.
+    /// </summary>
+    public void ToggleMute()
+    {
+        if (liveConnection != null)
+        {
+            liveConnection.isMuted = !liveConnection.isMuted;
+        }
     }
 }

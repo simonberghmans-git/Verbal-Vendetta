@@ -28,6 +28,7 @@ public class GeminiLiveConnection : MonoBehaviour
 
     [Header("Settings")]
     public bool alwaysListening = true;
+    public bool isMuted = false;
     private string micName;
     private int inputSampleRate = 16000;
     private AudioClip recordingClip;
@@ -243,7 +244,7 @@ public class GeminiLiveConnection : MonoBehaviour
                 float volumeThreshold = 0.02f;
                 bool isPlayerSpeaking = rmsValue > volumeThreshold;
 
-                if (isModelCurrentlySpeaking && isPlayerSpeaking)
+                if (isModelCurrentlySpeaking && isPlayerSpeaking && !isMuted)
                 {
                     // Local visual logging only. We rely on the continuous SendAudioChunk 
                     // below to trigger the server's VAD, which handles the real interruption.
@@ -252,7 +253,10 @@ public class GeminiLiveConnection : MonoBehaviour
                 
                 // Keep streaming audio to the server. The server's VAD will automatically 
                 // cut off the model when it hears this audio feed and send the interrupted flag.
-                SendAudioChunk(samples);
+                if (!isMuted)
+                {
+                    SendAudioChunk(samples);
+                }
             }
         }
     }
