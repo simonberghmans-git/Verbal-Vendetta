@@ -48,8 +48,8 @@ public class InterrogationManager : MonoBehaviour
     {
         if (newsArticle != null) newsArticle.SetActive(false);
 
-        suspectNameDisplay.text = "Initializing...";
-        responseTextField.text = "<i>Please wait...</i>";
+        suspectNameDisplay.text = "Select a Suspect";
+        responseTextField.text = "<i>Press 'I' or use Arrows to select.</i>";
         
         // Generation is now handled by GameManager
     }

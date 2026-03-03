@@ -65,6 +65,11 @@ public class GameManager : MonoBehaviour
                          selectionManager.SpawnLineup(data);
                          selectionManager.isInputActive = true;
                      }
+
+                     if (interrogationManager != null)
+                     {
+                         interrogationManager.SetActiveSuspect(null, null);
+                     }
                  }
                  else
                  {

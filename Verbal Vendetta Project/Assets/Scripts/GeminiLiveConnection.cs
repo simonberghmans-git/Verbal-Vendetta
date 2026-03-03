@@ -244,16 +244,10 @@ public class GeminiLiveConnection : MonoBehaviour
                 float volumeThreshold = 0.02f;
                 bool isPlayerSpeaking = rmsValue > volumeThreshold;
 
-                if (isModelCurrentlySpeaking && isPlayerSpeaking && !isMuted)
-                {
-                    // Local visual logging only. We rely on the continuous SendAudioChunk 
-                    // below to trigger the server's VAD, which handles the real interruption.
-                    Debug.Log("GeminiLiveConnection: Player speaking loudly, expecting server interrupt...");
-                }
-                
-                // Keep streaming audio to the server. The server's VAD will automatically 
-                // cut off the model when it hears this audio feed and send the interrupted flag.
-                if (!isMuted)
+                // We only stream audio to the server when the model is not speaking.
+                // This completely prevents the server's VAD from triggering an interruption
+                // which was causing connection issues.
+                if (!isMuted && !isModelCurrentlySpeaking)
                 {
                     SendAudioChunk(samples);
                 }
@@ -261,21 +255,7 @@ public class GeminiLiveConnection : MonoBehaviour
         }
     }
 
-    public void HandleServerInterruption()
-    {
-        Debug.Log("GeminiLiveConnection: Server confirmed interruption. Halting playback.");
-        
-        lock (audioJitterBuffer)
-        {
-            audioJitterBuffer.Clear();
-        }
-        
-        // Let the AudioSource keep running the OnAudioRead loop, but feeding it 0s (since buffer is clear)
-        // This is smoother than hard-stopping the AudioSource component and avoids Unity audio popping.
 
-        isModelCurrentlySpeaking = false;
-        OnSpeakStateChanged?.Invoke(false);
-    }
 
     private async void SendAudioChunk(float[] samples)
     {
@@ -452,31 +432,6 @@ public class GeminiLiveConnection : MonoBehaviour
         {
             var msg = JsonConvert.DeserializeObject<LiveServerMessage>(jsonResponse);
 
-            if (msg.server_content != null && msg.server_content.interrupted)
-            {
-                HandleServerInterruption();
-
-                byte[] audioToTranscribe = null;
-                lock (currentTurnAudioBuffer)
-                {
-                    if (currentTurnAudioBuffer.Count > 0)
-                    {
-                        int playedBytesCount = playedSamplesCount * 2;
-                        if (playedBytesCount > currentTurnAudioBuffer.Count) playedBytesCount = currentTurnAudioBuffer.Count;
-                             
-                        audioToTranscribe = currentTurnAudioBuffer.GetRange(0, playedBytesCount).ToArray();
-                        currentTurnAudioBuffer.Clear();
-                    }
-                }
-                     
-                if (audioToTranscribe != null && audioToTranscribe.Length > 0)
-                {
-                    StartCoroutine(TranscribeAudioRoutine(currentSuspect?.name ?? "Model", audioToTranscribe));
-                }
-                
-                // Keep returning to discard any model turn chunks in this exact interrupted payload
-                return;
-            }
 
             if (msg.server_content != null && msg.server_content.model_turn != null)
             {
@@ -577,7 +532,7 @@ public class GeminiLiveConnection : MonoBehaviour
 
         string jsonPayload = JsonConvert.SerializeObject(payload);
         
-        int maxRetries = 2;
+        int maxRetries = 3;
         int currentTry = 0;
         bool success = false;
 
@@ -591,6 +546,8 @@ public class GeminiLiveConnection : MonoBehaviour
                 request.uploadHandler.contentType = "application/json";
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.SetRequestHeader("Content-Type", "application/json");
+                // Unity restricts setting the "Connection: close" header directly.
+                // We rely on the retries to mitigate "Curl error 55" if/when it drops.
                 request.timeout = 30;
 
                 yield return request.SendWebRequest();
@@ -613,8 +570,15 @@ public class GeminiLiveConnection : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"GeminiLiveConnection STT API Error (Try {currentTry}): {request.error}");
-                    if (currentTry < maxRetries) yield return new WaitForSeconds(1.5f);
+                    if (currentTry < maxRetries) 
+                    {
+                        Debug.Log($"GeminiLiveConnection STT API Retry {currentTry}/{maxRetries} after error: {request.error}");
+                        yield return new WaitForSeconds(1.5f);
+                    }
+                    else
+                    {
+                        Debug.LogError($"GeminiLiveConnection STT API Error (Final Try): {request.error}");
+                    }
                 }
             }
         }
