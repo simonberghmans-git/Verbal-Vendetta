@@ -29,8 +29,13 @@ public class InterrogationManager : MonoBehaviour
     public TMP_Text articleHeadlineDisplay;
     public TMP_Text articleBodyDisplay;
     public UnityEngine.UI.Image killerPortraitDisplay;
-    public GameObject endScreen;
     public GameObject newsArticle;
+
+    [Header("End Game Camera Logic")]
+    public Transform endPosition1;
+    public Transform endPosition2;
+    public float cameraLerpDuration; // Time before returning to menu
+    public GameObject mainUICanvas; // The canvas housing crosshair/notebook that gets disabled
 
     [Header("Suspect Models")]
     // Models and Images are now managed by SuspectManager
@@ -46,8 +51,6 @@ public class InterrogationManager : MonoBehaviour
 
     private void Start()
     {
-        if (newsArticle != null) newsArticle.SetActive(false);
-
         suspectNameDisplay.text = "Select a Suspect";
         responseTextField.text = "<i>Press 'I' or use Arrows to select.</i>";
         
@@ -255,15 +258,11 @@ public class InterrogationManager : MonoBehaviour
         {
             if (gameManager != null) gameManager.HideLoadingScreen();
 
-            if (endScreen != null) endScreen.SetActive(true);
-
             if (string.IsNullOrEmpty(error))
             {
-                string color = isCorrect ? "green" : "red";
-                
                 if (articleHeadlineDisplay != null)
                 {
-                    articleHeadlineDisplay.text = $"<color={color}>{headline}</color>";
+                    articleHeadlineDisplay.text = headline;
                 }
                 
                 if (articleBodyDisplay != null)
@@ -286,7 +285,11 @@ public class InterrogationManager : MonoBehaviour
                     }
                 }
 
-                if (newsArticle != null) newsArticle.SetActive(true);
+                // Hide the main UI canvas to remove crosshair/notebook availability
+                if (mainUICanvas != null)
+                {
+                    mainUICanvas.SetActive(false);
+                }
 
                 StartCoroutine(ReturnToMenuRoutine());
             }
@@ -348,7 +351,30 @@ public class InterrogationManager : MonoBehaviour
     
     private IEnumerator ReturnToMenuRoutine()
     {
-        yield return new WaitForSeconds(60f);
+        if (gameManager != null && gameManager.mainCamera != null && 
+            endPosition1 != null && endPosition2 != null && newsArticle != null)
+        {
+            Transform camTransform = gameManager.mainCamera.transform;
+            camTransform.position = endPosition1.position;
+            camTransform.LookAt(newsArticle.transform, newsArticle.transform.up);
+
+            Vector3 startPos = endPosition1.position;
+            float elapsed = 0f;
+
+            // Slow lerp across the newspaper
+            while (elapsed < cameraLerpDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / cameraLerpDuration;
+                camTransform.position = Vector3.Lerp(startPos, endPosition2.position, t);
+                yield return null;
+            }
+        }
+        else
+        {
+            yield return new WaitForSeconds(cameraLerpDuration);
+        }
+
         if (scenesManager != null) scenesManager.GoToMenu();
     }
 }

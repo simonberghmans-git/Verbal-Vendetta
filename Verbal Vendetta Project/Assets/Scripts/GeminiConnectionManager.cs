@@ -313,10 +313,12 @@ public class GeminiConnectionManager : MonoBehaviour
         2. Write a SENSATIONAL NEWSPAPER HEADLINE. 
            - If Correct: Celebrate the capture.
            - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., 'DETECTIVE BLUNDERS! [True Killer] WAS THE REAL CULPRIT!').
+           - Make the headline no more than 110 characters long (including spaces and punctuation).
         3. Write the ARTICLE BODY (Noir Style).
            - Provide feedback on the investigation.
            - Explain WHY the logic was right or wrong.
            - If the detective missed clues, mention them mockingly or tragically.
+           - Make the article body no more than 850 characters long (including spaces and punctuation).
         
         Output JSON: 
         - is_correct (boolean)
