@@ -16,6 +16,8 @@ public class NotebookManager : MonoBehaviour
     public bool testing = false;
 
     [Header("Page 1: The Victim File")]
+    [Tooltip("Text field to display the random Case File number.")]
+    public TMP_Text caseFileTitleText;
     [SerializeField] private TMP_Text victimNameText;
     [SerializeField] private TMP_Text occupationText;
     [SerializeField] private TMP_Text biographyText;
@@ -35,6 +37,9 @@ public class NotebookManager : MonoBehaviour
     
     [Tooltip("Separate TMP_Text fields for each suspect's name/header. Order must match suspects in the scenario.")]
     public List<TMP_Text> suspectHeaderTexts = new List<TMP_Text>();
+
+    [Tooltip("Separate TMP_Text fields for each suspect's relationship to the victim. Order must match suspects in the scenario.")]
+    public List<TMP_Text> suspectRelationshipTexts = new List<TMP_Text>();
 
     [Header("Suspect Portraits")]
     [Tooltip("UI Images for each suspect's portrait/mugshot. Order must match suspects in the scenario.")]
@@ -80,6 +85,13 @@ public class NotebookManager : MonoBehaviour
         }
 
         ScenarioData data = connectionManager.currentScenario;
+
+        // Populate case file title with random number
+        if (caseFileTitleText)
+        {
+            int randomCaseNumber = UnityEngine.Random.Range(1, 1000);
+            caseFileTitleText.text = $"Case File #{randomCaseNumber:D3}";
+        }
 
         // Populate identity and bio
         if (victimNameText) victimNameText.text = "<b>Victim:</b> " + data.victim_name;
@@ -145,6 +157,12 @@ public class NotebookManager : MonoBehaviour
             if (i < suspectHeaderTexts.Count && suspectHeaderTexts[i] != null)
             {
                 suspectHeaderTexts[i].text = $"<b>{scenario.suspects[i].name}</b>";
+            }
+
+            // Set relationship in separate relationship text if available
+            if (i < suspectRelationshipTexts.Count && suspectRelationshipTexts[i] != null)
+            {
+                suspectRelationshipTexts[i].text = $"{scenario.suspects[i].relationship}";
             }
 
             // Set suspect portrait if available
@@ -345,6 +363,7 @@ public class NotebookManager : MonoBehaviour
     /// </summary>
     public void ClearPage()
     {
+        if (caseFileTitleText) caseFileTitleText.text = "Case File #---";
         if (victimNameText) victimNameText.text = "---";
         if (occupationText) occupationText.text = "---";
         if (biographyText) biographyText.text = "Awaiting briefing data...";
