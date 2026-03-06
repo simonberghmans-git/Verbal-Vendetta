@@ -109,6 +109,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   typewriterKeySound: {fileID: 8300000, guid: 59e0699ea3c65d440a70830215b98478, type: 3}
+  penScratchSound: {fileID: 0}
   uiAudioSource: {fileID: 107492932173464700}
   minPitch: 0.9
   maxPitch: 1.1
@@ -491,7 +492,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1416629698231979415}
         m_TargetAssemblyTypeName: SoundManager, Assembly-CSharp
-        m_MethodName: PlayUISound
+        m_MethodName: PlayPenScratchSound
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -378,7 +378,7 @@ public class NotebookManager : MonoBehaviour
             {
                 if (input != null)
                 {
-                    input.onValueChanged.AddListener(delegate { soundManager.PlayUISound(); });
+                    input.onValueChanged.AddListener(delegate { soundManager.PlayPenScratchSound(); });
                 }
             }
         }
