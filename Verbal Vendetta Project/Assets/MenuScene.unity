@@ -981,6 +981,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   typewriterKeySound: {fileID: 8300000, guid: 59e0699ea3c65d440a70830215b98478, type: 3}
+  penScratchSound: {fileID: 8300000, guid: 494f12783da6c76468ae35d0abe4e5d5, type: 3}
   uiAudioSource: {fileID: 2017079290}
   minPitch: 0.9
   maxPitch: 1.1

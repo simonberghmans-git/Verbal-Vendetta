@@ -373,7 +373,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8c5a36daa9d45b459caea05a3428fa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FaceAnimationsTest
-  faceAnimator: {fileID: 0}
+  faceAnimator: {fileID: 6070137644119787834}
   testEmotion: 0
 --- !u!4 &3136336864010433792 stripped
 Transform:

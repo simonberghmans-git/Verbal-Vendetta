@@ -39,6 +39,7 @@ public class GeminiLiveConnection : MonoBehaviour
     private ClientWebSocket webSocket;
     private CancellationTokenSource cts;
     private TaskCompletionSource<bool> setupCompletedTcs;
+    private SemaphoreSlim sendLock = new SemaphoreSlim(1, 1);
 
     // Events
     public delegate void TranscriptionReceivedHandler(string speaker, string text);
@@ -113,8 +114,6 @@ public class GeminiLiveConnection : MonoBehaviour
 
             var setupTimeout = Task.Delay(5000);
             var completedTask = await Task.WhenAny(setupCompletedTcs.Task, setupTimeout);
-
-            await SendChatHistory(suspect);
 
             if (alwaysListening)
             {
@@ -287,6 +286,18 @@ public class GeminiLiveConnection : MonoBehaviour
     private async Task SendSetupMessage(SuspectData suspect, ScenarioData scenario)
     {
         string timelineContext = $"TODAY IS: {scenario.interrogation_date}. THE MURDER HAPPENED ON: {scenario.murder_date} AT {scenario.murder_time}.";
+        
+        string chatHistoryContext = "";
+        if (suspect.chatHistory != null && suspect.chatHistory.Count > 0)
+        {
+            chatHistoryContext = "\n    PREVIOUS CONVERSATION LOGS:\n";
+            foreach (var msg in suspect.chatHistory)
+            {
+                string roleName = msg.role == "user" ? "DETECTIVE" : "YOU";
+                chatHistoryContext += $"    {roleName}: {msg.parts[0].text}\n";
+            }
+        }
+
         string systemPrompt = $@"You are roleplaying as {suspect.name}.
         {timelineContext}
         RELATIONSHIP: {suspect.relationship}.
@@ -307,7 +318,8 @@ public class GeminiLiveConnection : MonoBehaviour
         7. When asked about things that do not at all relate to the case, point out the absurdity of the question.
         8. When pressured about their false alibi, only the suspect with no motive and a false alibi (= Red Herring) will reveal their minor secret, explaining why they would fake their alibi.
         9. Refer only to what your character knows as described in the JSON file.
-        10. You MUST call the 'TriggerBodyAnimation' tool whenever your response is applicable to one of the animation options.";
+        10. You MUST call the 'TriggerBodyAnimation' tool whenever your response is applicable to one of the animation options.
+        {chatHistoryContext}";
 
         var setupMsg = new
         {
@@ -374,27 +386,38 @@ public class GeminiLiveConnection : MonoBehaviour
         await SendClientContent(setupMsg, cts.Token);
     }
 
-    private async Task SendChatHistory(SuspectData suspect)
-    {
-        if (suspect.chatHistory == null || suspect.chatHistory.Count == 0) return;
-
-        List<object> turns = new List<object>();
-        foreach (var msg in suspect.chatHistory)
-        {
-            turns.Add(new { role = msg.role, parts = new[] { new { text = msg.parts[0].text } } });
-        }
-
-        var historyMsg = new { clientContent = new { turns = turns.ToArray(), turnComplete = true } };
-        await SendClientContent(historyMsg, cts.Token);
-    }
-
     private async Task SendClientContent(object payload, CancellationToken token)
     {
         if (webSocket == null || webSocket.State != WebSocketState.Open) return;
         string json = JsonConvert.SerializeObject(payload);
         byte[] bytes = Encoding.UTF8.GetBytes(json);
         ArraySegment<byte> buffer = new ArraySegment<byte>(bytes);
-        await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, token);
+        
+        bool lockAcquired = false;
+        try
+        {
+            await sendLock.WaitAsync(token);
+            lockAcquired = true;
+            if (webSocket != null && webSocket.State == WebSocketState.Open)
+            {
+                await webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected during disconnect
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"GeminiLiveConnection: SendClientContent Error: {ex.Message}");
+        }
+        finally
+        {
+            if (lockAcquired)
+            {
+                sendLock.Release();
+            }
+        }
     }
 
 
@@ -423,7 +446,11 @@ public class GeminiLiveConnection : MonoBehaviour
             }
         }
         catch (OperationCanceledException) { }
-        catch (Exception ex) { Debug.LogError($"GeminiLiveConnection: Receive Loop Error: {ex.Message}"); }
+        catch (Exception ex) 
+        { 
+            Debug.LogError($"GeminiLiveConnection: Receive Loop Error: {ex.Message}"); 
+            _ = DisconnectSessionAsync($"Receive Loop Error");
+        }
     }
 
     private void ProcessServerMessage(string jsonResponse)
@@ -504,7 +531,10 @@ public class GeminiLiveConnection : MonoBehaviour
                 }
             }
         }
-        catch (Exception) { }
+        catch (Exception ex) 
+        { 
+            Debug.LogError($"GeminiLiveConnection: ProcessServerMessage Error: {ex.Message}\nRaw JSON: {jsonResponse}"); 
+        }
     }
 
     private IEnumerator TranscribeAudioRoutine(string speakerName, byte[] pcm16Data)

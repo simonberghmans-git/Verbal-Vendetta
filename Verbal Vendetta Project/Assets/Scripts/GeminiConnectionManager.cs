@@ -25,67 +25,49 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private const string TEST_SCENARIO_JSON = @"
 {
-  ""victim_name"": ""Silas Vance"",
-  ""victim_occupation"": ""Billionaire Tech Recluse"",
-  ""victim_biography"": ""Silas Vance was a ruthless innovator who spent his final years isolated in his Gothic mansion. He was notoriously paranoid and was known for making more legal enemies than friends during his career."",
-  ""victim_discovery_details"": ""Found slumped over his mahogany desk with a single puncture wound in his palm and a spilled bottle of specialty blue ink. The emergency alert on his desk had been disabled."",
-  ""murder_time"": ""11:45 PM"",
-  ""murder_date"": ""October 30th"",
-  ""interrogation_date"": ""October 31st"",
-  ""murder_weapon"": ""Poisoned Vintage Fountain Pen"",
-  ""murder_location"": ""The Mansion Library"",
+  ""victim_name"": ""Alistair Thorne"",
+  ""victim_occupation"": ""Museum Curator"",
+  ""victim_biography"": ""Alistair was a world-renowned archeologist and the director of the Thorne Museum of Antiquities. He was known for his uncompromising ethics and a massive private collection of Mesopotamian artifacts that he refused to sell to private collectors."",
+  ""victim_discovery_details"": ""The body was found by the night janitor in the Hall of Relics, slumped against a glass display case that had been unlocked. A ceremonial Babylonian dagger was found nearby, wiped clean of prints."",
+  ""murder_time"": ""11:30 PM"",
+  ""murder_date"": ""October 12th"",
+  ""interrogation_date"": ""October 13th"",
+  ""murder_weapon"": ""Ceremonial Babylonian Dagger"",
+  ""murder_location"": ""The Hall of Relics, Thorne Museum"",
   ""suspects"": [
     {
-      ""name"": ""Julian Thorne"",
+      ""name"": ""Julian Vane"",
       ""gender"": ""Male"",
-      ""relationship"": ""Business Partner"",
-      ""personality"": ""Nervous, ambitious, debt-ridden"",
-      ""voice_id"": ""Achird"",
+      ""relationship"": ""Assistant Curator"",
+      ""personality"": ""Nervous, meticulous, ambitious"",
+      ""voice_id"": ""Algieba"",
       ""model_id"": 0,
-      ""motive"": ""Julian owed Silas millions in failed tech investments and was about to be sued into bankruptcy."",
+      ""motive"": null,
       ""access_to_weapon_description"": null,
-      ""alibi_statement"": ""I was in the smoking room on the west wing, trying to relax and clearing my head after a long day."",
-      ""minor_secret"": ""He has been skimming small amounts from the company payroll for years."",
+      ""alibi_statement"": ""I was working late in my private office on the third floor organizing the new exhibit catalog. I didn't see or hear a soul until the police arrived."",
+      ""minor_secret"": ""He has been forging Alistair's signature to approve minor loan agreements."",
       ""rumors"": {
-        ""Elena Vance"": ""I saw Elena taking a key from the butler's station that opens Silas's private stationery cabinet.""
+        ""Arthur Sterling"": ""I noticed Arthur Sterling's silver sedan speeding away from the museum parking lot at approximately 11:45 PM, which is odd for someone who claims to have been home."",
+        ""Marcus Blackwood"": ""Marcus is far too relaxed; I often see him leaving his post for long cigarette breaks near the side entrance.""
       },
       ""has_no_alibi"": true,
-      ""has_motive"": true,
+      ""has_motive"": false,
       ""has_access_to_weapon"": false,
       ""is_killer"": false
     },
     {
-      ""name"": ""Marcus Reed"",
+      ""name"": ""Arthur Sterling"",
       ""gender"": ""Male"",
-      ""relationship"": ""Ex-Security Head"",
-      ""personality"": ""Resentful, disciplined, observant"",
-      ""voice_id"": ""Algenib"",
+      ""relationship"": ""Rival Collector"",
+      ""personality"": ""Arrogant, wealthy, obsessed"",
+      ""voice_id"": ""Charon"",
       ""model_id"": 1,
-      ""motive"": ""Silas fired him without a pension last month after a minor security lapse."",
-      ""access_to_weapon_description"": null,
-      ""alibi_statement"": ""I was at 'The Rusty Anchor' pub downtown until closing time. The bartender can vouch for me."",
-      ""minor_secret"": ""He still has a copy of the mansion's architectural blueprints."",
+      ""motive"": ""Alistair refused to sell him a rare Babylonian cylinder seal that would complete Arthur's billion-dollar collection."",
+      ""access_to_weapon_description"": ""Snatched the security master key from the desk when the head of security was distracted, allowing him to bypass the display case locks."",
+      ""alibi_statement"": ""I was at my estate all night, reading by the fire. My staff was off for the evening, so it was just me and my books."",
+      ""minor_secret"": ""He is currently facing a lawsuit for purchasing looted artifacts from war zones."",
       ""rumors"": {
-        ""Clara Hughes"": ""Clara is the only one Silas let handle his pen collection; she was cleaning them with a strange solvent yesterday.""
-      },
-      ""has_no_alibi"": false,
-      ""has_motive"": true,
-      ""has_access_to_weapon"": false,
-      ""is_killer"": false
-    },
-    {
-      ""name"": ""Elena Vance"",
-      ""gender"": ""Female"",
-      ""relationship"": ""Wife"",
-      ""personality"": ""Cold, calculated, elegant"",
-      ""voice_id"": ""Achernar"",
-      ""model_id"": 3,
-      ""motive"": ""Silas was planning to divorce her and update his will to exclude her entirely by morning."",
-      ""access_to_weapon_description"": ""She stole the key to the glass display case and used her knowledge of the library's security bypass to coat the pen nib with a fast-acting toxin."",
-      ""alibi_statement"": ""I had retired to my bedroom early with a migraine and didn't leave until the staff found his body."",
-      ""minor_secret"": ""She has already been in contact with a high-profile divorce attorney."",
-      ""rumors"": {
-        ""Marcus Reed"": ""I heard Silas shouting at Marcus that he was a 'useless failure' just hours before the firing.""
+        ""Julian Vane"": ""Julian claims he was working, but I happen to know the security cameras on the third floor were manually disabled from the inside right before the murder.""
       },
       ""has_no_alibi"": true,
       ""has_motive"": true,
@@ -93,18 +75,38 @@ public class GeminiConnectionManager : MonoBehaviour
       ""is_killer"": true
     },
     {
-      ""name"": ""Clara Hughes"",
+      ""name"": ""Elena Thorne"",
       ""gender"": ""Female"",
-      ""relationship"": ""Personal Secretary"",
-      ""personality"": ""Efficient, loyal, overworked"",
-      ""voice_id"": ""Autonoe"",
-      ""model_id"": 4,
-      ""motive"": null,
-      ""access_to_weapon_description"": ""Clara is responsible for the daily maintenance, ink-filling, and cleaning of Silas's extensive fountain pen collection."",
-      ""alibi_statement"": ""I was in the kitchen preparing the midnight tea tray, which the cook can confirm."",
-      ""minor_secret"": ""She is secretly writing a tell-all memoir about the Vance family."",
+      ""relationship"": ""Victim's Daughter"",
+      ""personality"": ""Elegant, cold, desperate"",
+      ""voice_id"": ""Achernar"",
+      ""model_id"": 3,
+      ""motive"": ""Alistair threatened to disinherit her and cut off her allowance due to her massive, unresolved gambling debts."",
+      ""access_to_weapon_description"": null,
+      ""alibi_statement"": ""I was at the Underground Royale casino until 2:00 AM. The pit boss and several dealers can vouch for my presence there all evening."",
+      ""minor_secret"": ""She has already contacted a black-market dealer to price out her father's private collection."",
       ""rumors"": {
-        ""Elena Vance"": ""I heard Elena and Silas arguing about a 'new will' and 'signing papers' late last night.""
+        ""Arthur Sterling"": ""I heard Arthur shouting at my father in the office last week, saying that Alistair would 'regret his stubbornness' regarding the seal."",
+        ""Marcus Blackwood"": ""Marcus is the only person who carries the master keys at all times; he's incredibly protective of them.""
+      },
+      ""has_no_alibi"": false,
+      ""has_motive"": true,
+      ""has_access_to_weapon"": false,
+      ""is_killer"": false
+    },
+    {
+      ""name"": ""Marcus Blackwood"",
+      ""gender"": ""Male"",
+      ""relationship"": ""Head of Security"",
+      ""personality"": ""Disciplined, observant, gruff"",
+      ""voice_id"": ""Alnilam"",
+      ""model_id"": 2,
+      ""motive"": null,
+      ""access_to_weapon_description"": ""As the head of security, he possesses the only master key that opens every display case and restricted door in the museum."",
+      ""alibi_statement"": ""I was performing my scheduled perimeter sweep of the grounds from 11:15 PM to 11:45 PM, which is logged in the digital security system."",
+      ""minor_secret"": ""He was once dishonorably discharged from the military for unknown reasons."",
+      ""rumors"": {
+        ""Elena Thorne"": ""I found a stack of 'Final Notice' debt collection letters in Elena's trash while doing my rounds; she's in far deeper than she admits.""
       },
       ""has_no_alibi"": false,
       ""has_motive"": false,
@@ -112,18 +114,18 @@ public class GeminiConnectionManager : MonoBehaviour
       ""is_killer"": false
     },
     {
-      ""name"": ""Father Dominic"",
-      ""gender"": ""Male"",
-      ""relationship"": ""Family Priest"",
-      ""personality"": ""Stoic, soft-spoken, judgmental"",
-      ""voice_id"": ""Algieba"",
-      ""model_id"": 2,
+      ""name"": ""Clara Whitby"",
+      ""gender"": ""Female"",
+      ""relationship"": ""Journalist"",
+      ""personality"": ""Inquisitive, charming, sharp"",
+      ""voice_id"": ""Kore"",
+      ""model_id"": 4,
       ""motive"": null,
       ""access_to_weapon_description"": null,
-      ""alibi_statement"": ""I was in the mansion's chapel performing my nightly prayers. I find the silence there very centering."",
-      ""minor_secret"": ""He was once a professional locksmith before entering the priesthood."",
+      ""alibi_statement"": ""I was live-streaming the Charity Gala at the Mayor's mansion. There is timestamped video of me interviewing the guests at exactly 11:30 PM."",
+      ""minor_secret"": ""She was planning an exposé on the museum's potential financial insolvency."",
       ""rumors"": {
-        ""Julian Thorne"": ""Julian claims he was in the smoking room, but I walked past it at 11:45 PM and the room was completely empty.""
+        ""Arthur Sterling"": ""While I was researching my story near the museum lobby yesterday, I saw Arthur Sterling lingering near the security desk while Marcus was outside on a break.""
       },
       ""has_no_alibi"": false,
       ""has_motive"": false,
