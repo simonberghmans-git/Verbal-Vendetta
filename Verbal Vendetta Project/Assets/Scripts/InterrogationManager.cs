@@ -28,6 +28,7 @@ public class InterrogationManager : MonoBehaviour
     [Header("End Game Newspaper UI")]
     public TMP_Text articleHeadlineDisplay;
     public TMP_Text articleBodyDisplay;
+    public TMP_Text articleBodyDisplay2;
     public UnityEngine.UI.Image killerPortraitDisplay;
     public GameObject newsArticle;
 
@@ -267,7 +268,32 @@ public class InterrogationManager : MonoBehaviour
                 
                 if (articleBodyDisplay != null)
                 {
-                    articleBodyDisplay.text = article;
+                    if (article.Length <= 315)
+                    {
+                        articleBodyDisplay.text = article;
+                        if (articleBodyDisplay2 != null) articleBodyDisplay2.text = "";
+                    }
+                    else
+                    {
+                        int breakPoint = 315;
+                        
+                        // Backtrack to the nearest whitespace to ensure no word is cut in half
+                        while (breakPoint > 0 && !char.IsWhiteSpace(article[breakPoint]))
+                        {
+                            breakPoint--;
+                        }
+
+                        if (breakPoint == 0) 
+                        {
+                            breakPoint = 315; // Fallback
+                        }
+                        
+                        articleBodyDisplay.text = article.Substring(0, breakPoint).Trim();
+                        if (articleBodyDisplay2 != null)
+                        {
+                            articleBodyDisplay2.text = article.Substring(breakPoint).Trim();
+                        }
+                    }
                 }
 
                 // Show killer's portrait
