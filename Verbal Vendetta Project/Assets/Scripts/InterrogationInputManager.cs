@@ -46,10 +46,12 @@ public class InterrogationInputManager : MonoBehaviour
             if (liveConnection.isMuted)
             {
                 if (micOffSprite != null) micImage.sprite = micOffSprite;
+                micImage.color = Color.yellow;
             }
             else
             {
                 if (micOnSprite != null) micImage.sprite = micOnSprite;
+                micImage.color = Color.white;
             }
         }
     }

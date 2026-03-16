@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         // Microphone Mute Toggle
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M) && currentState == GameState.Interrogation)
         {
             if (inputManager != null) inputManager.ToggleMute();
         }
@@ -135,7 +135,7 @@ public class GameManager : MonoBehaviour
     private System.Collections.IEnumerator SwitchToInterrogation()
     {
         if (selectionManager == null) yield break;
-
+        inputManager.micImage.gameObject.SetActive(true);
         isInputLocked = true;
         currentState = GameState.Interrogation;
 
@@ -186,7 +186,7 @@ public class GameManager : MonoBehaviour
         {
             inputManager.ForceReset();
         }
-
+        inputManager.micImage.gameObject.SetActive(false);
         isInputLocked = true;
         currentState = GameState.SubjectSelection;
 
