@@ -53,7 +53,7 @@ public class InterrogationManager : MonoBehaviour
     private void Start()
     {
         suspectNameDisplay.text = "Select a Suspect";
-        responseTextField.text = "<i>Press 'I' or use Arrows to select.</i>";
+        responseTextField.text = "<i>Press 'Space' or use Arrows to select.</i>";
         
         // Generation is now handled by GameManager
     }
@@ -71,7 +71,7 @@ public class InterrogationManager : MonoBehaviour
         else
         {
             suspectNameDisplay.text = "Select a Suspect";
-            responseTextField.text = "<i>Press 'I' or use Arrows to select.</i>";
+            responseTextField.text = "<i>Press 'Space' or use Arrows to select.</i>";
         }
 
         // Reset Eye State to Direct (Idle)

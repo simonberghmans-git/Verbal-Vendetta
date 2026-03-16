@@ -81,6 +81,12 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        // Microphone Mute Toggle
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            if (inputManager != null) inputManager.ToggleMute();
+        }
+
         if (isInputLocked) return;
 
         if (currentState == GameState.SubjectSelection)
@@ -88,7 +94,7 @@ public class GameManager : MonoBehaviour
             if (selectionManager != null) selectionManager.HandleInput();
             
             // Check for Toggle
-            if (Input.GetKeyDown(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 // Check if Notebook is open - if so, disable mode switching
                 if (interrogationManager != null && 
@@ -110,8 +116,8 @@ public class GameManager : MonoBehaviour
         }
         else if (currentState == GameState.Interrogation)
         {
-            // Press I to go back
-            if (Input.GetKeyDown(KeyCode.I))
+            // Press Space to go back
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 // Check if Notebook is open - if so, disable mode switching
                 if (interrogationManager != null && 
