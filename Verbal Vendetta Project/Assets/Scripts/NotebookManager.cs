@@ -287,7 +287,7 @@ public class NotebookManager : MonoBehaviour
 
         string q = question ?? "";
         string a = answer ?? "";
-        string combined = $"You: \"{q}\"\nSuspect: \"{a}\"";
+        string combined = $"You: \"{q}\"\n\"{a}\"";
 
         if (suspectTranscripts[suspectIndex].Length > 0)
             suspectTranscripts[suspectIndex] += "\n" + combined;

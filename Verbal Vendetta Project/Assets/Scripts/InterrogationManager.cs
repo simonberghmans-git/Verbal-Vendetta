@@ -136,11 +136,17 @@ public class InterrogationManager : MonoBehaviour
             responseTextField.text = $"<b>{speaker}:</b> {text}";
         }
         
-        // Notebook transcript append
         if (notebookManager != null && activeSuspectData != null)
         {
             int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspectData);
-            notebookManager.AppendSuspectLine(index, $"{speaker}: {text}");
+            if (speaker == "Player")
+            {
+                notebookManager.AppendSuspectLine(index, $"Player: {text}");
+            }
+            else
+            {
+                notebookManager.AppendSuspectLine(index, text);
+            }
         }
     }
 
