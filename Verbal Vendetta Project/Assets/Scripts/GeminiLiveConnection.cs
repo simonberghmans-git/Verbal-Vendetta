@@ -182,6 +182,17 @@ public class GeminiLiveConnection : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            var manager = FindObjectOfType<GeminiConnectionManager>();
+            if (manager != null && manager.currentScenario != null && currentSuspect != null)
+            {
+                Debug.Log("GeminiLiveConnection: Hard reset triggered via 'R' key.");
+                isConnecting = false;
+                ConnectSession(currentSuspect, manager.currentScenario, voiceSource);
+            }
+        }
+
         bool hasAudio = false;
         lock (audioJitterBuffer)
         {
@@ -319,6 +330,7 @@ public class GeminiLiveConnection : MonoBehaviour
         8. When pressured about their false alibi, only the suspect with no motive and a false alibi (= Red Herring) will reveal their minor secret, explaining why they would fake their alibi.
         9. Refer only to what your character knows as described in the JSON file.
         10. You MUST call the 'TriggerBodyAnimation' tool whenever your response is applicable to one of the animation options.
+        11. CRITICAL: Maintain a consistent voice pitch. Do NOT let your voice get excessively high-pitched, whiny, or squeaky, even when portraying extreme nervousness, anger, or anxiety. Keep a stable vocal tone.
         {chatHistoryContext}";
 
         var setupMsg = new
