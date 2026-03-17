@@ -316,12 +316,13 @@ public class GeminiConnectionManager : MonoBehaviour
            - If Correct: Celebrate the capture.
            - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., 'DETECTIVE BLUNDERS! [True Killer] WAS THE REAL CULPRIT!').
            - Make the headline no more than 45 characters long (including spaces and punctuation). Try to fit this length requirement as best as possible.
+           - Do not capitalize the headline. Only the first letters of important words should be capitalized.
         3. Write the ARTICLE BODY (Noir Style).
            - Provide feedback on the investigation.
            - Explain WHY the logic was right or wrong.
            - If the detective missed clues, mention them mockingly or tragically.
            - Make the article body no more than 685 characters long (including spaces and punctuation). Try to fit this length requirement as best as possible. 
-        
+        3. Write everything as if it is directed towards a casual newsreader, do not refer to the detective as 'you'.
         Output JSON: 
         - is_correct (boolean)
         - headline (string)

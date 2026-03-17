@@ -274,14 +274,14 @@ public class InterrogationManager : MonoBehaviour
                 
                 if (articleBodyDisplay != null)
                 {
-                    if (article.Length <= 315)
+                    if (article.Length <= 306)
                     {
                         articleBodyDisplay.text = article;
                         if (articleBodyDisplay2 != null) articleBodyDisplay2.text = "";
                     }
                     else
                     {
-                        int breakPoint = 315;
+                        int breakPoint = 306;
                         
                         // Backtrack to the nearest whitespace to ensure no word is cut in half
                         while (breakPoint > 0 && !char.IsWhiteSpace(article[breakPoint]))
@@ -291,7 +291,7 @@ public class InterrogationManager : MonoBehaviour
 
                         if (breakPoint == 0) 
                         {
-                            breakPoint = 315; // Fallback
+                            breakPoint = 306; // Fallback
                         }
                         
                         articleBodyDisplay.text = article.Substring(0, breakPoint).Trim();

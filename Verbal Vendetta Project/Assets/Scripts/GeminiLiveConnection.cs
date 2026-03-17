@@ -430,19 +430,22 @@ public class GeminiLiveConnection : MonoBehaviour
             while (webSocket.State == WebSocketState.Open && !cts.IsCancellationRequested)
             {
                 WebSocketReceiveResult result;
-                var sb = new StringBuilder();
-                do
+                using (var ms = new System.IO.MemoryStream())
                 {
-                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
-                    if (result.MessageType == WebSocketMessageType.Close)
+                    do
                     {
-                        await DisconnectSessionAsync($"Server Closed");
-                        return;
-                    }
-                    sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
-                } while (!result.EndOfMessage);
+                        result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            await DisconnectSessionAsync($"Server Closed");
+                            return;
+                        }
+                        ms.Write(buffer, 0, result.Count);
+                    } while (!result.EndOfMessage);
 
-                ProcessServerMessage(sb.ToString());
+                    string jsonResponse = Encoding.UTF8.GetString(ms.ToArray());
+                    ProcessServerMessage(jsonResponse);
+                }
             }
         }
         catch (OperationCanceledException) { }
@@ -487,23 +490,34 @@ public class GeminiLiveConnection : MonoBehaviour
 
                 foreach (var call in msg.tool_call.functionCalls)
                 {
-                    if (call.name == "SetEmotion" && call.args != null && call.args.ContainsKey("emotion"))
+                    try
                     {
-                        string emotionStr = call.args["emotion"].ToString();
-                        OnMetadataReceived?.Invoke(emotionStr, emotionStr, 0.5f);
-                        functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
+                        if (call.name == "SetEmotion" && call.args != null && call.args.ContainsKey("emotion"))
+                        {
+                            string emotionStr = call.args["emotion"].ToString();
+                            OnMetadataReceived?.Invoke(emotionStr, emotionStr, 0.5f);
+                        }
+                        else if (call.name == "TriggerBodyAnimation" && call.args != null && call.args.ContainsKey("animationName"))
+                        {
+                            string animName = call.args["animationName"].ToString();
+                            OnBodyAnimationTriggered?.Invoke(animName);
+                        }
+                        else if (call.name == "ForceDirectEyeContact")
+                        {
+                            OnForceDirectEyeContact?.Invoke();
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"GeminiLiveConnection: Unknown or malformed tool call: {call.name}");
+                        }
                     }
-                    else if (call.name == "TriggerBodyAnimation" && call.args != null && call.args.ContainsKey("animationName"))
+                    catch (Exception ex)
                     {
-                        string animName = call.args["animationName"].ToString();
-                        OnBodyAnimationTriggered?.Invoke(animName);
-                        functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
+                        Debug.LogError($"GeminiLiveConnection: Error executing tool {call.name}: {ex.Message}");
                     }
-                    else if (call.name == "ForceDirectEyeContact")
-                    {
-                        OnForceDirectEyeContact?.Invoke();
-                        functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
-                    }
+                    
+                    // ALWAYS send a response for every tool call! If one is missed, the Live API session will hang forever waiting.
+                    functionResponses.Add(new { id = call.id, name = call.name, response = new { result = "success" } });
                 }
 
                 if (functionResponses.Count > 0)
