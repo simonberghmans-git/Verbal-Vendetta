@@ -2115,7 +2115,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8389453417825262833, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5801147807177406830}
   m_SourcePrefab: {fileID: 100100000, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
 --- !u!136 &416934019459086344 stripped
 CapsuleCollider:
@@ -2197,6 +2200,32 @@ CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 8497168277518992721, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
   m_PrefabInstance: {fileID: 4732162349933547295}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3873473889567577070 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8389453417825262833, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
+  m_PrefabInstance: {fileID: 4732162349933547295}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5801147807177406830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3873473889567577070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8429c2a8145c8c46a73134bca6dbb4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EyeBlinking
+  targetMeshRenderer: {fileID: 8151481623981394946}
+  leftEyeBlinkName: Eye_Blink_L
+  rightEyeBlinkName: Eye_Blink_R
+  minBlinkInterval: 3
+  maxBlinkInterval: 10
+  closeDuration: 0.05
+  openDuration: 0.1
+  minStressBlinkInterval: 0.2
+  maxStressBlinkInterval: 3
 --- !u!4 &4513514659159948197 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9155603908074894522, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
@@ -2275,6 +2304,11 @@ CapsuleCollider:
 --- !u!136 &7818324467730185686 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 3255047256361480905, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
+  m_PrefabInstance: {fileID: 4732162349933547295}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &8151481623981394946 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3509401203044598557, guid: 1cc604c8fee03b442b5d8a1db67f470e, type: 3}
   m_PrefabInstance: {fileID: 4732162349933547295}
   m_PrefabAsset: {fileID: 0}
 --- !u!136 &8219464761342341129 stripped

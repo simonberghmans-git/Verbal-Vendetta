@@ -67,5 +67,39 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6961618175190215399, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7335839651011102014}
   m_SourcePrefab: {fileID: 100100000, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
+--- !u!137 &3076525901007223346 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2612673253532611851, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
+  m_PrefabInstance: {fileID: 1076378431293968185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7956931052175812062 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6961618175190215399, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
+  m_PrefabInstance: {fileID: 1076378431293968185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-7335839651011102014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7956931052175812062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8429c2a8145c8c46a73134bca6dbb4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EyeBlinking
+  targetMeshRenderer: {fileID: 3076525901007223346}
+  leftEyeBlinkName: Eye_Blink_L
+  rightEyeBlinkName: Eye_Blink_R
+  minBlinkInterval: 3
+  maxBlinkInterval: 10
+  closeDuration: 0.05
+  openDuration: 0.1
+  minStressBlinkInterval: 0.2
+  maxStressBlinkInterval: 3

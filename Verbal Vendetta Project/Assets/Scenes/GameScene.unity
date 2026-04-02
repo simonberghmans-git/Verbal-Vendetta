@@ -19909,13 +19909,13 @@ MonoBehaviour:
   - {fileID: 4912406151670937579, guid: 4e3a5c7c7df0a4740849f64cbfa9423a, type: 3}
   - {fileID: 3132613654859285460, guid: 97767e95d306a0b448fee32ce37de85d, type: 3}
   - {fileID: 372304003995880053, guid: feefd2170a2dcfc42bf0b9d11507e9bf, type: 3}
-  - {fileID: 3710276211541570393, guid: 08a2c2220db183d48a5ad550d6758c0d, type: 3}
+  - {fileID: 8855889750911900523, guid: 08a2c2220db183d48a5ad550d6758c0d, type: 3}
   - {fileID: 1151775911495335091, guid: 484e0811945da4947a4ceda5463d9f74, type: 3}
   lowDetailSuspectPrefabs:
   - {fileID: 2552858701234886895, guid: 9cbff1c9a356a2c4d804d4a0d5410fbf, type: 3}
   - {fileID: 7956931052175812062, guid: 694b37b7bb4640f4dbad699823a06f96, type: 3}
   - {fileID: 8318607436118820114, guid: 321196663a5e07a45b668f84b8a61829, type: 3}
-  - {fileID: 6393385287523794668, guid: dabd0cc4e87529c46a9002f6e3578495, type: 3}
+  - {fileID: 1234586954406057694, guid: dabd0cc4e87529c46a9002f6e3578495, type: 3}
   - {fileID: 3873473889567577070, guid: 43fc5df42912c234fb3a1cdeaf9b1636, type: 3}
   maleVoiceIds:
   - Achird

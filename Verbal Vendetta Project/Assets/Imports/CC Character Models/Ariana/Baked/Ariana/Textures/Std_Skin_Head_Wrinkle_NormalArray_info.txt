@@ -1,4 +1,0 @@
-# Texture array source files
-9b88834c401626040ab33a6b7c6e364b
-c4acddd00a740ae4c9a44b19013e17da
-ff5112b0c6ec06546b6a79162e14f607
