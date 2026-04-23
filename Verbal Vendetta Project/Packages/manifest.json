@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.soupday.cc3_unity_tools": "file:C:/Users/empir/Downloads/ccic_unity_tools-2_2_3/CCiC-Unity-Tools-2.2.3",
+    "com.unity.ai.inference": "2.6.1",
     "com.unity.collab-proxy": "2.10.2",
     "com.unity.feature.development": "1.0.2",
     "com.unity.inputsystem": "1.17.0",
@@ -11,6 +12,7 @@
     "com.unity.timeline": "1.8.9",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.9",
+    "com.whisper.unity": "https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
