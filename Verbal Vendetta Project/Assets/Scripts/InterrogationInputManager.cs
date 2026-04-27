@@ -22,6 +22,9 @@ public class InterrogationInputManager : MonoBehaviour
     [Header("Settings")]
     private bool isRecording = false;
 
+    [Header("Debug/Test UI")]
+    public TMP_Text debugTranscriptionText; // To show the last sentence said
+
     void Start()
     {
         if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
@@ -40,23 +43,69 @@ public class InterrogationInputManager : MonoBehaviour
             return;
         }
 
+        // Handle Hold-to-Talk with 'X' key
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            if (gameManager != null && (gameManager.currentState == GameManager.GameState.Interrogation || gameManager.currentState == GameManager.GameState.Accusation))
+            {
+                StartRecording();
+            }
+        }
+        else if (Input.GetKeyUp(KeyCode.X))
+        {
+            StopRecording();
+        }
+
         // Always-listening or state feedback
         if (conversationPipeline != null && micImage != null)
         {
-            // Update UI based on if Whisper is recording (you can implement a bool IsRecording in Whisper wrapper if needed)
-            // For now, assume it's white when active
-            if (micOnSprite != null) micImage.sprite = micOnSprite;
-            micImage.color = Color.white;
+            // Visual feedback for recording
+            if (isRecording)
+            {
+                if (micOnSprite != null) micImage.sprite = micOnSprite;
+                micImage.color = Color.red; // Visual cue for recording
+            }
+            else
+            {
+                if (micOffSprite != null) micImage.sprite = micOffSprite;
+                micImage.color = Color.white;
+            }
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (conversationPipeline != null)
+        {
+            conversationPipeline.OnTranscriptionReceived += HandleTranscriptionReceived;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (conversationPipeline != null)
+        {
+            conversationPipeline.OnTranscriptionReceived -= HandleTranscriptionReceived;
+        }
+    }
+
+    private void HandleTranscriptionReceived(string speaker, string text)
+    {
+        if (speaker == "Player" && debugTranscriptionText != null)
+        {
+            debugTranscriptionText.text = $"Last Heard: \"{text}\"";
         }
     }
 
     void StartRecording()
     {
+        isRecording = true;
         conversationPipeline?.StartRecording();
     }
 
     void StopRecording()
     {
+        isRecording = false;
         conversationPipeline?.StopRecording();
     }
 
@@ -85,6 +134,7 @@ public class InterrogationInputManager : MonoBehaviour
         if (micImage != null && micOffSprite != null)
         {
             micImage.sprite = micOffSprite;
+            micImage.color = Color.white;
         }
     }
 

@@ -26,22 +26,10 @@ public class LocalWhisperManager : MonoBehaviour
 
     public void StartRecording()
     {
-        if (microphoneRecord == null || whisperManager == null)
-        {
-            Debug.LogError("WhisperManager or MicrophoneRecord is not set!");
-            OnError?.Invoke("Microphone or STT missing.");
-            return;
-        }
-
-        if (!whisperManager.IsLoaded)
-        {
-            Debug.LogError("Whisper model is not loaded!");
-            OnError?.Invoke("STT model not loaded.");
-            return;
-        }
+        if (microphoneRecord == null || whisperManager == null) return;
+        if (!whisperManager.IsLoaded) return;
 
         microphoneRecord.StartRecord();
-        Debug.Log("Local Whisper started recording...");
     }
 
     public void StopRecording()
@@ -49,17 +37,15 @@ public class LocalWhisperManager : MonoBehaviour
         if (microphoneRecord != null && microphoneRecord.IsRecording)
         {
             microphoneRecord.StopRecord();
-            Debug.Log("Local Whisper stopped recording. Processing...");
         }
     }
 
     private async void OnRecordStop(AudioChunk chunk)
     {
-        if (chunk.Data == null || chunk.Data.Length == 0)
-        {
-            OnError?.Invoke("No audio data recorded.");
-            return;
-        }
+        if (chunk.Data == null || chunk.Data.Length == 0) return;
+
+        float lengthInSeconds = (float)chunk.Data.Length / chunk.Frequency / chunk.Channels;
+        if (lengthInSeconds < 0.2f) return;
 
         try
         {
@@ -67,7 +53,6 @@ public class LocalWhisperManager : MonoBehaviour
             if (res != null && !string.IsNullOrWhiteSpace(res.Result))
             {
                 string text = res.Result.Trim();
-                Debug.Log($"Local Whisper transcribed: {text}");
                 OnTranscriptionReceived?.Invoke(text);
             }
             else

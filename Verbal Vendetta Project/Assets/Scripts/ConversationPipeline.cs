@@ -15,6 +15,7 @@ public class ConversationPipeline : MonoBehaviour
     [Header("State")]
     public SuspectData activeSuspect;
     public bool isPoliceChiefMode = false;
+    public bool sttTestMode = false; // Added for testing STT separately
     
     // UI Events (Mimicking the old LiveConnection)
     public event Action<string, string> OnTranscriptionReceived; // speaker, text
@@ -111,7 +112,7 @@ public class ConversationPipeline : MonoBehaviour
         pastTranscript += $"Detective: {text}\n";
 
         // Call Gemini
-        if (geminiManager != null)
+        if (geminiManager != null && !sttTestMode)
         {
             geminiManager.GenerateInterrogationResponse(text, activeSuspect, pastTranscript, isPoliceChiefMode, HandleGeminiResponse);
         }
