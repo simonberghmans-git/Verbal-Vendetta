@@ -361,6 +361,7 @@ Limit your response to 2-3 sentences. Keep it conversational.";
                 {
                     var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
                     string generatedText = res.candidates[0].content.parts[0].text;
+                    Debug.Log($"Gemini Response: {generatedText}");
                     callback?.Invoke(generatedText, null);
                 }
                 catch (Exception ex) { callback?.Invoke(null, "Parsing Error: " + ex.Message); }

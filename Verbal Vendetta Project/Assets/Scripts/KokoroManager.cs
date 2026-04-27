@@ -18,6 +18,7 @@ public class KokoroManager : MonoBehaviour
     public bool testing = false;
     
     private AudioSource audioSource;
+    private AudioSource targetAudioSource; // Added for dynamic targeting
     private KokoroHandler kokoroHandler;
     private List<KokoroHandler.Voice> availableVoices;
     private KokoroHandler.Voice activeVoice;
@@ -44,6 +45,11 @@ public class KokoroManager : MonoBehaviour
             activeVoice = availableVoices[0];
             Debug.LogWarning($"Voice '{voiceName}' not found. Defaulting to {activeVoice.Name}");
         }
+    }
+
+    public void SetTargetAudioSource(AudioSource source)
+    {
+        targetAudioSource = source;
     }
 
     public void SynthesizeAndPlay(string text)
@@ -78,8 +84,9 @@ public class KokoroManager : MonoBehaviour
             clip.SetData(audioData, 0);
 
             // 4. Play
-            audioSource.clip = clip;
-            audioSource.Play();
+            AudioSource currentSource = targetAudioSource != null ? targetAudioSource : audioSource;
+            currentSource.clip = clip;
+            currentSource.Play();
 
             // Wait for audio to finish before invoking the event
             float duration = clip.length;

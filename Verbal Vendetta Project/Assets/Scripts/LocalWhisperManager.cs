@@ -21,6 +21,7 @@ public class LocalWhisperManager : MonoBehaviour
         if (microphoneRecord != null)
         {
             microphoneRecord.OnRecordStop += OnRecordStop;
+            // microphoneRecord.echo = false; // Attempt to disable playback if it exists
         }
     }
 

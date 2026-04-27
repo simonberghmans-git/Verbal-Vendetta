@@ -81,11 +81,21 @@ public class InterrogationManager : MonoBehaviour
             EyePointManager.Instance.forceDirectEyeContact = false;
         }
 
-        // Register Animator
-        if (currentSuspectModel != null && AnimationsManager.Instance != null)
+        // Register Animator and AudioSource for LipSync
+        if (currentSuspectModel != null)
         {
-            AnimationsManager.Instance.stressLevel = 0f;
-            AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
+            if (AnimationsManager.Instance != null)
+            {
+                AnimationsManager.Instance.stressLevel = 0f;
+                AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
+            }
+
+            if (conversationPipeline != null && conversationPipeline.kokoroManager != null)
+            {
+                AudioSource suspectAudio = currentSuspectModel.GetComponent<AudioSource>();
+                if (suspectAudio == null) suspectAudio = currentSuspectModel.GetComponentInChildren<AudioSource>();
+                conversationPipeline.kokoroManager.SetTargetAudioSource(suspectAudio);
+            }
         }
 
         // Initialize Local Pipeline Connection
