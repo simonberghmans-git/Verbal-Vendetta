@@ -338,7 +338,8 @@ Limit your response to 2-3 sentences. Keep it conversational.";
         3. Do not over-explain unless pressed. 
         4. If you are the killer ({activeSuspect.is_killer}), you will lie about your motive and access to the weapon, and stick to your false alibi.
         5. Respond naturally to the detective's most recent statement or question.
-        6. Do not generate asterisks or roleplay actions (e.g. *sighs*), only dialogue.";
+        6. Do not generate asterisks or roleplay actions (e.g. *sighs*), only dialogue.
+        7. TTS OPTIMIZATION: Do not refer to people by name but rather by their job title/ relationship to you.";
         }
 
         string fullPrompt = $"Previous Transcript:\n{pastTranscript}\n\nDetective: {playerInput}\n{ (isPoliceChief ? "Police Chief" : activeSuspect.name) }:";
@@ -367,6 +368,20 @@ Limit your response to 2-3 sentences. Keep it conversational.";
             else { callback?.Invoke(null, "API Error: " + request.error); }
         }
         if (currentRequest == request) currentRequest = null;
+        else 
+{ 
+    // Check if it's a 503 or 429
+    if (request.responseCode == 503 || request.responseCode == 429)
+    {
+        Debug.LogWarning("Gemini is busy (503/429). Retrying in 2 seconds...");
+        // You could trigger a small delay and try the call again here
+        callback?.Invoke(null, "SERVER_BUSY"); 
+    }
+    else 
+    {
+        callback?.Invoke(null, "API Error: " + request.error); 
+    }
+}
     }
 
     // --- CALL 3: THE JUDGE ---
