@@ -16,8 +16,7 @@ public class GeminiConnectionManager : MonoBehaviour
 {
     public string apiKey = ""; // Made public for sync
 
-    private string model = "gemini-3-flash-preview"; // Updated to model that supports audio generation or stick to 3-flash-preview? Stuck to user's choice but 1.5-flash is safer for audio. I'll keep the private field as is but maybe update the default value if needed.
-    // User had "gemini-3-flash-preview". I should probably leave 'model' alone unless necessary, but the lists need update.
+    private string model = "gemini-flash-latest"; // Using the latest alias for maximum availability
 
     public ScenarioData currentScenario;
 
@@ -189,15 +188,15 @@ public class GeminiConnectionManager : MonoBehaviour
     private IEnumerator PostScenarioRequest(ScenarioCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-
-        // Convert lists to strings for the prompt
-        string maleIdsJoined = suspectManager.maleVoiceIds.Count > 0 ? string.Join(", ", suspectManager.maleVoiceIds) : "Achird";
-        string femaleIdsJoined = suspectManager.femaleVoiceIds.Count > 0 ? string.Join(", ", suspectManager.femaleVoiceIds) : "Achernar";
+        Debug.Log($"Gemini Scenario Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
 
         string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
         string femaleModelIndicesStr = suspectManager.femaleModelIndices != null && suspectManager.femaleModelIndices.Count > 0 ? string.Join(", ", suspectManager.femaleModelIndices) : "0";
 
-        // UPDATED SYSTEM PROMPT: Integrates Voice ID assignment logic
+        int maxMaleVoiceIndex = Mathf.Max(0, suspectManager.maleKokoroVoices.Count - 1);
+        int maxFemaleVoiceIndex = Mathf.Max(0, suspectManager.femaleKokoroVoices.Count - 1);
+
+        // UPDATED SYSTEM PROMPT: Integrates Voice Index assignment logic
         string systemPrompt = $@"You are a master mystery writer. Generate a murder mystery scenario in JSON.
         
         LOGIC RULES (The Triple-Filter):
@@ -216,17 +215,18 @@ public class GeminiConnectionManager : MonoBehaviour
         10. RANDOMIZATION: You MUST randomize the index of the killer in the suspects list (0-4).
         11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' of one suspect MUST have a corresponding clue in the 'rumors' of a different suspect.
         12. CONTRADICTION: Every 'rumor' a suspect knows, must not contradict their own alibi. Unless the suspect who knows this 'rumor' has a false alibi (Killer or Red Herring).
-        13. VOICE ASSIGNMENT: Assign a 'voice_id' to each suspect based on their gender.
-            - Available Male IDs: [{maleIdsJoined}]
-            - Available Female IDs: [{femaleIdsJoined}]
-            - Available Female IDs: [{femaleIdsJoined}]
-            - RULE: Try to ensure each suspect has a unique voice_id. If a list is too short, you may reuse IDs, but prioritize variety across the 5 suspects.
+        13. VOICE ASSIGNMENT: Assign a 'voice_index' (integer) to each suspect based on their gender.
+            - Available Male Indices: 0 to {maxMaleVoiceIndex}
+            - Available Female Indices: 0 to {maxFemaleVoiceIndex}
+            - RULE: Try to ensure each suspect has a unique voice_index. If the list is too short, you may reuse indices.
         14. MODEL ASSIGNMENT:
             - Available Male Model IDs: [ {maleModelIndicesStr} ]
             - Available Female Model IDs: [ {femaleModelIndicesStr} ]
             - Assign a 'model_id' (integer) to each suspect from the appropriate list based on their gender.
             - RULE: Try to assign a unique model_id for each suspect if possible.
-        15. GENDER ASSIGNMENT: Assign a 'gender' ('Male' or 'Female') to each suspect. Ensure it matches the voice_id, model_id, and name.
+        15. GENDER: Ensure 'gender' ('Male'/'Female') matches voice_id and name.
+        
+        Return ONLY valid JSON. do not include markdown formatting.
 
         JSON_STRUCTURE_EXAMPLE:
         {{
@@ -245,7 +245,7 @@ public class GeminiConnectionManager : MonoBehaviour
               ""gender"": ""Male"",
               ""relationship"": ""Connection"",
               ""personality"": ""Trait"",
-              ""voice_id"": ""TheSelectedID"",
+              ""voice_index"": 0,
               ""model_id"": 0,
               ""motive"": ""Reason or null"",
               ""access_to_weapon_description"": ""Description or null"",
@@ -292,7 +292,82 @@ public class GeminiConnectionManager : MonoBehaviour
     }
 
     // --- CALL 2: INTERROGATION ---
+    public void GenerateInterrogationResponse(string playerInput, SuspectData activeSuspect, string pastTranscript, bool isPoliceChief, Action<string, string> callback)
+    {
+        if (currentScenario == null) return;
+        StartCoroutine(PostInterrogationRequest(playerInput, activeSuspect, pastTranscript, isPoliceChief, callback));
+    }
 
+    private IEnumerator PostInterrogationRequest(string playerInput, SuspectData activeSuspect, string pastTranscript, bool isPoliceChief, Action<string, string> callback)
+    {
+        string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
+        Debug.Log($"Gemini Interrogation Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
+        
+        string systemPrompt;
+
+        if (isPoliceChief)
+        {
+            systemPrompt = $@"You are the cynical, no-nonsense Police Chief of the precinct.
+The detective (the player) is calling you to submit an official accusation.
+You do not know the truth of the case, but you demand clear logic.
+Respond naturally to the detective's statements. 
+Limit your response to 2-3 sentences. Keep it conversational.";
+        }
+        else
+        {
+            string rumorsJson = JsonConvert.SerializeObject(activeSuspect.rumors);
+            systemPrompt = $@"You are a suspect in a murder mystery being interrogated by a detective (the player).
+            
+        YOUR PROFILE:
+        Name: {activeSuspect.name}
+        Personality: {activeSuspect.personality}
+        Relationship to victim: {activeSuspect.relationship}
+        Alibi: {activeSuspect.alibi_statement}
+        
+        KNOWLEDGE:
+        You know the following rumors about others: {rumorsJson}
+        
+        CASE DETAILS:
+        Victim: {currentScenario.victim_name}
+        Time/Date: {currentScenario.murder_time}, {currentScenario.murder_date}
+        Weapon: {currentScenario.murder_weapon}
+        
+        RULES:
+        1. Stay in character at all times. Do not break the fourth wall.
+        2. Keep your answers brief and concise (1-3 sentences maximum).
+        3. Do not over-explain unless pressed. 
+        4. If you are the killer ({activeSuspect.is_killer}), you will lie about your motive and access to the weapon, and stick to your false alibi.
+        5. Respond naturally to the detective's most recent statement or question.
+        6. Do not generate asterisks or roleplay actions (e.g. *sighs*), only dialogue.";
+        }
+
+        string fullPrompt = $"Previous Transcript:\n{pastTranscript}\n\nDetective: {playerInput}\n{ (isPoliceChief ? "Police Chief" : activeSuspect.name) }:";
+
+        var payload = new
+        {
+            contents = new[] { new { parts = new[] { new { text = fullPrompt } } } },
+            systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
+            generationConfig = new { responseMimeType = "text/plain" }
+        };
+
+        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
+        using (request)
+        {
+            yield return request.SendWebRequest();
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                    string generatedText = res.candidates[0].content.parts[0].text;
+                    callback?.Invoke(generatedText, null);
+                }
+                catch (Exception ex) { callback?.Invoke(null, "Parsing Error: " + ex.Message); }
+            }
+            else { callback?.Invoke(null, "API Error: " + request.error); }
+        }
+        if (currentRequest == request) currentRequest = null;
+    }
 
     // --- CALL 3: THE JUDGE ---
     public void JudgeAccusation(string accusedName, string motiveReasoning, string accessReasoning, JudgeCallback callback)
@@ -304,6 +379,7 @@ public class GeminiConnectionManager : MonoBehaviour
     private IEnumerator PostJudgeRequest(string accusedName, string motive, string access, JudgeCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
+        Debug.Log($"Gemini Judge Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
 
         string systemPrompt = $@"You are a cynical 1940s crime journalist for the 'Daily Truth'. 
         Compare the detective's accusation to the hidden truth.
@@ -334,17 +410,7 @@ public class GeminiConnectionManager : MonoBehaviour
             systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
             generationConfig = new
             {
-                responseMimeType = "application/json",
-                responseSchema = new
-                {
-                    type = "OBJECT",
-                    properties = new { 
-                        is_correct = new { type = "BOOLEAN" }, 
-                        headline = new { type = "STRING" },
-                        article = new { type = "STRING" }
-                    },
-                    required = new[] { "is_correct", "headline", "article" }
-                }
+                responseMimeType = "application/json"
             }
         };
 

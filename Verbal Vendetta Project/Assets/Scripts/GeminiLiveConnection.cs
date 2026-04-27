@@ -343,7 +343,7 @@ public class GeminiLiveConnection : MonoBehaviour
                     responseModalities = new[] { "AUDIO" },
                     speechConfig = new
                     {
-                        voiceConfig = new { prebuiltVoiceConfig = new { voiceName = string.IsNullOrEmpty(suspect.voice_id) ? "Puck" : suspect.voice_id } }
+                        voiceConfig = new { prebuiltVoiceConfig = new { voiceName = "Puck" } }
                     }
                 },
                 systemInstruction = new { parts = new[] { new { text = systemPrompt } }, role = "user" },

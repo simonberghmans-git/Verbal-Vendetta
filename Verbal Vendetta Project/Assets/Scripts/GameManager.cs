@@ -4,7 +4,7 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { SubjectSelection, Interrogation, Ending}
+    public enum GameState { SubjectSelection, Interrogation, Ending, Accusation }
     public GameState currentState = GameState.SubjectSelection;
 
     [Header("Dependencies")]
@@ -216,6 +216,52 @@ public class GameManager : MonoBehaviour
         {
             interrogationManager.StopInterrogation(); // Cancel All Processes
             interrogationManager.SetActiveSuspect(null, null); // Clear active suspect
+        }
+
+        yield return new WaitForSeconds(0.5f);
+        isInputLocked = false;
+    }
+
+    public void StartAccusationPhase()
+    {
+        if (isInputLocked) return;
+        StartCoroutine(SwitchToAccusation());
+    }
+
+    private System.Collections.IEnumerator SwitchToAccusation()
+    {
+        if (inputManager != null) inputManager.ForceReset();
+        
+        isInputLocked = true;
+        currentState = GameState.Accusation;
+        inputManager.micImage.gameObject.SetActive(true);
+        
+        if (selectionManager != null)
+        {
+            selectionManager.isInputActive = false;
+            selectionManager.SetVisible(false);
+        }
+
+        if (currentActiveHighDetailModel != null)
+        {
+            Destroy(currentActiveHighDetailModel);
+            currentActiveHighDetailModel = null;
+        }
+        
+        if (interrogationManager != null)
+        {
+            interrogationManager.StopInterrogation();
+            
+            if (interrogationManager.conversationPipeline != null)
+            {
+                interrogationManager.conversationPipeline.ConnectSession(null, true);
+            }
+        }
+
+        if (mainCamera != null && interrogationCameraPos != null)
+        {
+            mainCamera.transform.position = interrogationCameraPos.position;
+            mainCamera.transform.rotation = interrogationCameraPos.rotation * Quaternion.Euler(0, 90, 0);
         }
 
         yield return new WaitForSeconds(0.5f);

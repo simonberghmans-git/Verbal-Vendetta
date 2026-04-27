@@ -23,6 +23,11 @@ public class PiperManager : MonoBehaviour
     private bool isInitialized = false;
 
     private bool hasSidKey = false;
+    
+    private Coroutine initCoroutine;
+    private static bool isEspeakInitialized = false;
+    
+    public event Action OnSpeechFinished;
 
 
     [Range(0.0f, 1.0f)] public float commaDelay = 0.1f;
@@ -38,7 +43,36 @@ public class PiperManager : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        StartCoroutine(InitializePiper());
+        if (modelAsset != null && tokenizer != null)
+        {
+            if (initCoroutine != null) StopCoroutine(initCoroutine);
+            initCoroutine = StartCoroutine(InitializePiper());
+        }
+    }
+
+    public void SetVoice(ModelAsset newModel, ESpeakTokenizer newToken)
+    {
+        if (initCoroutine != null)
+        {
+            StopCoroutine(initCoroutine);
+            initCoroutine = null;
+        }
+
+        modelAsset = newModel;
+        tokenizer = newToken;
+        
+        isInitialized = false;
+        
+        if (engine != null)
+        {
+            engine.Dispose();
+            engine = null;
+        }
+
+        if (modelAsset != null && tokenizer != null)
+        {
+            initCoroutine = StartCoroutine(InitializePiper());
+        }
     }
 
     private IEnumerator InitializePiper()
@@ -96,7 +130,18 @@ public class PiperManager : MonoBehaviour
             yield return null;
         #endif
 
+        if (!Directory.Exists(espeakDataPath))
+        {
+            Debug.LogError($"[PiperManager] eSpeak-ng Initialization ABORTED. Data path does not exist: {espeakDataPath}\nPlease ensure 'espeak-ng-data' is present in your StreamingAssets folder.");
+            yield break;
+        }
+
         InitializeESpeak(espeakDataPath);
+
+        if (engine != null)
+        {
+            engine.Dispose();
+        }
 
         var model = ModelLoader.Load(modelAsset);
         engine = new Worker(model, BackendType.CPU);
@@ -117,10 +162,20 @@ public class PiperManager : MonoBehaviour
 
     private void InitializeESpeak(string dataPath)
     {
+        if (isEspeakInitialized)
+        {
+            if (tokenizer != null && !string.IsNullOrEmpty(tokenizer.Voice))
+            {
+                ESpeakNG.espeak_SetVoiceByName(tokenizer.Voice);
+            }
+            return;
+        }
+
         int initResult = ESpeakNG.espeak_Initialize(0, 0, dataPath, 0);
 
         if (initResult > 0)
         {
+            isEspeakInitialized = true;
             Debug.Log($"[PiperManager] eSpeak-ng Initialization SUCCEEDED. Data path: {dataPath}");
 
             if (tokenizer == null || string.IsNullOrEmpty(tokenizer.Voice))
@@ -224,6 +279,7 @@ public class PiperManager : MonoBehaviour
             }
         }
         Debug.Log("Finished playing all chunks.");
+        OnSpeechFinished?.Invoke();
     }
 
     private void _SynthesizeAndPlayChunk(string textChunk)

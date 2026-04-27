@@ -1,5 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.InferenceEngine;
+
+[System.Serializable]
+public struct KokoroVoice
+{
+    public string voiceName; // e.g., "af_heart", "am_adam"
+}
+
 
 public class SuspectManager : MonoBehaviour
 {
@@ -9,11 +17,13 @@ public class SuspectManager : MonoBehaviour
     [Header("Low Detail Models (For Selection Lineup)")]
     public List<GameObject> lowDetailSuspectPrefabs;
 
-    [Header("Voice Settings")]
-    [Tooltip("List of Gemini Voice Names for Male suspects.")]
-    public List<string> maleVoiceIds;
-    [Tooltip("List of Gemini Voice Names for Female suspects.")]
-    public List<string> femaleVoiceIds;
+    [Header("Kokoro Voice Settings")]
+    [Tooltip("List of Kokoro Voices for Male suspects.")]
+    public List<string> maleKokoroVoices;
+    [Tooltip("List of Kokoro Voices for Female suspects.")]
+    public List<string> femaleKokoroVoices;
+    [Tooltip("Kokoro Voice for the Police Chief in the Accusation Phase.")]
+    public string policeChiefVoice = "am_adam";
 
     [Header("Model Indices")]
     [Tooltip("Indices in the Prefab List that correspond to Male characters.")]

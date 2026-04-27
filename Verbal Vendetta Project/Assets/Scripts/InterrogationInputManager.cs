@@ -16,7 +16,7 @@ public class InterrogationInputManager : MonoBehaviour
     public UnityEngine.UI.Image micImage;
     public Sprite micOnSprite;
     public Sprite micOffSprite;
-    public GeminiLiveConnection liveConnection;
+    public ConversationPipeline conversationPipeline;
     public GameManager gameManager; // Added reference
 
     [Header("Settings")]
@@ -30,7 +30,7 @@ public class InterrogationInputManager : MonoBehaviour
     void Update()
     {
         // 0. check game state
-        if (gameManager != null && gameManager.currentState != GameManager.GameState.Interrogation) return;
+        if (gameManager != null && gameManager.currentState != GameManager.GameState.Interrogation && gameManager.currentState != GameManager.GameState.Accusation) return;
 
         // Check if Notebook is open
         if (interrogationManager != null && 
@@ -40,30 +40,24 @@ public class InterrogationInputManager : MonoBehaviour
             return;
         }
 
-        // Always-listening: Just keep status updated
-        if (liveConnection != null && liveConnection.alwaysListening && micImage != null)
+        // Always-listening or state feedback
+        if (conversationPipeline != null && micImage != null)
         {
-            if (liveConnection.isMuted)
-            {
-                if (micOffSprite != null) micImage.sprite = micOffSprite;
-                micImage.color = Color.yellow;
-            }
-            else
-            {
-                if (micOnSprite != null) micImage.sprite = micOnSprite;
-                micImage.color = Color.white;
-            }
+            // Update UI based on if Whisper is recording (you can implement a bool IsRecording in Whisper wrapper if needed)
+            // For now, assume it's white when active
+            if (micOnSprite != null) micImage.sprite = micOnSprite;
+            micImage.color = Color.white;
         }
     }
 
     void StartRecording()
     {
-        // Handled automatically by LiveConnection in Always-Listening mode
+        conversationPipeline?.StartRecording();
     }
 
     void StopRecording()
     {
-        // Handled automatically by LiveConnection in Always-Listening mode
+        conversationPipeline?.StopRecording();
     }
 
     /// <summary>
@@ -99,9 +93,6 @@ public class InterrogationInputManager : MonoBehaviour
     /// </summary>
     public void ToggleMute()
     {
-        if (liveConnection != null)
-        {
-            liveConnection.isMuted = !liveConnection.isMuted;
-        }
+        // ConversationPipeline uses hold-to-talk or click-to-talk.
     }
 }

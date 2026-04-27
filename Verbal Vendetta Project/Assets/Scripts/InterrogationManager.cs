@@ -10,7 +10,7 @@ public class InterrogationManager : MonoBehaviour
 {
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
-    public GeminiLiveConnection liveConnection; // Replaces TTS/STT handlers
+    public ConversationPipeline conversationPipeline; // Replaces GeminiLiveConnection
     public NotebookManager notebookManager;
     public ScenesManager scenesManager;
     public GameManager gameManager; // Need this to access GameState
@@ -88,29 +88,19 @@ public class InterrogationManager : MonoBehaviour
             AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
         }
 
-        // Initialize Live Connection
-        if (liveConnection != null && activeSuspectData != null)
+        // Initialize Local Pipeline Connection
+        if (conversationPipeline != null && activeSuspectData != null)
         {
-            AudioSource suspectAudioSource = null;
-            if (currentSuspectModel != null)
-            {
-                suspectAudioSource = currentSuspectModel.GetComponentInChildren<AudioSource>();
-            }
-
-            liveConnection.ConnectSession(activeSuspectData, connectionManager.currentScenario, suspectAudioSource);
+            conversationPipeline.ConnectSession(activeSuspectData, false);
             
             // Unsubscribe just in case, then subscribe to events
-            liveConnection.OnTranscriptionReceived -= HandleTranscription;
-            liveConnection.OnMetadataReceived -= HandleMetadata;
-            liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
-            liveConnection.OnBodyAnimationTriggered -= HandleBodyAnimationTriggered;
-            liveConnection.OnForceDirectEyeContact -= HandleForceDirectEyeContact;
+            conversationPipeline.OnTranscriptionReceived -= HandleTranscription;
+            conversationPipeline.OnMetadataReceived -= HandleMetadata;
+            conversationPipeline.OnSpeakStateChanged -= HandleSpeakStateChanged;
             
-            liveConnection.OnTranscriptionReceived += HandleTranscription;
-            liveConnection.OnMetadataReceived += HandleMetadata;
-            liveConnection.OnSpeakStateChanged += HandleSpeakStateChanged;
-            liveConnection.OnBodyAnimationTriggered += HandleBodyAnimationTriggered;
-            liveConnection.OnForceDirectEyeContact += HandleForceDirectEyeContact;
+            conversationPipeline.OnTranscriptionReceived += HandleTranscription;
+            conversationPipeline.OnMetadataReceived += HandleMetadata;
+            conversationPipeline.OnSpeakStateChanged += HandleSpeakStateChanged;
         }
     }
 
@@ -118,8 +108,8 @@ public class InterrogationManager : MonoBehaviour
 
     public void AskSuspect()
     {
-        // Now handled via real-time stream.
-        // InterrogationInputManager will call liveConnection.StartRecording() / StopRecording().
+        // Now handled via ConversationPipeline.
+        // InterrogationInputManager will call conversationPipeline.StartRecording() / StopRecording().
     }
 
     private void HandleTranscription(string speaker, string text)
@@ -350,15 +340,13 @@ public class InterrogationManager : MonoBehaviour
         isModelSpeaking = false;
         currentModelTranscript = "";
 
-        // Cancel LLM Generation and Socket Connection
-        if (liveConnection != null)
+        // Cancel LLM Generation and TTS pipeline
+        if (conversationPipeline != null)
         {
-            liveConnection.OnTranscriptionReceived -= HandleTranscription;
-            liveConnection.OnMetadataReceived -= HandleMetadata;
-            liveConnection.OnSpeakStateChanged -= HandleSpeakStateChanged;
-            liveConnection.OnBodyAnimationTriggered -= HandleBodyAnimationTriggered;
-            liveConnection.OnForceDirectEyeContact -= HandleForceDirectEyeContact;
-            _ = liveConnection.DisconnectSessionAsync();
+            conversationPipeline.OnTranscriptionReceived -= HandleTranscription;
+            conversationPipeline.OnMetadataReceived -= HandleMetadata;
+            conversationPipeline.OnSpeakStateChanged -= HandleSpeakStateChanged;
+            conversationPipeline.DisconnectSession();
         }
 
         // 3. Reset Animation State (Stop Lip Sync)
