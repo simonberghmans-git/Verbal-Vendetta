@@ -218,13 +218,11 @@ public class InterrogationManager : MonoBehaviour
         }
     }
 
-    private IEnumerator ResetEyeStateAfterDelay(float delay)
+    public void PrepareAccusationUI()
     {
-        yield return new WaitForSeconds(delay);
-        if (EyePointManager.Instance != null)
-        {
-            EyePointManager.Instance.currentState = EyePointManager.EyeState.Waiting;
-        }
+        if (suspectNameDisplay != null) suspectNameDisplay.text = "Police Chief";
+        if (responseTextField != null) responseTextField.text = "<i>The Police Chief is on the line. Hold 'X' to speak and explain your reasoning.</i>";
+        if (playerInputField != null) playerInputField.text = "";
     }
 
     /// <summary>

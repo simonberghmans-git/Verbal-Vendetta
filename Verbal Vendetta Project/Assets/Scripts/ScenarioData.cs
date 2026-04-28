@@ -21,7 +21,13 @@ public class ScenarioData
     [Header("Interrogation Timeline")]
     public string interrogation_date;
 
+    [JsonProperty("murder_weapon")]
+    [Header("Crime Details")]
     public string murder_weapon;
+    
+    [JsonProperty("weapon")]
+    private string weapon { set => murder_weapon = value; }
+
     public string murder_location;
     public List<SuspectData> suspects;
 
@@ -45,9 +51,30 @@ public class SuspectData
     public int model_id;                          // The ID of the visual model (prefab + image)
     public string motive;                         // Only assigned if has_motive is true
     public string access_to_weapon_description;    // The specific "Means" for the Judge to verify
+    [JsonProperty("alibi_statement")]
     public string alibi_statement;
+
+    [JsonProperty("alibi")]
+    private string alibi { set => alibi_statement = value; }
     public string minor_secret;                   // Only assigned for the Red Herring
 
+    [JsonProperty("rumors")]
+    private object rumors_raw
+    {
+        set
+        {
+            if (value is string s)
+            {
+                rumors = new Dictionary<string, string> { { "General", s } };
+            }
+            else if (value is Newtonsoft.Json.Linq.JObject obj)
+            {
+                rumors = obj.ToObject<Dictionary<string, string>>();
+            }
+        }
+    }
+
+    [JsonIgnore]
     public Dictionary<string, string> rumors;
 
     // --- TRIPLE-FILTER LOGIC FLAGS ---

@@ -60,6 +60,79 @@ public class KokoroManager : MonoBehaviour
         _ = GenerateAndPlayLocal(text);
     }
 
+    public async Task<AudioClip> Synthesize(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        if (activeVoice == null)
+        {
+            Debug.LogError("No Kokoro voice selected!");
+            return null;
+        }
+
+        try
+        {
+            // Split text into sentences to avoid sequence length limits
+            string[] sentences = text.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+            List<float[]> audioChunks = new List<float[]>();
+            int totalLength = 0;
+
+            foreach (string sentence in sentences)
+            {
+                string trimmed = sentence.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+
+                // Add punctuation back for better prosody
+                char punctuation = text.Length > text.IndexOf(sentence) + sentence.Length ? text[text.IndexOf(sentence) + sentence.Length] : '.';
+                trimmed += punctuation;
+
+                // 1. Convert text to phoneme IDs using MisakiSharp
+                int[] tokens = MisakiSharp.TokenizeGraphemes(trimmed);
+                
+                // Safety: Kokoro usually has a 512 token limit. 
+                // We'll be conservative and skip if it's somehow massive, 
+                // or we could split further, but sentence-splitting usually suffices.
+                if (tokens.Length > 500)
+                {
+                    Debug.LogWarning($"Sentence too long ({tokens.Length} tokens), skipping chunk to avoid crash.");
+                    continue;
+                }
+
+                // 2. Run Sentis Inference
+                using Tensor<float> outputTensor = await kokoroHandler.Execute(tokens, speed, activeVoice);
+
+                // 3. Store raw audio data
+                float[] chunkData = outputTensor.DownloadToArray();
+                if (chunkData != null && chunkData.Length > 0)
+                {
+                    audioChunks.Add(chunkData);
+                    totalLength += chunkData.Length;
+                }
+            }
+
+            if (totalLength == 0) return null;
+
+            // 4. Merge Chunks
+            float[] mergedData = new float[totalLength];
+            int offset = 0;
+            foreach (var chunk in audioChunks)
+            {
+                Array.Copy(chunk, 0, mergedData, offset, chunk.Length);
+                offset += chunk.Length;
+            }
+
+            // 5. Create final AudioClip
+            AudioClip clip = AudioClip.Create("Kokoro_Briefing", mergedData.Length, 1, 24000, false);
+            clip.SetData(mergedData, 0);
+
+            return clip;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Sentis Kokoro Synthesis Error: {e.Message}");
+            return null;
+        }
+    }
+
     private async Task GenerateAndPlayLocal(string text)
     {
         if (activeVoice == null)
@@ -70,18 +143,8 @@ public class KokoroManager : MonoBehaviour
 
         try
         {
-            // 1. Convert text to phoneme IDs using MisakiSharp
-            int[] tokens = MisakiSharp.TokenizeGraphemes(text);
-
-            // 2. Run Sentis Inference
-            using Tensor<float> outputTensor = await kokoroHandler.Execute(tokens, speed, activeVoice);
-
-            // 3. Convert Tensor output to AudioClip
-            float[] audioData = outputTensor.DownloadToArray();
-            
-            // Kokoro output is always 24000Hz mono
-            AudioClip clip = AudioClip.Create("Kokoro_Speech", audioData.Length, 1, 24000, false);
-            clip.SetData(audioData, 0);
+            AudioClip clip = await Synthesize(text);
+            if (clip == null) return;
 
             // 4. Play
             AudioSource currentSource = targetAudioSource != null ? targetAudioSource : audioSource;

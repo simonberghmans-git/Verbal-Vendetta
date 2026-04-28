@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 public class ConversationPipeline : MonoBehaviour
 {
@@ -128,18 +129,28 @@ public class ConversationPipeline : MonoBehaviour
         
         if (string.IsNullOrWhiteSpace(responseText)) return;
 
+        // Parse JSON result
+        GeminiConnectionManager.InterrogationResult result = geminiManager.SafeDeserialize<GeminiConnectionManager.InterrogationResult>(responseText);
+
+        if (result == null || string.IsNullOrEmpty(result.text))
+        {
+            Debug.LogError($"Parsed Gemini result is invalid. Raw: {responseText}");
+            return;
+        }
+
         string speakerName = isPoliceChiefMode ? "Police Chief" : (activeSuspect != null ? activeSuspect.name : "Character");
         
         // Append to transcript
-        pastTranscript += $"{speakerName}: {responseText}\n";
+        pastTranscript += $"{speakerName}: {result.text}\n";
 
         // Clean up response for UI and TTS (remove action asterisks if Gemini accidentally generates them)
-        string cleanedText = Regex.Replace(responseText, @"\*.*?\*", "").Trim();
+        string cleanedText = Regex.Replace(result.text, @"\*.*?\*", "").Trim();
         
         OnTranscriptionReceived?.Invoke(speakerName, cleanedText);
 
-        // Optional metadata parsing could go here, but default to neutral
-        OnMetadataReceived?.Invoke("Neutral", "Neutral", 0.5f);
+        // Trigger Metadata (Emotions)
+        string emotion = string.IsNullOrEmpty(result.emotion) ? "Neutral" : result.emotion;
+        OnMetadataReceived?.Invoke(emotion, emotion, 0.5f);
 
         // Start Kokoro
         if (kokoroManager != null)
@@ -147,6 +158,21 @@ public class ConversationPipeline : MonoBehaviour
             OnSpeakStateChanged?.Invoke(true);
             kokoroManager.SynthesizeAndPlay(cleanedText);
         }
+    }
+
+    public async Task<AudioClip> GenerateBriefingAudio(ScenarioData data)
+    {
+        if (data == null || kokoroManager == null || suspectManager == null) return null;
+
+        // Set the Police Chief voice first
+        kokoroManager.SetVoice(suspectManager.policeChiefVoice);
+
+        string briefingText = $"Listen up detective, we've got a new case on our hands. The victim is {data.victim_name}, a {data.victim_occupation}. " +
+                            $"Body was found at {data.murder_location}. Time of death is estimated at {data.murder_time} on {data.murder_date}. " +
+                            $"The murder weapon was a {data.murder_weapon}. {data.victim_discovery_details}. " +
+                            $"We've brought in {data.suspects.Count} suspects for you to talk to. Get to work.";
+
+        return await kokoroManager.Synthesize(briefingText);
     }
 
     private void HandleKokoroFinished()

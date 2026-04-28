@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
+using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class GameManager : MonoBehaviour
     [Header("Loading Screen")]
     public GameObject loadingScreen;
     public TMP_Text loadingText;
+    public GameObject accusationButton;
 
     public void ShowLoadingScreen(string message)
     {
@@ -42,6 +44,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         if (inputManager == null) inputManager = FindObjectOfType<InterrogationInputManager>();
+        if (accusationButton != null) accusationButton.SetActive(currentState == GameState.SubjectSelection);
 
         // Initial Setup - Camera to Selection
         if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
@@ -54,9 +57,8 @@ public class GameManager : MonoBehaviour
         if (connectionManager != null)
         {
              ShowLoadingScreen("Generating Scenario...");
-             connectionManager.GenerateScenario((data, error) =>
+             connectionManager.GenerateScenario(async (data, error) =>
              {
-                 HideLoadingScreen();
                  if (data != null)
                  {
                      // Delegate Spawning to SelectionManager
@@ -70,12 +72,46 @@ public class GameManager : MonoBehaviour
                      {
                          interrogationManager.SetActiveSuspect(null, null);
                      }
+
+                     // Generate Briefing Audio for Notebook Page 1
+                     if (interrogationManager != null && interrogationManager.conversationPipeline != null && interrogationManager.notebookManager != null)
+                     {
+                         ShowLoadingScreen("Synthesizing Briefing...");
+                         await GenerateBriefing(data);
+                     }
+
+                     HideLoadingScreen();
                  }
                  else
                  {
+                     HideLoadingScreen();
                      Debug.LogError("Generation Failed: " + error);
                  }
              });
+        }
+    }
+
+    private async Task GenerateBriefing(ScenarioData data)
+    {
+        Debug.Log("[GameManager] Starting Briefing Synthesis...");
+        AudioClip briefing = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
+        
+        if (briefing != null && interrogationManager.notebookManager != null)
+        {
+            Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefing.length}s");
+            interrogationManager.notebookManager.briefingClip = briefing;
+
+            // Automatic fallback if no AudioSource is assigned
+            if (interrogationManager.notebookManager.briefingAudioSource == null)
+            {
+                AudioSource kokoroSource = interrogationManager.conversationPipeline.kokoroManager.GetComponent<AudioSource>();
+                interrogationManager.notebookManager.briefingAudioSource = kokoroSource;
+                Debug.Log("[GameManager] Assigned KokoroManager AudioSource as fallback for Notebook briefing.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] Briefing synthesis failed or NotebookManager is missing.");
         }
     }
 
@@ -112,6 +148,12 @@ public class GameManager : MonoBehaviour
             {
                 SuspectData data = selectionManager.GetSelectedSuspectData();
                 if (data != null) interrogationManager.suspectNameDisplay.text = $"Selected: {data.name}";
+            }
+
+            // ENTER to start Accusation Phase
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            {
+                StartAccusationPhase();
             }
         }
         else if (currentState == GameState.Interrogation)
@@ -175,6 +217,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        if (accusationButton != null) accusationButton.SetActive(false);
+
         yield return new WaitForSeconds(0.5f); 
         isInputLocked = false;
     }
@@ -218,6 +262,8 @@ public class GameManager : MonoBehaviour
             interrogationManager.SetActiveSuspect(null, null); // Clear active suspect
         }
 
+        if (accusationButton != null) accusationButton.SetActive(true);
+
         yield return new WaitForSeconds(0.5f);
         isInputLocked = false;
     }
@@ -239,7 +285,7 @@ public class GameManager : MonoBehaviour
         if (selectionManager != null)
         {
             selectionManager.isInputActive = false;
-            selectionManager.SetVisible(false);
+            // selectionManager.SetVisible(false); // KEEP VISIBLE
         }
 
         if (currentActiveHighDetailModel != null)
@@ -251,6 +297,7 @@ public class GameManager : MonoBehaviour
         if (interrogationManager != null)
         {
             interrogationManager.StopInterrogation();
+            interrogationManager.PrepareAccusationUI();
             
             if (interrogationManager.conversationPipeline != null)
             {
@@ -258,11 +305,15 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        /* REMOVED CAMERA SWITCH
         if (mainCamera != null && interrogationCameraPos != null)
         {
             mainCamera.transform.position = interrogationCameraPos.position;
             mainCamera.transform.rotation = interrogationCameraPos.rotation * Quaternion.Euler(0, 90, 0);
         }
+        */
+
+        if (accusationButton != null) accusationButton.SetActive(false);
 
         yield return new WaitForSeconds(0.5f);
         isInputLocked = false;

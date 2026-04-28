@@ -16,7 +16,7 @@ public class GeminiConnectionManager : MonoBehaviour
 {
     public string apiKey = ""; // Made public for sync
 
-    private string model = "gemini-flash-latest"; // Using the latest alias for maximum availability
+    private string model = "gemini-3.1-flash-lite-preview"; // Using the latest alias for maximum availability
 
     public ScenarioData currentScenario;
 
@@ -188,15 +188,13 @@ public class GeminiConnectionManager : MonoBehaviour
     private IEnumerator PostScenarioRequest(ScenarioCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-        Debug.Log($"Gemini Scenario Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
-
+        
         string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
         string femaleModelIndicesStr = suspectManager.femaleModelIndices != null && suspectManager.femaleModelIndices.Count > 0 ? string.Join(", ", suspectManager.femaleModelIndices) : "0";
 
         int maxMaleVoiceIndex = Mathf.Max(0, suspectManager.maleKokoroVoices.Count - 1);
         int maxFemaleVoiceIndex = Mathf.Max(0, suspectManager.femaleKokoroVoices.Count - 1);
 
-        // UPDATED SYSTEM PROMPT: Integrates Voice Index assignment logic
         string systemPrompt = $@"You are a master mystery writer. Generate a murder mystery scenario in JSON.
         
         LOGIC RULES (The Triple-Filter):
@@ -218,47 +216,51 @@ public class GeminiConnectionManager : MonoBehaviour
         13. VOICE ASSIGNMENT: Assign a 'voice_index' (integer) to each suspect based on their gender.
             - Available Male Indices: 0 to {maxMaleVoiceIndex}
             - Available Female Indices: 0 to {maxFemaleVoiceIndex}
-            - RULE: Try to ensure each suspect has a unique voice_index. If the list is too short, you may reuse indices.
         14. MODEL ASSIGNMENT:
             - Available Male Model IDs: [ {maleModelIndicesStr} ]
             - Available Female Model IDs: [ {femaleModelIndicesStr} ]
-            - Assign a 'model_id' (integer) to each suspect from the appropriate list based on their gender.
-            - RULE: Try to assign a unique model_id for each suspect if possible.
-        15. GENDER: Ensure 'gender' ('Male'/'Female') matches voice_id and name.
+            - Assign a 'model_id' (integer) from the appropriate list.
         
-        Return ONLY valid JSON. do not include markdown formatting.
-
-        JSON_STRUCTURE_EXAMPLE:
+        STRICT SCHEMA RULES:
+        - 'murder_weapon' (string) - DO NOT use 'weapon'.
+        - 'alibi_statement' (string) - DO NOT use 'alibi'.
+        - 'rumors' (OBJECT) - This MUST be a JSON object where keys are the names of OTHER suspects and values are the rumors. 
+          Example: ""rumors"": {{ ""John Doe"": ""I saw him near the desk."" }}
+          NEVER provide 'rumors' as a string.
+        
+        JSON TEMPLATE:
         {{
-          ""victim_name"": ""Name"",
-          ""victim_occupation"": ""Job"",
-          ""victim_biography"": ""Context..."",
-          ""murder_time"": ""10:15 PM"",
-          ""murder_date"": ""July 14th"",
-          ""interrogation_date"": ""July 15th"",
-          ""victim_discovery_details"": ""Details"",
-          ""murder_weapon"": ""Weapon"",
-          ""murder_location"": ""Location"",
+          ""victim_name"": ""..."",
+          ""victim_occupation"": ""..."",
+          ""victim_biography"": ""..."",
+          ""victim_discovery_details"": ""..."",
+          ""murder_time"": ""..."",
+          ""murder_date"": ""..."",
+          ""interrogation_date"": ""..."",
+          ""murder_weapon"": ""..."",
+          ""murder_location"": ""..."",
           ""suspects"": [
             {{
-              ""name"": ""Name"",
-              ""gender"": ""Male"",
-              ""relationship"": ""Connection"",
-              ""personality"": ""Trait"",
+              ""name"": ""..."",
+              ""gender"": ""..."",
+              ""relationship"": ""..."",
+              ""personality"": ""..."",
               ""voice_index"": 0,
               ""model_id"": 0,
-              ""motive"": ""Reason or null"",
-              ""access_to_weapon_description"": ""Description or null"",
-              ""alibi_statement"": ""Statement..."",
-              ""minor_secret"": ""Secret or null"",
-              ""rumors"": {{ ""OtherSuspectName"": ""Rumor text..."" }},
-              ""has_no_alibi"": true,
-              ""has_motive"": true,
-              ""has_access_to_weapon"": true,
-              ""is_killer"": true
+              ""motive"": ""..."",
+              ""access_to_weapon_description"": ""..."",
+              ""alibi_statement"": ""..."",
+              ""minor_secret"": ""..."",
+              ""rumors"": {{ ""Suspect Name"": ""Rumor text"" }},
+              ""has_no_alibi"": false,
+              ""has_motive"": false,
+              ""has_access_to_weapon"": false,
+              ""is_killer"": false
             }}
           ]
-        }}";
+        }}
+        
+        Return ONLY valid JSON. No markdown. No extra keys.";
 
         var payload = new
         {
@@ -267,28 +269,68 @@ public class GeminiConnectionManager : MonoBehaviour
             generationConfig = new { responseMimeType = "application/json" }
         };
 
-        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
-        using (request)
+        string jsonPayload = JsonConvert.SerializeObject(payload);
+        int retries = 5;
+        float delay = 1.0f;
+
+        while (retries > 0)
         {
+            UnityWebRequest request = CreateRequest(url, jsonPayload);
             yield return request.SendWebRequest();
+
             if (request.result == UnityWebRequest.Result.Success)
             {
                 try
                 {
                     var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                    if (res == null || res.candidates == null || res.candidates.Count == 0)
+                    {
+                        callback?.Invoke(null, "API Error: No candidates returned in response.");
+                        yield break;
+                    }
+
                     string jsonText = res.candidates[0].content.parts[0].text;
-                    currentScenario = JsonConvert.DeserializeObject<ScenarioData>(jsonText);
+                    Debug.Log("Raw Gemini Scenario JSON: " + jsonText);
+
+                    currentScenario = SafeDeserialize<ScenarioData>(jsonText);
+
+                    if (currentScenario == null || string.IsNullOrEmpty(currentScenario.victim_name))
+                    {
+                        callback?.Invoke(null, "Parsing Error: Scenario data was null or incomplete. Check logs for raw JSON.");
+                        yield break;
+                    }
 
                     if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
                     if (notebookManager != null) notebookManager.PopulateVictimPage();
 
                     callback?.Invoke(currentScenario, null);
+                    yield break;
                 }
-                catch (Exception ex) { callback?.Invoke(null, "Parsing Error: " + ex.Message); }
+                catch (Exception ex) 
+                { 
+                    callback?.Invoke(null, "Parsing Error: " + ex.Message); 
+                    yield break;
+                }
             }
-            else { callback?.Invoke(null, "API Error: " + request.error); }
+            else 
+            {
+                // Retry on 503, 429, or network errors
+                if (request.responseCode == 503 || request.responseCode == 429 || request.result == UnityWebRequest.Result.ConnectionError)
+                {
+                    retries--;
+                    if (retries > 0)
+                    {
+                        Debug.LogWarning($"Gemini Busy/Error ({request.responseCode}/{request.result}). Retrying in {delay}s... ({retries} left)");
+                        yield return new WaitForSeconds(delay);
+                        delay += 2.0f; // Linear increase
+                        continue;
+                    }
+                }
+                
+                callback?.Invoke(null, "API Error: " + request.error);
+                yield break;
+            }
         }
-        if (currentRequest == request) currentRequest = null;
     }
 
     // --- CALL 2: INTERROGATION ---
@@ -311,7 +353,12 @@ public class GeminiConnectionManager : MonoBehaviour
 The detective (the player) is calling you to submit an official accusation.
 You do not know the truth of the case, but you demand clear logic.
 Respond naturally to the detective's statements. 
-Limit your response to 2-3 sentences. Keep it conversational.";
+Limit your response to 2-3 sentences. Keep it conversational.
+
+OUTPUT JSON:
+- text: Your spoken dialogue.
+- emotion: One of [Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty].
+RULE: You MUST always choose the emotion that best fits your reaction to the detective.";
         }
         else
         {
@@ -339,7 +386,12 @@ Limit your response to 2-3 sentences. Keep it conversational.";
         4. If you are the killer ({activeSuspect.is_killer}), you will lie about your motive and access to the weapon, and stick to your false alibi.
         5. Respond naturally to the detective's most recent statement or question.
         6. Do not generate asterisks or roleplay actions (e.g. *sighs*), only dialogue.
-        7. TTS OPTIMIZATION: Do not refer to people by name but rather by their job title/ relationship to you.";
+        7. TTS OPTIMIZATION: Do not refer to people by name but rather by their job title/ relationship to you.
+        8. EMOTION: You MUST ALWAYS provide an 'emotion' from the allowed list that reflects your character's reaction.
+        
+        OUTPUT JSON:
+        - text: Your spoken dialogue.
+        - emotion: One of [Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty]. Choose based on the context of the conversation.";
         }
 
         string fullPrompt = $"Previous Transcript:\n{pastTranscript}\n\nDetective: {playerInput}\n{ (isPoliceChief ? "Police Chief" : activeSuspect.name) }:";
@@ -348,41 +400,59 @@ Limit your response to 2-3 sentences. Keep it conversational.";
         {
             contents = new[] { new { parts = new[] { new { text = fullPrompt } } } },
             systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
-            generationConfig = new { responseMimeType = "text/plain" }
+            generationConfig = new { responseMimeType = "application/json" }
         };
 
-        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
-        using (request)
+        string jsonPayload = JsonConvert.SerializeObject(payload);
+        int retries = 3;
+        float delay = 1.0f;
+
+        while (retries > 0)
         {
+            UnityWebRequest request = CreateRequest(url, jsonPayload);
             yield return request.SendWebRequest();
+
             if (request.result == UnityWebRequest.Result.Success)
             {
                 try
                 {
                     var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                    string generatedText = res.candidates[0].content.parts[0].text;
-                    Debug.Log($"Gemini Response: {generatedText}");
-                    callback?.Invoke(generatedText, null);
+                    if (res != null && res.candidates != null && res.candidates.Count > 0)
+                    {
+                        string generatedText = res.candidates[0].content.parts[0].text;
+                        Debug.Log($"Gemini Response: {generatedText}");
+                        callback?.Invoke(generatedText, null);
+                        yield break;
+                    }
+                    else
+                    {
+                        callback?.Invoke(null, "API Error: No response candidates.");
+                        yield break;
+                    }
                 }
-                catch (Exception ex) { callback?.Invoke(null, "Parsing Error: " + ex.Message); }
+                catch (Exception ex) 
+                { 
+                    callback?.Invoke(null, "Parsing Error: " + ex.Message); 
+                    yield break;
+                }
             }
-            else { callback?.Invoke(null, "API Error: " + request.error); }
+            else 
+            {
+                if (request.responseCode == 503 || request.responseCode == 429)
+                {
+                    retries--;
+                    if (retries > 0)
+                    {
+                        Debug.LogWarning($"Gemini Busy ({request.responseCode}). Retrying in {delay}s...");
+                        yield return new WaitForSeconds(delay);
+                        delay += 2.0f;
+                        continue;
+                    }
+                }
+                callback?.Invoke(null, "API Error: " + request.error);
+                yield break;
+            }
         }
-        if (currentRequest == request) currentRequest = null;
-        else 
-{ 
-    // Check if it's a 503 or 429
-    if (request.responseCode == 503 || request.responseCode == 429)
-    {
-        Debug.LogWarning("Gemini is busy (503/429). Retrying in 2 seconds...");
-        // You could trigger a small delay and try the call again here
-        callback?.Invoke(null, "SERVER_BUSY"); 
-    }
-    else 
-    {
-        callback?.Invoke(null, "API Error: " + request.error); 
-    }
-}
     }
 
     // --- CALL 3: THE JUDGE ---
@@ -395,8 +465,7 @@ Limit your response to 2-3 sentences. Keep it conversational.";
     private IEnumerator PostJudgeRequest(string accusedName, string motive, string access, JudgeCallback callback)
     {
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-        Debug.Log($"Gemini Judge Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
-
+        
         string systemPrompt = $@"You are a cynical 1940s crime journalist for the 'Daily Truth'. 
         Compare the detective's accusation to the hidden truth.
         
@@ -407,42 +476,75 @@ Limit your response to 2-3 sentences. Keep it conversational.";
         2. Write a SENSATIONAL NEWSPAPER HEADLINE. 
            - If Correct: Celebrate the capture.
            - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., 'DETECTIVE BLUNDERS! [True Killer] WAS THE REAL CULPRIT!').
-           - Make the headline no more than 45 characters long (including spaces and punctuation). Try to fit this length requirement as best as possible.
-           - Do not capitalize the headline. Only the first letters of important words should be capitalized.
+           - Make the headline no more than 45 characters long.
         3. Write the ARTICLE BODY (Noir Style).
            - Provide feedback on the investigation.
            - Explain WHY the logic was right or wrong.
-           - If the detective missed clues, mention them mockingly or tragically.
-           - Make the article body no more than 685 characters long (including spaces and punctuation). Try to fit this length requirement as best as possible. 
-        3. Write everything as if it is directed towards a casual newsreader, do not refer to the detective as 'you'.
+           - Article body max 685 characters.
         Output JSON: 
-        - is_correct (boolean)
-        - headline (string)
-        - article (string)";
+        {{
+          ""is_correct"": true,
+          ""headline"": ""..."",
+          ""article"": ""...""
+        }}";
 
         var payload = new
         {
             contents = new[] { new { parts = new[] { new { text = $"Accused: {accusedName}\nMotive: {motive}\nAccess: {access}" } } } },
             systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
-            generationConfig = new
-            {
-                responseMimeType = "application/json"
-            }
+            generationConfig = new { responseMimeType = "application/json" }
         };
 
-        UnityWebRequest request = CreateRequest(url, JsonConvert.SerializeObject(payload));
-        using (request)
+        string jsonPayload = JsonConvert.SerializeObject(payload);
+        int retries = 3;
+        float delay = 1.0f;
+
+        while (retries > 0)
         {
+            UnityWebRequest request = CreateRequest(url, jsonPayload);
             yield return request.SendWebRequest();
+
             if (request.result == UnityWebRequest.Result.Success)
             {
-                var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
-                var result = JsonConvert.DeserializeObject<JudgeResult>(res.candidates[0].content.parts[0].text);
-                callback?.Invoke(result.headline, result.article, result.is_correct, null);
+                try
+                {
+                    var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
+                    string jsonText = res.candidates[0].content.parts[0].text;
+                    var result = SafeDeserialize<JudgeResult>(jsonText);
+                    if (result != null)
+                    {
+                        callback?.Invoke(result.headline, result.article, result.is_correct, null);
+                        yield break;
+                    }
+                    else
+                    {
+                        callback?.Invoke(null, null, false, "Parsing Error: Judge result was null");
+                        yield break;
+                    }
+                }
+                catch (Exception ex) 
+                { 
+                    callback?.Invoke(null, null, false, "Parsing Error: " + ex.Message); 
+                    yield break;
+                }
             }
-            else { callback?.Invoke(null, null, false, request.error); }
+            else 
+            {
+                if (request.responseCode == 503 || request.responseCode == 429)
+                {
+                    retries--;
+                    if (retries > 0)
+                    {
+                        Debug.LogWarning($"Gemini Busy ({request.responseCode}). Retrying in {delay}s...");
+                        yield return new WaitForSeconds(delay);
+                        delay += 2.0f;
+                        continue;
+                    }
+                }
+                callback?.Invoke(null, null, false, "API Error: " + request.error);
+                yield break;
+            }
         }
-        if (currentRequest == request) currentRequest = null;
     }
 
     // Track current request
@@ -462,6 +564,44 @@ Limit your response to 2-3 sentences. Keep it conversational.";
         StopAllCoroutines();
     }
 
+    public T SafeDeserialize<T>(string json) where T : class
+    {
+        if (string.IsNullOrWhiteSpace(json)) return null;
+        string trimmed = json.Trim();
+
+        // Strip markdown code blocks if present
+        if (trimmed.StartsWith("```"))
+        {
+            // Remove starting ```json or ```
+            int firstNewline = trimmed.IndexOf('\n');
+            if (firstNewline != -1)
+            {
+                trimmed = trimmed.Substring(firstNewline).Trim();
+            }
+            
+            // Remove ending ```
+            if (trimmed.EndsWith("```"))
+            {
+                trimmed = trimmed.Substring(0, trimmed.Length - 3).Trim();
+            }
+        }
+
+        try
+        {
+            if (trimmed.StartsWith("["))
+            {
+                var list = JsonConvert.DeserializeObject<List<T>>(trimmed);
+                return (list != null && list.Count > 0) ? list[0] : null;
+            }
+            return JsonConvert.DeserializeObject<T>(trimmed);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"SafeDeserialize failed for {typeof(T).Name}: {ex.Message}. Raw: {json}");
+            return null;
+        }
+    }
+
     private UnityWebRequest CreateRequest(string url, string json)
     {
         UnityWebRequest req = new UnityWebRequest(url, "POST");
@@ -477,6 +617,6 @@ Limit your response to 2-3 sentences. Keep it conversational.";
     [Serializable] public class GeminiCandidate { public GeminiContent content; }
     [Serializable] public class GeminiContent { public string role; public List<GeminiPart> parts; }
     [Serializable] public class GeminiPart { public string text; }
+    [Serializable] public class InterrogationResult { public string text; public string emotion; }
     [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
-    // [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
 }

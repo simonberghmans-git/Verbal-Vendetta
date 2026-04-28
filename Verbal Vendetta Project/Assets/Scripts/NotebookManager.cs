@@ -64,6 +64,10 @@ public class NotebookManager : MonoBehaviour
     [Tooltip("Index of the page that should be shown when the notebook is opened (0-based).")]
     public int startingPageIndex = 0;
 
+    [Header("Briefing Audio")]
+    public AudioSource briefingAudioSource;
+    public AudioClip briefingClip;
+
     // currently active page index, -1 when none
     private int currentPageIndex = -1;
 
@@ -404,6 +408,13 @@ public class NotebookManager : MonoBehaviour
 
         currentPageIndex = -1;
         IsOpen = false;
+
+        // Fallback for briefing audio source
+        if (briefingAudioSource == null)
+        {
+            briefingAudioSource = GetComponent<AudioSource>();
+            if (briefingAudioSource != null) Debug.Log("[NotebookManager] Automatically found AudioSource on self.");
+        }
     }
 
     // Toggle notebook visibility with Tab and allow simple page navigation
@@ -438,6 +449,8 @@ public class NotebookManager : MonoBehaviour
         // deactivate any active page
         if (currentPageIndex >= 0 && currentPageIndex < notebookPages.Count && notebookPages[currentPageIndex] != null)
             notebookPages[currentPageIndex].SetActive(false);
+        
+        if (briefingAudioSource != null) briefingAudioSource.Stop();
         currentPageIndex = -1;
     }
 
@@ -454,6 +467,28 @@ public class NotebookManager : MonoBehaviour
             notebookPages[pageIndex].SetActive(true);
 
         currentPageIndex = pageIndex;
+
+        // Play Briefing Audio if page 0 (Case File) is opened
+        if (pageIndex == 0 && briefingClip != null)
+        {
+            if (briefingAudioSource != null)
+            {
+                if (!briefingAudioSource.isPlaying)
+                {
+                    Debug.Log("[NotebookManager] Playing Briefing Audio.");
+                    briefingAudioSource.clip = briefingClip;
+                    briefingAudioSource.Play();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[NotebookManager] briefingClip is ready, but briefingAudioSource is missing!");
+            }
+        }
+        else
+        {
+            if (briefingAudioSource != null) briefingAudioSource.Stop();
+        }
     }
 
     public void NextPage()
