@@ -71,6 +71,7 @@ public class KokoroManager : MonoBehaviour
 
         try
         {
+            Debug.Log($"[KokoroManager] Starting Synthesis for: \"{text.Substring(0, Mathf.Min(text.Length, 20))}...\"");
             // Split text into sentences to avoid sequence length limits
             string[] sentences = text.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
             List<float[]> audioChunks = new List<float[]>();
@@ -124,6 +125,7 @@ public class KokoroManager : MonoBehaviour
             AudioClip clip = AudioClip.Create("Kokoro_Briefing", mergedData.Length, 1, 24000, false);
             clip.SetData(mergedData, 0);
 
+            Debug.Log($"[KokoroManager] Synthesis Finished. Clip Length: {clip.length:F2}s");
             return clip;
         }
         catch (Exception e)
@@ -149,6 +151,7 @@ public class KokoroManager : MonoBehaviour
             // 4. Play
             AudioSource currentSource = targetAudioSource != null ? targetAudioSource : audioSource;
             currentSource.clip = clip;
+            Debug.Log($"[KokoroManager] Playing Audio via {(targetAudioSource != null ? targetAudioSource.gameObject.name : "Local Source")}");
             currentSource.Play();
 
             // Wait for audio to finish before invoking the event

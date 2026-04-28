@@ -24,6 +24,8 @@ public class SuspectManager : MonoBehaviour
     public List<string> femaleKokoroVoices;
     [Tooltip("Kokoro Voice for the Police Chief in the Accusation Phase.")]
     public string policeChiefVoice = "am_adam";
+    [Tooltip("Kokoro Voice for the Newsreader in the Ending.")]
+    public string newsreaderVoice = "af_nicole";
 
     [Header("Model Indices")]
     [Tooltip("Indices in the Prefab List that correspond to Male characters.")]

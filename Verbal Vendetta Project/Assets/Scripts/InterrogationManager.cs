@@ -226,6 +226,38 @@ public class InterrogationManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Submits the final accusation report to the Judge API automatically from the AI conversation.
+    /// </summary>
+    public void SubmitAutomatedAccusation(string name, string motive, string access)
+    {
+        if (connectionManager.currentScenario == null) return;
+
+        // STOP interrogation right away so the suspect doesn't keep talking
+        StopInterrogation();
+
+        // Inform GameManager
+        if (gameManager != null)
+        {
+            gameManager.currentState = GameManager.GameState.Ending;
+        }
+
+        if (gameManager != null) gameManager.ShowLoadingScreen("Finalizing Police Report...");
+
+        connectionManager.JudgeAccusation(name, motive, access, async (headline, article, isCorrect, error) =>
+        {
+            AudioClip newsClip = null;
+            if (string.IsNullOrEmpty(error) && conversationPipeline != null)
+            {
+                if (gameManager != null) gameManager.ShowLoadingScreen("Synthesizing News Broadcast...");
+                newsClip = await conversationPipeline.GenerateNewsAudio(article);
+            }
+
+            if (gameManager != null) gameManager.HideLoadingScreen();
+            ProcessJudgeResult(headline, article, isCorrect, error, newsClip);
+        });
+    }
+
+    /// <summary>
     /// Submits the final accusation report to the Judge API.
     /// </summary>
     public void SubmitAccusation()
@@ -259,79 +291,105 @@ public class InterrogationManager : MonoBehaviour
 
         if (gameManager != null) gameManager.ShowLoadingScreen("Submitting Accusation...");
 
-        connectionManager.JudgeAccusation(name, motive, access, (headline, article, isCorrect, error) =>
+        connectionManager.JudgeAccusation(name, motive, access, async (headline, article, isCorrect, error) =>
         {
+            AudioClip newsClip = null;
+            if (string.IsNullOrEmpty(error) && conversationPipeline != null)
+            {
+                if (gameManager != null) gameManager.ShowLoadingScreen("Synthesizing News Broadcast...");
+                newsClip = await conversationPipeline.GenerateNewsAudio(article);
+            }
+
             if (gameManager != null) gameManager.HideLoadingScreen();
-
-            if (string.IsNullOrEmpty(error))
-            {
-                if (articleHeadlineDisplay != null)
-                {
-                    articleHeadlineDisplay.text = headline;
-                }
-                
-                if (articleBodyDisplay != null)
-                {
-                    if (article.Length <= 306)
-                    {
-                        articleBodyDisplay.text = article;
-                        if (articleBodyDisplay2 != null) articleBodyDisplay2.text = "";
-                    }
-                    else
-                    {
-                        int breakPoint = 306;
-                        
-                        // Backtrack to the nearest whitespace to ensure no word is cut in half
-                        while (breakPoint > 0 && !char.IsWhiteSpace(article[breakPoint]))
-                        {
-                            breakPoint--;
-                        }
-
-                        if (breakPoint == 0) 
-                        {
-                            breakPoint = 306; // Fallback
-                        }
-                        
-                        articleBodyDisplay.text = article.Substring(0, breakPoint).Trim();
-                        if (articleBodyDisplay2 != null)
-                        {
-                            articleBodyDisplay2.text = article.Substring(breakPoint).Trim();
-                        }
-                    }
-                }
-
-                // Show killer's portrait
-                if (killerPortraitDisplay != null && connectionManager.currentScenario != null)
-                {
-                    SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
-                    if (suspectManager != null)
-                    {
-                        var killer = connectionManager.currentScenario.suspects.Find(s => s.is_killer);
-                        if (killer != null)
-                        {
-                            killerPortraitDisplay.sprite = suspectManager.GetSuspectImage(killer.model_id);
-                            killerPortraitDisplay.enabled = true;
-                        }
-                    }
-                }
-
-                // Hide the main UI canvas to remove crosshair/notebook availability
-                if (mainUICanvas != null)
-                {
-                    mainUICanvas.SetActive(false);
-                }
-
-                StartCoroutine(ReturnToMenuRoutine());
-            }
-            else
-            {
-                if (articleHeadlineDisplay != null)
-                    articleHeadlineDisplay.text = "Newsroom Error";
-                
-                if (articleBodyDisplay != null)
-                    articleBodyDisplay.text = $"<color=red>Error:</color> {error}";
-            }
+            ProcessJudgeResult(headline, article, isCorrect, error, newsClip);
         });
+    }
+
+    private void ProcessJudgeResult(string headline, string article, bool isCorrect, string error, AudioClip newsClip = null)
+    {
+        if (string.IsNullOrEmpty(error))
+        {
+            if (articleHeadlineDisplay != null)
+            {
+                articleHeadlineDisplay.text = headline;
+            }
+            
+            if (articleBodyDisplay != null)
+            {
+                if (article.Length <= 306)
+                {
+                    articleBodyDisplay.text = article;
+                    if (articleBodyDisplay2 != null) articleBodyDisplay2.text = "";
+                }
+                else
+                {
+                    int breakPoint = 306;
+                    
+                    // Backtrack to the nearest whitespace to ensure no word is cut in half
+                    while (breakPoint > 0 && !char.IsWhiteSpace(article[breakPoint]))
+                    {
+                        breakPoint--;
+                    }
+
+                    if (breakPoint == 0) 
+                    {
+                        breakPoint = 306; // Fallback
+                    }
+                    
+                    articleBodyDisplay.text = article.Substring(0, breakPoint).Trim();
+                    if (articleBodyDisplay2 != null)
+                    {
+                        articleBodyDisplay2.text = article.Substring(breakPoint).Trim();
+                    }
+                }
+            }
+
+            // Show killer's portrait
+            if (killerPortraitDisplay != null && connectionManager.currentScenario != null)
+            {
+                SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
+                if (suspectManager != null)
+                {
+                    var killer = connectionManager.currentScenario.suspects.Find(s => s.is_killer);
+                    if (killer != null)
+                    {
+                        killerPortraitDisplay.sprite = suspectManager.GetSuspectImage(killer.model_id);
+                        killerPortraitDisplay.enabled = true;
+                    }
+                }
+            }
+
+            // Hide the main UI canvas to remove crosshair/notebook availability
+            if (mainUICanvas != null)
+            {
+                mainUICanvas.SetActive(false);
+            }
+
+            // Play News Audio via KokoroManager's AudioSource
+            if (newsClip != null && conversationPipeline != null && conversationPipeline.kokoroManager != null)
+            {
+                AudioSource kokoroSource = conversationPipeline.kokoroManager.GetComponent<AudioSource>();
+                
+                // Stop any existing speech (e.g., Police Chief)
+                if (kokoroSource.isPlaying) kokoroSource.Stop();
+                
+                // Ensure we are playing from the local source, not a suspect's source
+                conversationPipeline.kokoroManager.SetTargetAudioSource(null); 
+                
+                kokoroSource.clip = newsClip;
+                kokoroSource.Play();
+            }
+
+            StartCoroutine(ReturnToMenuRoutine());
+        }
+        else
+        {
+            if (articleHeadlineDisplay != null)
+                articleHeadlineDisplay.text = "Newsroom Error";
+            
+            if (articleBodyDisplay != null)
+                articleBodyDisplay.text = $"<color=red>Error:</color> {error}";
+        }
     }
 
     // Track current speech for transition states
@@ -401,6 +459,20 @@ public class InterrogationManager : MonoBehaviour
         else
         {
             yield return new WaitForSeconds(cameraLerpDuration);
+        }
+
+        // Wait for the news audio to finish if it's still playing
+        if (conversationPipeline != null && conversationPipeline.kokoroManager != null)
+        {
+            AudioSource kokoroSource = conversationPipeline.kokoroManager.GetComponent<AudioSource>();
+            if (kokoroSource != null && kokoroSource.isPlaying)
+            {
+                while (kokoroSource.isPlaying)
+                {
+                    yield return null;
+                }
+                yield return new WaitForSeconds(1f); // Brief pause after audio ends
+            }
         }
 
         if (scenesManager != null) scenesManager.GoToMenu();

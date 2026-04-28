@@ -158,6 +158,16 @@ public class ConversationPipeline : MonoBehaviour
             OnSpeakStateChanged?.Invoke(true);
             kokoroManager.SynthesizeAndPlay(cleanedText);
         }
+
+        // Check for Accusation Completion (Police Chief Mode)
+        if (isPoliceChiefMode && result.provided_suspect && result.provided_motive && result.provided_means)
+        {
+            InterrogationManager im = FindObjectOfType<InterrogationManager>();
+            if (im != null)
+            {
+                im.SubmitAutomatedAccusation(result.suspect_name, result.motive_description, result.means_description);
+            }
+        }
     }
 
     public async Task<AudioClip> GenerateBriefingAudio(ScenarioData data)
@@ -173,6 +183,16 @@ public class ConversationPipeline : MonoBehaviour
                             $"We've brought in {data.suspects.Count} suspects for you to talk to. Get to work.";
 
         return await kokoroManager.Synthesize(briefingText);
+    }
+
+    public async Task<AudioClip> GenerateNewsAudio(string text)
+    {
+        if (string.IsNullOrEmpty(text) || kokoroManager == null || suspectManager == null) return null;
+
+        // Set the Newsreader voice
+        kokoroManager.SetVoice(suspectManager.newsreaderVoice);
+
+        return await kokoroManager.Synthesize(text);
     }
 
     private void HandleKokoroFinished()

@@ -187,6 +187,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private IEnumerator PostScenarioRequest(ScenarioCallback callback)
     {
+        Debug.Log("[GeminiConnectionManager] Sending Scenario Generation Request...");
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
@@ -290,6 +291,7 @@ public class GeminiConnectionManager : MonoBehaviour
                     }
 
                     string jsonText = res.candidates[0].content.parts[0].text;
+                    Debug.Log("[GeminiConnectionManager] Scenario Response Received.");
                     Debug.Log("Raw Gemini Scenario JSON: " + jsonText);
 
                     currentScenario = SafeDeserialize<ScenarioData>(jsonText);
@@ -342,6 +344,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private IEnumerator PostInterrogationRequest(string playerInput, SuspectData activeSuspect, string pastTranscript, bool isPoliceChief, Action<string, string> callback)
     {
+        Debug.Log($"[GeminiConnectionManager] Sending {(isPoliceChief ? "Police Chief" : "Suspect")} Interrogation Request...");
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         Debug.Log($"Gemini Interrogation Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
         
@@ -351,14 +354,28 @@ public class GeminiConnectionManager : MonoBehaviour
         {
             systemPrompt = $@"You are the cynical, no-nonsense Police Chief of the precinct.
 The detective (the player) is calling you to submit an official accusation.
-You do not know the truth of the case, but you demand clear logic.
+You do not know the truth of the case, but you are here to listen.
+Your goal is to get three things from the detective:
+1. The name of the suspect they are accusing.
+2. The motive of that suspect.
+3. The means of accessing the weapon (how they got it).
+
+Do not pressure for 'accurate' information, just listen and confirm when you've heard all three.
 Respond naturally to the detective's statements. 
 Limit your response to 2-3 sentences. Keep it conversational.
 
 OUTPUT JSON:
 - text: Your spoken dialogue.
 - emotion: One of [Neutral, Angry, Shocked, Sad, Smug, Nervous, Guilty].
-RULE: You MUST always choose the emotion that best fits your reaction to the detective.";
+- provided_suspect: boolean, true if the player has clearly named a suspect in this turn or previous turns.
+- suspect_name: string, the name of the accused suspect (if provided).
+- provided_motive: boolean, true if the player has explained a motive.
+- motive_description: string, the motive description (if provided).
+- provided_means: boolean, true if the player has explained how the suspect accessed the weapon.
+- means_description: string, the description of the means/access (if provided).
+
+RULE: You MUST always choose the emotion that best fits your reaction to the detective.
+Keep the provided_* flags true once they have been established in the conversation history.";
         }
         else
         {
@@ -420,6 +437,7 @@ RULE: You MUST always choose the emotion that best fits your reaction to the det
                     if (res != null && res.candidates != null && res.candidates.Count > 0)
                     {
                         string generatedText = res.candidates[0].content.parts[0].text;
+                        Debug.Log("[GeminiConnectionManager] Interrogation Response Received.");
                         Debug.Log($"Gemini Response: {generatedText}");
                         callback?.Invoke(generatedText, null);
                         yield break;
@@ -464,6 +482,7 @@ RULE: You MUST always choose the emotion that best fits your reaction to the det
 
     private IEnumerator PostJudgeRequest(string accusedName, string motive, string access, JudgeCallback callback)
     {
+        Debug.Log("[GeminiConnectionManager] Sending Judge Accusation Request...");
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string systemPrompt = $@"You are a cynical 1940s crime journalist for the 'Daily Truth'. 
@@ -510,6 +529,7 @@ RULE: You MUST always choose the emotion that best fits your reaction to the det
                 {
                     var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
                     string jsonText = res.candidates[0].content.parts[0].text;
+                    Debug.Log("[GeminiConnectionManager] Judge Response Received.");
                     var result = SafeDeserialize<JudgeResult>(jsonText);
                     if (result != null)
                     {
@@ -617,6 +637,16 @@ RULE: You MUST always choose the emotion that best fits your reaction to the det
     [Serializable] public class GeminiCandidate { public GeminiContent content; }
     [Serializable] public class GeminiContent { public string role; public List<GeminiPart> parts; }
     [Serializable] public class GeminiPart { public string text; }
-    [Serializable] public class InterrogationResult { public string text; public string emotion; }
+    [Serializable] public class InterrogationResult 
+    { 
+        public string text; 
+        public string emotion; 
+        public bool provided_suspect;
+        public string suspect_name;
+        public bool provided_motive;
+        public string motive_description;
+        public bool provided_means;
+        public string means_description;
+    }
     [Serializable] private class JudgeResult { public bool is_correct; public string headline; public string article; }
 }

@@ -19,7 +19,6 @@ public class GameManager : MonoBehaviour
     [Header("Loading Screen")]
     public GameObject loadingScreen;
     public TMP_Text loadingText;
-    public GameObject accusationButton;
 
     public void ShowLoadingScreen(string message)
     {
@@ -44,7 +43,6 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         if (inputManager == null) inputManager = FindObjectOfType<InterrogationInputManager>();
-        if (accusationButton != null) accusationButton.SetActive(currentState == GameState.SubjectSelection);
 
         // Initial Setup - Camera to Selection
         if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
@@ -217,8 +215,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (accusationButton != null) accusationButton.SetActive(false);
-
         yield return new WaitForSeconds(0.5f); 
         isInputLocked = false;
     }
@@ -262,8 +258,6 @@ public class GameManager : MonoBehaviour
             interrogationManager.SetActiveSuspect(null, null); // Clear active suspect
         }
 
-        if (accusationButton != null) accusationButton.SetActive(true);
-
         yield return new WaitForSeconds(0.5f);
         isInputLocked = false;
     }
@@ -305,15 +299,13 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        /* REMOVED CAMERA SWITCH
-        if (mainCamera != null && interrogationCameraPos != null)
+        // Set Camera to Selection Spot
+        if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
         {
-            mainCamera.transform.position = interrogationCameraPos.position;
-            mainCamera.transform.rotation = interrogationCameraPos.rotation * Quaternion.Euler(0, 90, 0);
+            mainCamera.transform.position = selectionManager.cameraPosition.position;
+            mainCamera.transform.rotation = selectionManager.cameraPosition.rotation * Quaternion.Euler(0, 180, 0);
         }
-        */
 
-        if (accusationButton != null) accusationButton.SetActive(false);
 
         yield return new WaitForSeconds(0.5f);
         isInputLocked = false;

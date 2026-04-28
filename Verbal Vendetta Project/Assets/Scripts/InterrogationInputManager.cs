@@ -99,12 +99,14 @@ public class InterrogationInputManager : MonoBehaviour
 
     void StartRecording()
     {
+        Debug.Log("[InterrogationInputManager] Recording Started.");
         isRecording = true;
         conversationPipeline?.StartRecording();
     }
 
     void StopRecording()
     {
+        Debug.Log("[InterrogationInputManager] Recording Stopped. Requesting Transcription...");
         isRecording = false;
         conversationPipeline?.StopRecording();
     }
