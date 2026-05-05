@@ -187,7 +187,6 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private IEnumerator PostScenarioRequest(ScenarioCallback callback)
     {
-        Debug.Log("[GeminiConnectionManager] Sending Scenario Generation Request...");
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
@@ -291,9 +290,6 @@ public class GeminiConnectionManager : MonoBehaviour
                     }
 
                     string jsonText = res.candidates[0].content.parts[0].text;
-                    Debug.Log("[GeminiConnectionManager] Scenario Response Received.");
-                    Debug.Log("Raw Gemini Scenario JSON: " + jsonText);
-
                     currentScenario = SafeDeserialize<ScenarioData>(jsonText);
 
                     if (currentScenario == null || string.IsNullOrEmpty(currentScenario.victim_name))
@@ -344,9 +340,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private IEnumerator PostInterrogationRequest(string playerInput, SuspectData activeSuspect, string pastTranscript, bool isPoliceChief, Action<string, string> callback)
     {
-        Debug.Log($"[GeminiConnectionManager] Sending {(isPoliceChief ? "Police Chief" : "Suspect")} Interrogation Request...");
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
-        Debug.Log($"Gemini Interrogation Request URL: {url.Replace(apiKey, "HIDDEN_KEY")}");
         
         string systemPrompt;
 
@@ -437,8 +431,6 @@ Keep the provided_* flags true once they have been established in the conversati
                     if (res != null && res.candidates != null && res.candidates.Count > 0)
                     {
                         string generatedText = res.candidates[0].content.parts[0].text;
-                        Debug.Log("[GeminiConnectionManager] Interrogation Response Received.");
-                        Debug.Log($"Gemini Response: {generatedText}");
                         callback?.Invoke(generatedText, null);
                         yield break;
                     }
@@ -482,7 +474,6 @@ Keep the provided_* flags true once they have been established in the conversati
 
     private IEnumerator PostJudgeRequest(string accusedName, string motive, string access, JudgeCallback callback)
     {
-        Debug.Log("[GeminiConnectionManager] Sending Judge Accusation Request...");
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string systemPrompt = $@"You are a cynical 1940s crime journalist for the 'Daily Truth'. 
@@ -529,7 +520,6 @@ Keep the provided_* flags true once they have been established in the conversati
                 {
                     var res = JsonConvert.DeserializeObject<GeminiResponseWrapper>(request.downloadHandler.text);
                     string jsonText = res.candidates[0].content.parts[0].text;
-                    Debug.Log("[GeminiConnectionManager] Judge Response Received.");
                     var result = SafeDeserialize<JudgeResult>(jsonText);
                     if (result != null)
                     {

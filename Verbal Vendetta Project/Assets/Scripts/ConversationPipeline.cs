@@ -115,12 +115,14 @@ public class ConversationPipeline : MonoBehaviour
         // Call Gemini
         if (geminiManager != null && !sttTestMode)
         {
+            Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Sending Text to Gemini...");
             geminiManager.GenerateInterrogationResponse(text, activeSuspect, pastTranscript, isPoliceChiefMode, HandleGeminiResponse);
         }
     }
 
     private void HandleGeminiResponse(string responseText, string error)
     {
+        Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Gemini Reply Received.");
         if (!string.IsNullOrEmpty(error))
         {
             Debug.LogError($"Gemini Error: {error}");

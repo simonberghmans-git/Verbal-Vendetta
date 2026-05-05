@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System;
 using System.Collections;
 
 /// <summary>
@@ -99,14 +100,13 @@ public class InterrogationInputManager : MonoBehaviour
 
     void StartRecording()
     {
-        Debug.Log("[InterrogationInputManager] Recording Started.");
         isRecording = true;
         conversationPipeline?.StartRecording();
     }
 
     void StopRecording()
     {
-        Debug.Log("[InterrogationInputManager] Recording Stopped. Requesting Transcription...");
+        Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Recording Key Released.");
         isRecording = false;
         conversationPipeline?.StopRecording();
     }

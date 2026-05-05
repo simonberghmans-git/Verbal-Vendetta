@@ -50,17 +50,17 @@ public class LocalWhisperManager : MonoBehaviour
 
         try
         {
-            Debug.Log($"[LocalWhisperManager] Transcribing {lengthInSeconds:F2}s of audio...");
+            Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Speech Sent to Whisper (Length: {lengthInSeconds:F2}s)");
             var res = await whisperManager.GetTextAsync(chunk.Data, chunk.Frequency, chunk.Channels);
             if (res != null && !string.IsNullOrWhiteSpace(res.Result))
             {
                 string text = res.Result.Trim();
-                Debug.Log($"[LocalWhisperManager] Transcription Result: \"{text}\"");
+                Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Speech Converted to Text: \"{text}\"");
                 OnTranscriptionReceived?.Invoke(text);
             }
             else
             {
-                Debug.Log("[LocalWhisperManager] Transcription returned empty result.");
+                Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Speech Converted to Text (EMPTY RESULT)");
                 OnTranscriptionReceived?.Invoke(""); // Empty transcript
             }
         }
