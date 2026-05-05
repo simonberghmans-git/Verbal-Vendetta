@@ -2,6 +2,9 @@
     "name": "TTS.Editor",
     "rootNamespace": "Unity.InferenceEngine.Samples.TTS.Editor",
     "references": [
+        "GUID:63a57c8b658089e49a173b0f0c4870a7",
+        "GUID:2f101f87087d58f4ba92ca00188e763d",
+        "GUID:710bb277e6ff49ed91ba164465e106ef",
         "GUID:bcea027dc80964ca8946fef1a5635af4"
     ],
     "includePlatforms": [
