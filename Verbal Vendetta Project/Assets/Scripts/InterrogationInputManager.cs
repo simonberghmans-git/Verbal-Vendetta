@@ -36,10 +36,8 @@ public class InterrogationInputManager : MonoBehaviour
         // 0. check game state
         if (gameManager != null && gameManager.currentState != GameManager.GameState.Interrogation && gameManager.currentState != GameManager.GameState.Accusation) return;
 
-        // Check if Notebook is open
-        if (interrogationManager != null && 
-            interrogationManager.notebookManager != null && 
-            interrogationManager.notebookManager.IsOpen)
+        // Check if Pin Board is open
+        if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
         {
             return;
         }

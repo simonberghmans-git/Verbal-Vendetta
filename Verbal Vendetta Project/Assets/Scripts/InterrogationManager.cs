@@ -11,7 +11,7 @@ public class InterrogationManager : MonoBehaviour
     [Header("Dependencies")]
     public GeminiConnectionManager connectionManager;
     public ConversationPipeline conversationPipeline; // Replaces GeminiLiveConnection
-    public NotebookManager notebookManager;
+    public PinBoardManager pinBoardManager;
     public ScenesManager scenesManager;
     public GameManager gameManager; // Need this to access GameState
 
@@ -56,6 +56,25 @@ public class InterrogationManager : MonoBehaviour
         responseTextField.text = "<i>Press 'Space' or use Arrows to select.</i>";
         
         // Generation is now handled by GameManager
+    }
+
+    private void Update()
+    {
+        // Press R to record the last suspect statement to the pin board
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (activeSuspectData != null && !string.IsNullOrEmpty(currentModelTranscript))
+            {
+                if (pinBoardManager != null)
+                {
+                    pinBoardManager.AddEvidenceScrap(currentModelTranscript);
+                }
+                else if (PinBoardManager.Instance != null)
+                {
+                    PinBoardManager.Instance.AddEvidenceScrap(currentModelTranscript);
+                }
+            }
+        }
     }
 
     public void SetActiveSuspect(SuspectData data, GameObject suspectObject)
@@ -136,18 +155,7 @@ public class InterrogationManager : MonoBehaviour
             responseTextField.text = $"<b>{speaker}:</b> {text}";
         }
         
-        if (notebookManager != null && activeSuspectData != null)
-        {
-            int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspectData);
-            if (speaker == "Player")
-            {
-                notebookManager.AppendSuspectLine(index, $"Player: {text}");
-            }
-            else
-            {
-                notebookManager.AppendSuspectLine(index, text);
-            }
-        }
+        // Note: NotebookManager logic removed in favor of PinBoard 'R' key recording.
     }
 
     private void HandleSpeakStateChanged(bool isSpeaking)
@@ -398,11 +406,7 @@ public class InterrogationManager : MonoBehaviour
     public void StopInterrogation()
     {
         // Handle interruption marker in transcript
-        if (isModelSpeaking && notebookManager != null && activeSuspectData != null)
-        {
-            int index = connectionManager.currentScenario.suspects.IndexOf(activeSuspectData);
-            notebookManager.AppendSuspectLine(index, "[INTERRUPTED]");
-        }
+        // Note: NotebookManager logic removed.
         isModelSpeaking = false;
         currentModelTranscript = "";
 

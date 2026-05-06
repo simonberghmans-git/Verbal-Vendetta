@@ -142,8 +142,7 @@ public class GeminiConnectionManager : MonoBehaviour
     [Header("Debug Settings")]
     [SerializeField] private TMP_Text debugDisplayField;
 
-    [Header("UI References")]
-    public NotebookManager notebookManager;
+    // Removed NotebookManager reference in favor of PinBoardManager (managed by GameManager)
 
     // --- DELEGATES ---
     public delegate void ScenarioCallback(ScenarioData data, string error);
@@ -159,7 +158,6 @@ public class GeminiConnectionManager : MonoBehaviour
             {
                 currentScenario = JsonConvert.DeserializeObject<ScenarioData>(TEST_SCENARIO_JSON);
                 if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
-                if (notebookManager != null) notebookManager.PopulateVictimPage();
                 callback?.Invoke(currentScenario, null);
             }
             catch (Exception ex)
@@ -299,8 +297,6 @@ public class GeminiConnectionManager : MonoBehaviour
                     }
 
                     if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
-                    if (notebookManager != null) notebookManager.PopulateVictimPage();
-
                     callback?.Invoke(currentScenario, null);
                     yield break;
                 }

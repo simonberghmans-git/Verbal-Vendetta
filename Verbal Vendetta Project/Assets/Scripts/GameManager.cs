@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { SubjectSelection, Interrogation, Ending, Accusation }
+    public enum GameState { SubjectSelection, Interrogation, Ending, Accusation, PinBoard }
     public GameState currentState = GameState.SubjectSelection;
 
     [Header("Dependencies")]
@@ -35,10 +35,12 @@ public class GameManager : MonoBehaviour
     [Header("Interrogation Scene")]
     public Transform interrogationSpot;
     public Transform interrogationCameraPos;
+    public Transform pinBoardCameraPos;
 
     // Internal State
     private GameObject currentActiveHighDetailModel;
     private bool isInputLocked = false;
+    private GameState stateBeforePinBoard = GameState.SubjectSelection;
 
     void Start()
     {
@@ -71,9 +73,12 @@ public class GameManager : MonoBehaviour
                          interrogationManager.SetActiveSuspect(null, null);
                      }
 
-                     // Generate Briefing Audio for Notebook Page 1
-                     if (interrogationManager != null && interrogationManager.conversationPipeline != null && interrogationManager.notebookManager != null)
+                     // Generate Briefing Audio for Pin Board
+                     if (interrogationManager != null && interrogationManager.conversationPipeline != null)
                      {
+                         // Populate the board with suspect cards
+                         if (PinBoardManager.Instance != null) PinBoardManager.Instance.PopulateBoard(data);
+
                          ShowLoadingScreen("Synthesizing Briefing...");
                          await GenerateBriefing(data);
                      }
@@ -94,22 +99,15 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] Starting Briefing Synthesis...");
         AudioClip briefing = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
         
-        if (briefing != null && interrogationManager.notebookManager != null)
+        if (briefing != null)
         {
             Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefing.length}s");
-            interrogationManager.notebookManager.briefingClip = briefing;
-
-            // Automatic fallback if no AudioSource is assigned
-            if (interrogationManager.notebookManager.briefingAudioSource == null)
-            {
-                AudioSource kokoroSource = interrogationManager.conversationPipeline.kokoroManager.GetComponent<AudioSource>();
-                interrogationManager.notebookManager.briefingAudioSource = kokoroSource;
-                Debug.Log("[GameManager] Assigned KokoroManager AudioSource as fallback for Notebook briefing.");
-            }
+            // Store briefing in a central place if needed, or play via PinBoardManager
+            // For now, we'll assume the Chief's briefing is played via a button on the PinBoard or automatically on toggle.
         }
         else
         {
-            Debug.LogWarning("[GameManager] Briefing synthesis failed or NotebookManager is missing.");
+            Debug.LogWarning("[GameManager] Briefing synthesis failed.");
         }
     }
 
@@ -130,10 +128,8 @@ public class GameManager : MonoBehaviour
             // Check for Toggle
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                // Check if Notebook is open - if so, disable mode switching
-                if (interrogationManager != null && 
-                    interrogationManager.notebookManager != null && 
-                    interrogationManager.notebookManager.IsOpen)
+                // Check if Pin Board is open - if so, disable mode switching
+                if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
                 {
                     return; 
                 }
@@ -159,15 +155,26 @@ public class GameManager : MonoBehaviour
             // Press Space to go back
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                // Check if Notebook is open - if so, disable mode switching
-                if (interrogationManager != null && 
-                    interrogationManager.notebookManager != null && 
-                    interrogationManager.notebookManager.IsOpen)
+                // Check if Pin Board is open - if so, disable mode switching
+                if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
                 {
                     return; 
                 }
 
                 StartCoroutine(SwitchToSelection());
+            }
+        }
+
+        // --- GLOBAL PIN BOARD TOGGLE (TAB) ---
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (currentState == GameState.PinBoard)
+            {
+                StartCoroutine(ClosePinBoard());
+            }
+            else if (currentState == GameState.SubjectSelection || currentState == GameState.Interrogation)
+            {
+                StartCoroutine(OpenPinBoard());
             }
         }
     }
@@ -308,6 +315,69 @@ public class GameManager : MonoBehaviour
 
 
         yield return new WaitForSeconds(0.5f);
+        isInputLocked = false;
+    }
+
+    private System.Collections.IEnumerator OpenPinBoard()
+    {
+        if (inputManager != null) inputManager.ForceReset();
+        isInputLocked = true;
+        
+        stateBeforePinBoard = currentState; // Remember where we were
+        currentState = GameState.PinBoard;
+
+        // Hide other UIs
+        if (selectionManager != null) selectionManager.isInputActive = false;
+        
+        // Show Pin Board UI
+        if (PinBoardManager.Instance != null) PinBoardManager.Instance.SetVisible(true);
+
+        // Move Camera
+        if (mainCamera != null && pinBoardCameraPos != null)
+        {
+            mainCamera.transform.position = pinBoardCameraPos.position;
+            mainCamera.transform.rotation = pinBoardCameraPos.rotation;
+        }
+
+        yield return new WaitForSeconds(0.3f);
+        isInputLocked = false;
+    }
+
+    private System.Collections.IEnumerator ClosePinBoard()
+    {
+        isInputLocked = true;
+
+        // Hide Pin Board UI
+        if (PinBoardManager.Instance != null) PinBoardManager.Instance.SetVisible(false);
+
+        // Restore State
+        if (stateBeforePinBoard == GameState.Interrogation)
+        {
+            // Move camera back to interrogation spot
+            if (mainCamera != null && interrogationCameraPos != null)
+            {
+                mainCamera.transform.position = interrogationCameraPos.position;
+                mainCamera.transform.rotation = interrogationCameraPos.rotation * Quaternion.Euler(0, 90, 0);
+            }
+            currentState = GameState.Interrogation;
+        }
+        else
+        {
+            // Default back to selection
+            if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
+            {
+                mainCamera.transform.position = selectionManager.cameraPosition.position;
+                mainCamera.transform.rotation = selectionManager.cameraPosition.rotation * Quaternion.Euler(0, 180, 0);
+            }
+            if (selectionManager != null)
+            {
+                selectionManager.SetVisible(true);
+                selectionManager.isInputActive = true;
+            }
+            currentState = GameState.SubjectSelection;
+        }
+
+        yield return new WaitForSeconds(0.3f);
         isInputLocked = false;
     }
 }
