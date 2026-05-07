@@ -1175,6 +1175,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4951971647986025878, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       insertIndex: -1
       addedObject: {fileID: -8762337167484277165}
+    - targetCorrespondingSourceObject: {fileID: 4951971647986025878, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5888363283540313476}
   m_SourcePrefab: {fileID: 100100000, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
 --- !u!1 &1234586954406057694 stripped
 GameObject:
@@ -1202,6 +1205,27 @@ MonoBehaviour:
   openDuration: 0.1
   minStressBlinkInterval: 0.2
   maxStressBlinkInterval: 3
+--- !u!65 &5888363283540313476
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1234586954406057694}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.42, z: 1}
+  m_Center: {x: 0, y: 0.94, z: 0}
 --- !u!137 &6195990915288418610 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 28808690520251002, guid: bd5f652942e669a47b2393d56690c7df, type: 3}

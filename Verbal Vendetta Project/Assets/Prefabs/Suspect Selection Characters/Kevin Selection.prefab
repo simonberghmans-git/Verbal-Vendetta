@@ -71,6 +71,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6961618175190215399, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
       insertIndex: -1
       addedObject: {fileID: -7335839651011102014}
+    - targetCorrespondingSourceObject: {fileID: 6961618175190215399, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8934848516542230491}
   m_SourcePrefab: {fileID: 100100000, guid: 2bfed661d6f47124a896459ccc7cf35c, type: 3}
 --- !u!137 &3076525901007223346 stripped
 SkinnedMeshRenderer:
@@ -103,3 +106,24 @@ MonoBehaviour:
   openDuration: 0.1
   minStressBlinkInterval: 0.2
   maxStressBlinkInterval: 3
+--- !u!65 &8934848516542230491
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7956931052175812062}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.42, z: 1}
+  m_Center: {x: 0, y: 0.94, z: 0}

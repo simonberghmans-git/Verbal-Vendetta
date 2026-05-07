@@ -1166,6 +1166,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
       insertIndex: -1
       addedObject: {fileID: 44500309297943700}
+    - targetCorrespondingSourceObject: {fileID: 6301624631962165282, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7396902833418456182}
   m_SourcePrefab: {fileID: 100100000, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}
 --- !u!136 &163403378645178449 stripped
 CapsuleCollider:
@@ -1239,6 +1242,27 @@ MonoBehaviour:
   openDuration: 0.1
   minStressBlinkInterval: 0.2
   maxStressBlinkInterval: 3
+--- !u!65 &7396902833418456182
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2552858701234886895}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.42, z: 1}
+  m_Center: {x: 0, y: 0.94, z: 0}
 --- !u!136 &2741568080583454784 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 5913873808692070541, guid: 3fb16c9bdd13f28418a820cdd7296af3, type: 3}

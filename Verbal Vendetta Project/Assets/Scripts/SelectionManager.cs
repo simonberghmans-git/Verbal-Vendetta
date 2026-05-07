@@ -9,7 +9,8 @@ public class SelectionManager : MonoBehaviour
     [Header("Configuration")]
     public List<Transform> lineupSpots;
     public Transform cameraPosition;
-    public GameObject selectionHighlight;
+    public Light selectionLight; 
+    public Vector3 lightOffset = new Vector3(0, 3, 0);
 
     [HideInInspector] public bool isInputActive = false;
     
@@ -56,16 +57,39 @@ public class SelectionManager : MonoBehaviour
     {
         if (!isInputActive || spawnedLowDetailSuspects.Count == 0) return;
 
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        // --- Mouse Click Selection ---
+        if (Input.GetMouseButtonDown(0))
         {
-            currentSelectionIndex = (currentSelectionIndex + 1) % spawnedLowDetailSuspects.Count;
-            UpdateSelectionHighlight();
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            currentSelectionIndex--;
-            if (currentSelectionIndex < 0) currentSelectionIndex = spawnedLowDetailSuspects.Count - 1;
-            UpdateSelectionHighlight();
+            // Prevent selection if clicking on UI
+            if (UnityEngine.EventSystems.EventSystem.current != null && 
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) 
+            {
+                Debug.Log("[Selection] Clicked on UI, ignoring.");
+                return;
+            }
+
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                Debug.Log($"[Selection] Hit object: {hit.transform.name}");
+                
+                // Check if we hit one of our suspects
+                for (int i = 0; i < spawnedLowDetailSuspects.Count; i++)
+                {
+                    if (hit.transform.IsChildOf(spawnedLowDetailSuspects[i].transform))
+                    {
+                        Debug.Log($"[Selection] Selected Suspect {i}: {spawnedLowDetailSuspects[i].name}");
+                        currentSelectionIndex = i;
+                        UpdateSelectionHighlight();
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log("[Selection] Raycast hit nothing. Ensure suspects have Colliders.");
+            }
         }
     }
 
@@ -73,14 +97,24 @@ public class SelectionManager : MonoBehaviour
     {
         if (spawnedLowDetailSuspects.Count == 0) return;
 
-        // Move Highlight
-        if (selectionHighlight != null)
+        // Move Selection Light
+        if (selectionLight != null)
         {
-           selectionHighlight.transform.position = spawnedLowDetailSuspects[currentSelectionIndex].transform.position + new Vector3(0, 2, 0);
+            selectionLight.transform.position = spawnedLowDetailSuspects[currentSelectionIndex].transform.position + lightOffset;
+            selectionLight.gameObject.SetActive(true);
         }
 
-        // Optional: Notify UI of name? 
-        // We can expose the currently selected name for GameManager to display.
+        // Update Character Highlights
+        for (int i = 0; i < spawnedLowDetailSuspects.Count; i++)
+        {
+            var highlight = spawnedLowDetailSuspects[i].GetComponent<SuspectHighlight>();
+            if (highlight == null)
+            {
+                // Add component if missing
+                highlight = spawnedLowDetailSuspects[i].AddComponent<SuspectHighlight>();
+            }
+            highlight.SetSelected(i == currentSelectionIndex);
+        }
     }
 
     public int GetSelectedSuspectIndex()
@@ -103,8 +137,6 @@ public class SelectionManager : MonoBehaviour
         {
             if (s != null) s.SetActive(visible);
         }
-        if (selectionHighlight != null) selectionHighlight.SetActive(visible);
-        
-        // Note: We don't disable the camera object itself usually, just the renderers of the suspects
+        if (selectionLight != null) selectionLight.gameObject.SetActive(visible);
     }
 }
