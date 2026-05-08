@@ -24,6 +24,7 @@ public class InterrogationManager : MonoBehaviour
     public TMP_InputField accusedNameInput;
     public TMP_InputField motiveInput;
     public TMP_InputField accessInput;
+    public AudioClip accusationTriggerClip;
 
     [Header("End Game Newspaper UI")]
     public TMP_Text articleHeadlineDisplay;
@@ -58,21 +59,17 @@ public class InterrogationManager : MonoBehaviour
         // Generation is now handled by GameManager
     }
 
-    private void Update()
+    public void RecordLastStatement()
     {
-        // Press R to record the last suspect statement to the pin board
-        if (Input.GetKeyDown(KeyCode.R))
+        if (activeSuspectData != null && !string.IsNullOrEmpty(currentModelTranscript))
         {
-            if (activeSuspectData != null && !string.IsNullOrEmpty(currentModelTranscript))
+            if (pinBoardManager != null)
             {
-                if (pinBoardManager != null)
-                {
-                    pinBoardManager.AddEvidenceScrap(currentModelTranscript);
-                }
-                else if (PinBoardManager.Instance != null)
-                {
-                    PinBoardManager.Instance.AddEvidenceScrap(currentModelTranscript);
-                }
+                pinBoardManager.AddEvidenceScrap(currentModelTranscript);
+            }
+            else if (PinBoardManager.Instance != null)
+            {
+                PinBoardManager.Instance.AddEvidenceScrap(currentModelTranscript);
             }
         }
     }

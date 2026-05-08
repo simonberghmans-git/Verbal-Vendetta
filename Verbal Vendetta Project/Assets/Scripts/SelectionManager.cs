@@ -103,18 +103,6 @@ public class SelectionManager : MonoBehaviour
             selectionLight.transform.position = spawnedLowDetailSuspects[currentSelectionIndex].transform.position + lightOffset;
             selectionLight.gameObject.SetActive(true);
         }
-
-        // Update Character Highlights
-        for (int i = 0; i < spawnedLowDetailSuspects.Count; i++)
-        {
-            var highlight = spawnedLowDetailSuspects[i].GetComponent<SuspectHighlight>();
-            if (highlight == null)
-            {
-                // Add component if missing
-                highlight = spawnedLowDetailSuspects[i].AddComponent<SuspectHighlight>();
-            }
-            highlight.SetSelected(i == currentSelectionIndex);
-        }
     }
 
     public int GetSelectedSuspectIndex()

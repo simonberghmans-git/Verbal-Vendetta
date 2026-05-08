@@ -10,7 +10,8 @@ public class InterrogationCameraLook : MonoBehaviour
 
     [Header("Rotation Limits")]
     public float maxHorizontalAngle = 45f;
-    public float maxVerticalAngle = 20f;
+    public float maxTopVerticalAngle = 0f;
+    public float maxBottomVerticalAngle = 30f;
     public float sensitivity = 2f;
     public float smoothTime = 5f;
 
@@ -90,7 +91,7 @@ public class InterrogationCameraLook : MonoBehaviour
 
         // Clamp offsets
         rotationY = Mathf.Clamp(rotationY, -maxHorizontalAngle, maxHorizontalAngle);
-        rotationX = Mathf.Clamp(rotationX, -maxVerticalAngle, maxVerticalAngle);
+        rotationX = Mathf.Clamp(rotationX, -maxBottomVerticalAngle, maxTopVerticalAngle);
 
         // Apply rotation relative to the base rotation
         Quaternion targetRotation = baseRotation * Quaternion.Euler(rotationX, rotationY, 0f);

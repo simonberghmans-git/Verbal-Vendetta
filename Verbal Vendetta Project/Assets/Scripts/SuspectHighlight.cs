@@ -4,11 +4,11 @@ using System.Collections.Generic;
 public class SuspectHighlight : MonoBehaviour
 {
     [Header("Visual Settings")]
-    public Color highlightColor = new Color(0, 0.5f, 0.5f, 1); // Subtle teal
+    public Color materialColor = new Color(0, 0.5f, 0.5f, 1); // Subtle teal
     public float highlightIntensity = 0.5f;
     
     private Renderer[] renderers;
-    private Dictionary<Material, Color> originalEmissionColors = new Dictionary<Material, Color>();
+    private Dictionary<Material, Color> originalColors = new Dictionary<Material, Color>();
     private bool isSelected = false;
 
     void Awake()
@@ -20,19 +20,18 @@ public class SuspectHighlight : MonoBehaviour
         {
             foreach (var mat in renderer.materials)
             {
-                // Cache Emissive Color (HDRP)
-                if (mat.HasProperty("_EmissiveColor"))
+                // Cache Base Color (HDRP/URP/Standard)
+                if (mat.HasProperty("_BaseColor"))
                 {
-                    originalEmissionColors[mat] = mat.GetColor("_EmissiveColor");
+                    originalColors[mat] = mat.GetColor("_BaseColor");
                 }
-                // Cache Emission Color (Standard)
-                else if (mat.HasProperty("_EmissionColor"))
+                else if (mat.HasProperty("_Color"))
                 {
-                    originalEmissionColors[mat] = mat.GetColor("_EmissionColor");
+                    originalColors[mat] = mat.GetColor("_Color");
                 }
                 else
                 {
-                    originalEmissionColors[mat] = Color.black;
+                    originalColors[mat] = Color.white;
                 }
             }
         }
@@ -52,30 +51,21 @@ public class SuspectHighlight : MonoBehaviour
             {
                 if (isSelected)
                 {
-                    mat.EnableKeyword("_EMISSION");
-                    
-                    // Try both property names for maximum compatibility
-                    if (mat.HasProperty("_EmissiveColor"))
-                        mat.SetColor("_EmissiveColor", highlightColor * highlightIntensity);
-                    
-                    if (mat.HasProperty("_EmissionColor"))
-                        mat.SetColor("_EmissionColor", highlightColor * highlightIntensity);
+                    // Apply Material Color
+                    if (mat.HasProperty("_BaseColor"))
+                        mat.SetColor("_BaseColor", materialColor * highlightIntensity);
+                    else if (mat.HasProperty("_Color"))
+                        mat.SetColor("_Color", materialColor * highlightIntensity);
                 }
                 else
                 {
                     // Restore original
-                    if (originalEmissionColors.ContainsKey(mat))
+                    if (originalColors.ContainsKey(mat))
                     {
-                        if (mat.HasProperty("_EmissiveColor"))
-                            mat.SetColor("_EmissiveColor", originalEmissionColors[mat]);
-                        
-                        if (mat.HasProperty("_EmissionColor"))
-                            mat.SetColor("_EmissionColor", originalEmissionColors[mat]);
-
-                        if (originalEmissionColors[mat] == Color.black)
-                        {
-                            mat.DisableKeyword("_EMISSION");
-                        }
+                        if (mat.HasProperty("_BaseColor"))
+                            mat.SetColor("_BaseColor", originalColors[mat]);
+                        else if (mat.HasProperty("_Color"))
+                            mat.SetColor("_Color", originalColors[mat]);
                     }
                 }
             }

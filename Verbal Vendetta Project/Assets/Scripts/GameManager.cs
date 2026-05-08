@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     public enum GameState { SubjectSelection, Interrogation, Ending, Accusation, PinBoard }
     public GameState currentState = GameState.SubjectSelection;
 
@@ -43,6 +45,12 @@ public class GameManager : MonoBehaviour
     private GameState stateBeforePinBoard = GameState.SubjectSelection;
     private AudioClip briefingClip;
     private AudioSource briefingAudioSource;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
@@ -151,10 +159,14 @@ public class GameManager : MonoBehaviour
             if (inputManager != null) inputManager.ToggleMute();
         }
 
-        // Briefing Replay Shortcut
+        // Briefing Replay/Stop Shortcuts
         if (Input.GetKeyDown(KeyCode.B))
         {
             ReplayBriefing();
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            StopBriefing();
         }
 
         if (isInputLocked) return;
@@ -210,7 +222,7 @@ public class GameManager : MonoBehaviour
             {
                 StartCoroutine(ClosePinBoard());
             }
-            else if (currentState == GameState.SubjectSelection || currentState == GameState.Interrogation)
+            else if (currentState == GameState.SubjectSelection || currentState == GameState.Interrogation || currentState == GameState.Accusation)
             {
                 StartCoroutine(OpenPinBoard());
             }
@@ -355,11 +367,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Set Camera to Selection Spot
-        if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
+        // Set Camera to Pin Board Spot
+        if (PinBoardManager.Instance != null) PinBoardManager.Instance.SetVisible(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        if (mainCamera != null && pinBoardCameraPos != null)
         {
-            mainCamera.transform.position = selectionManager.cameraPosition.position;
-            mainCamera.transform.rotation = selectionManager.cameraPosition.rotation * Quaternion.Euler(0, 180, 0);
+            mainCamera.transform.position = pinBoardCameraPos.position;
+            mainCamera.transform.rotation = pinBoardCameraPos.rotation;
         }
 
 
@@ -381,9 +396,6 @@ public class GameManager : MonoBehaviour
 
         // Hide other UIs
         if (selectionManager != null) selectionManager.isInputActive = false;
-        
-        // Show Pin Board UI
-        if (PinBoardManager.Instance != null) PinBoardManager.Instance.SetVisible(true);
 
         // Move Camera
         if (mainCamera != null && pinBoardCameraPos != null)
@@ -391,6 +403,9 @@ public class GameManager : MonoBehaviour
             mainCamera.transform.position = pinBoardCameraPos.position;
             mainCamera.transform.rotation = pinBoardCameraPos.rotation;
         }
+
+        // Show Pin Board UI
+        if (PinBoardManager.Instance != null) PinBoardManager.Instance.SetVisible(true);
 
         yield return new WaitForSeconds(0.3f);
         isInputLocked = false;
@@ -411,8 +426,20 @@ public class GameManager : MonoBehaviour
             {
                 mainCamera.transform.position = interrogationCameraPos.position;
                 mainCamera.transform.rotation = interrogationCameraPos.rotation * Quaternion.Euler(0, 90, 0);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
             }
             currentState = GameState.Interrogation;
+        }
+        else if (stateBeforePinBoard == GameState.Accusation)
+        {
+            // Move camera back to pin board spot
+            if (mainCamera != null && pinBoardCameraPos != null)
+            {
+                mainCamera.transform.position = pinBoardCameraPos.position;
+                mainCamera.transform.rotation = pinBoardCameraPos.rotation;
+            }
+            currentState = GameState.Accusation;
         }
         else
         {
