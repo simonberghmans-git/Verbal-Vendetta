@@ -39,12 +39,17 @@ public class GameManager : MonoBehaviour
 
     // Internal State
     private GameObject currentActiveHighDetailModel;
-    private bool isInputLocked = false;
+    public bool isInputLocked = false;
     private GameState stateBeforePinBoard = GameState.SubjectSelection;
+    private AudioClip briefingClip;
+    private AudioSource briefingAudioSource;
 
     void Start()
     {
         if (inputManager == null) inputManager = FindObjectOfType<InterrogationInputManager>();
+
+        briefingAudioSource = GetComponent<AudioSource>();
+        if (briefingAudioSource == null) briefingAudioSource = gameObject.AddComponent<AudioSource>();
 
         // Initial Setup - Camera to Selection
         if (mainCamera != null && selectionManager != null && selectionManager.cameraPosition != null)
@@ -52,6 +57,10 @@ public class GameManager : MonoBehaviour
             mainCamera.transform.position = selectionManager.cameraPosition.position;
             mainCamera.transform.rotation = selectionManager.cameraPosition.rotation * Quaternion.Euler(0, 180, 0);
         }
+
+        // Ensure cursor is free for selection
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         // Wait for Generation, then Spawn Lineup
         if (connectionManager != null)
@@ -97,17 +106,40 @@ public class GameManager : MonoBehaviour
     private async Task GenerateBriefing(ScenarioData data)
     {
         Debug.Log("[GameManager] Starting Briefing Synthesis...");
-        AudioClip briefing = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
+        briefingClip = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
         
-        if (briefing != null)
+        if (briefingClip != null)
         {
-            Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefing.length}s");
-            // Store briefing in a central place if needed, or play via PinBoardManager
-            // For now, we'll assume the Chief's briefing is played via a button on the PinBoard or automatically on toggle.
+            Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefingClip.length}s");
+            // Auto-play the briefing
+            ReplayBriefing();
         }
         else
         {
             Debug.LogWarning("[GameManager] Briefing synthesis failed.");
+        }
+    }
+
+    public void ReplayBriefing()
+    {
+        if (briefingClip != null && briefingAudioSource != null)
+        {
+            Debug.Log("[GameManager] Playing Briefing...");
+            briefingAudioSource.clip = briefingClip;
+            briefingAudioSource.Play();
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] Cannot replay briefing: Clip or AudioSource missing.");
+        }
+    }
+
+    public void StopBriefing()
+    {
+        if (briefingAudioSource != null && briefingAudioSource.isPlaying)
+        {
+            Debug.Log("[GameManager] Stopping Briefing playback.");
+            briefingAudioSource.Stop();
         }
     }
 
@@ -117,6 +149,12 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.M) && currentState == GameState.Interrogation)
         {
             if (inputManager != null) inputManager.ToggleMute();
+        }
+
+        // Briefing Replay Shortcut
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            ReplayBriefing();
         }
 
         if (isInputLocked) return;
@@ -186,6 +224,13 @@ public class GameManager : MonoBehaviour
         isInputLocked = true;
         currentState = GameState.Interrogation;
 
+        // Stop the briefing if it's playing
+        StopBriefing();
+
+        // Cursor should be locked during interrogation
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         // 1. Get Data from Selection Manager
         SuspectData activeData = selectionManager.GetSelectedSuspectData();
         int modelId = activeData.model_id;
@@ -236,6 +281,10 @@ public class GameManager : MonoBehaviour
         inputManager.micImage.gameObject.SetActive(false);
         isInputLocked = true;
         currentState = GameState.SubjectSelection;
+
+        // Unlock cursor for selection
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         // 1. Destroy High Detail Model
         if (currentActiveHighDetailModel != null)
@@ -326,6 +375,10 @@ public class GameManager : MonoBehaviour
         stateBeforePinBoard = currentState; // Remember where we were
         currentState = GameState.PinBoard;
 
+        // Ensure cursor is free for Pin Board
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         // Hide other UIs
         if (selectionManager != null) selectionManager.isInputActive = false;
         
@@ -375,6 +428,10 @@ public class GameManager : MonoBehaviour
                 selectionManager.isInputActive = true;
             }
             currentState = GameState.SubjectSelection;
+            
+            // Ensure cursor is free for selection
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         yield return new WaitForSeconds(0.3f);

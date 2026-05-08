@@ -37,18 +37,6 @@ public class PinBoardManager : MonoBehaviour
     public void SetVisible(bool visible)
     {
         if (boardRoot != null) boardRoot.SetActive(visible);
-
-        // Handle cursor
-        if (visible)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
     }
 
     /// <summary>
