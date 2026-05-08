@@ -8,8 +8,10 @@ using System.Collections.Generic;
 public class Recorder : MonoBehaviour
 {
     [Header("Visual Feedback")]
+    public AudioClip recordingClip;
     public Color materialColor = new Color(0, 0.8f, 1, 1); // Blue for recording
     public float highlightIntensity = 1.0f;
+    private Animator recorderAnimator;
 
     private Renderer[] renderers;
     private Dictionary<Material, Color> originalColors = new Dictionary<Material, Color>();
@@ -17,6 +19,7 @@ public class Recorder : MonoBehaviour
 
     void Start()
     {
+        recorderAnimator = GetComponentInChildren<Animator>();
         // Cache renderers and original material colors
         renderers = GetComponentsInChildren<Renderer>();
         foreach (var renderer in renderers)
@@ -116,11 +119,17 @@ public class Recorder : MonoBehaviour
 
     private void DoRecord()
     {
+        recorderAnimator.SetTrigger("Click");
         Debug.Log("[Recorder] Clicked! Recording last statement.");
         var intMan = FindObjectOfType<InterrogationManager>();
         if (intMan != null)
         {
             intMan.RecordLastStatement();
+            AudioSource source = intMan.GetComponent<AudioSource>();
+            if (source != null)
+            {
+                source.PlayOneShot(recordingClip);
+            }
         }
     }
 }
