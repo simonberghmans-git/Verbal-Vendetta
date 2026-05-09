@@ -218,11 +218,17 @@ public class GameManager : MonoBehaviour
         // --- GLOBAL PIN BOARD TOGGLE (TAB) ---
         if (Input.GetKeyDown(KeyCode.Tab))
         {
+            // Do not allow toggling the Pin Board during the Accusation phase
+            if (currentState == GameState.Accusation)
+            {
+                return;
+            }
+
             if (currentState == GameState.PinBoard)
             {
                 StartCoroutine(ClosePinBoard());
             }
-            else if (currentState == GameState.SubjectSelection || currentState == GameState.Interrogation || currentState == GameState.Accusation)
+            else if (currentState == GameState.SubjectSelection || currentState == GameState.Interrogation)
             {
                 StartCoroutine(OpenPinBoard());
             }

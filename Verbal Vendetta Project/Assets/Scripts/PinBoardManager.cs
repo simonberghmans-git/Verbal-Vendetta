@@ -20,6 +20,7 @@ public class PinBoardManager : MonoBehaviour
     [Header("Settings")]
     public KeyCode toggleKey = KeyCode.Tab;
     public bool IsOpen => boardRoot != null && boardRoot.activeSelf;
+    public List<Transform> suspectSpawnPoints;
 
     private void Awake()
     {
@@ -46,11 +47,11 @@ public class PinBoardManager : MonoBehaviour
     {
         if (scenario == null || suspectCardPrefab == null || cardContainer == null) return;
 
-        // Clear existing items
-        foreach (Transform child in cardContainer)
-        {
-            Destroy(child.gameObject);
-        }
+        // Clear existing items (Disabled to keep manually placed items)
+        // foreach (Transform child in cardContainer)
+        // {
+        //     Destroy(child.gameObject);
+        // }
 
         SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
 
@@ -59,8 +60,16 @@ public class PinBoardManager : MonoBehaviour
             var data = scenario.suspects[i];
             GameObject card = Instantiate(suspectCardPrefab, cardContainer);
             
-            RectTransform rt = card.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(Random.Range(-400, 400), Random.Range(-200, 200));
+            if (suspectSpawnPoints != null && i < suspectSpawnPoints.Count && suspectSpawnPoints[i] != null)
+            {
+                card.transform.position = suspectSpawnPoints[i].position;
+                card.transform.rotation = suspectSpawnPoints[i].rotation;
+            }
+            else
+            {
+                RectTransform rt = card.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(Random.Range(-400, 400), Random.Range(-200, 200));
+            }
 
             var ui = card.GetComponent<SuspectCardUI>();
             if (ui != null)

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Handles dragging UI elements on a World Space Canvas.
 /// </summary>
-public class DraggableEvidence : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class DraggableEvidence : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     private RectTransform rectTransform;
     private Canvas canvas;
@@ -70,5 +70,13 @@ public class DraggableEvidence : MonoBehaviour, IBeginDragHandler, IDragHandler,
         transform.localScale = originalScale;
         
         // Optional: Trigger a "pin" sound
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            Destroy(gameObject);
+        }
     }
 }
