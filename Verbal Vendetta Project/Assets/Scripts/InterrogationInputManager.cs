@@ -36,8 +36,8 @@ public class InterrogationInputManager : MonoBehaviour
         // 0. check game state
         if (gameManager != null && gameManager.currentState != GameManager.GameState.Interrogation && gameManager.currentState != GameManager.GameState.Accusation) return;
 
-        // Check if Pin Board is open
-        if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
+        // Check if Pin Board is open (but allow input during Accusation phase where the board is intentionally open)
+        if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen && gameManager.currentState != GameManager.GameState.Accusation)
         {
             return;
         }
