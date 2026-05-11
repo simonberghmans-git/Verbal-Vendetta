@@ -187,12 +187,7 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(SwitchToInterrogation());
             }
 
-            // Continuous UI Update (Optional, can be event based)
-            if (selectionManager != null && interrogationManager != null && interrogationManager.suspectNameDisplay != null)
-            {
-                SuspectData data = selectionManager.GetSelectedSuspectData();
-                if (data != null) interrogationManager.suspectNameDisplay.text = $"Selected: {data.name}";
-            }
+            // Continuous UI Update removed because suspectNameDisplay was deleted
 
             // ENTER to start Accusation Phase
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
@@ -238,7 +233,7 @@ public class GameManager : MonoBehaviour
     private System.Collections.IEnumerator SwitchToInterrogation()
     {
         if (selectionManager == null) yield break;
-        inputManager.micImage.gameObject.SetActive(true);
+        if (inputManager != null && inputManager.micImage != null) inputManager.micImage.gameObject.SetActive(true);
         isInputLocked = true;
         currentState = GameState.Interrogation;
 
@@ -296,7 +291,7 @@ public class GameManager : MonoBehaviour
         {
             inputManager.ForceReset();
         }
-        inputManager.micImage.gameObject.SetActive(false);
+        if (inputManager != null && inputManager.micImage != null) inputManager.micImage.gameObject.SetActive(false);
         isInputLocked = true;
         currentState = GameState.SubjectSelection;
 
@@ -348,7 +343,7 @@ public class GameManager : MonoBehaviour
         
         isInputLocked = true;
         currentState = GameState.Accusation;
-        inputManager.micImage.gameObject.SetActive(true);
+        if (inputManager != null && inputManager.micImage != null) inputManager.micImage.gameObject.SetActive(true);
         
         if (selectionManager != null)
         {

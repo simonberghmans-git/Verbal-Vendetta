@@ -15,15 +15,6 @@ public class InterrogationManager : MonoBehaviour
     public ScenesManager scenesManager;
     public GameManager gameManager; // Need this to access GameState
 
-    [Header("Interrogation UI")]
-    public TMP_InputField playerInputField;
-    public TMP_Text responseTextField;
-    public TMP_Text suspectNameDisplay;
-
-    [Header("Accusation UI")]
-    public TMP_InputField accusedNameInput;
-    public TMP_InputField motiveInput;
-    public TMP_InputField accessInput;
     public AudioClip accusationTriggerClip;
 
     [Header("End Game Newspaper UI")]
@@ -51,13 +42,6 @@ public class InterrogationManager : MonoBehaviour
     private bool isModelSpeaking = false;
     private string currentModelTranscript = "";
 
-    private void Start()
-    {
-        suspectNameDisplay.text = "Select a Suspect";
-        responseTextField.text = "<i>Press 'Space' or use Arrows to select.</i>";
-        
-        // Generation is now handled by GameManager
-    }
 
     public void RecordLastStatement()
     {
@@ -78,17 +62,6 @@ public class InterrogationManager : MonoBehaviour
     {
         activeSuspectData = data;
         currentSuspectModel = suspectObject;
-
-        if (activeSuspectData != null)
-        {
-            suspectNameDisplay.text = $"Interrogating: {activeSuspectData.name}";
-            responseTextField.text = $"<i>{activeSuspectData.name} enters the room.</i>";
-        }
-        else
-        {
-            suspectNameDisplay.text = "Select a Suspect";
-            responseTextField.text = "<i>Press 'Space' or use Arrows to select.</i>";
-        }
 
         // Reset Eye State to Direct (Idle)
         if (EyePointManager.Instance != null)
@@ -140,16 +113,10 @@ public class InterrogationManager : MonoBehaviour
 
     private void HandleTranscription(string speaker, string text)
     {
-        // Update UI
-        if (speaker == "Player")
-        {
-            playerInputField.text = text;
-        }
-        else
+        if (speaker != "Player")
         {
             // Model
             currentModelTranscript = text;
-            responseTextField.text = $"<b>{speaker}:</b> {text}";
         }
         
         // Note: NotebookManager logic removed in favor of PinBoard 'R' key recording.
@@ -225,9 +192,7 @@ public class InterrogationManager : MonoBehaviour
 
     public void PrepareAccusationUI()
     {
-        if (suspectNameDisplay != null) suspectNameDisplay.text = "Police Chief";
-        if (responseTextField != null) responseTextField.text = "<i>The Police Chief is on the line. Hold 'X' to speak and explain your reasoning.</i>";
-        if (playerInputField != null) playerInputField.text = "";
+        // UI logic removed
     }
 
     /// <summary>
@@ -262,53 +227,7 @@ public class InterrogationManager : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// Submits the final accusation report to the Judge API.
-    /// </summary>
-    public void SubmitAccusation()
-    {
-        if (connectionManager.currentScenario == null)
-        {
-            if (articleBodyDisplay != null)
-                articleBodyDisplay.text = "Error: No scenario loaded.";
-            return;
-        }
 
-        string name = accusedNameInput.text;
-        string motive = motiveInput.text;
-        string access = accessInput.text;
-
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(motive) || string.IsNullOrWhiteSpace(access))
-        {
-            if (articleBodyDisplay != null)
-                articleBodyDisplay.text = "Please fill in all fields of the report.";
-            return;
-        }
-
-        // STOP interrogation right away so the suspect doesn't keep talking
-        StopInterrogation();
-
-        // Inform GameManager
-        if (gameManager != null)
-        {
-            gameManager.currentState = GameManager.GameState.Ending;
-        }
-
-        if (gameManager != null) gameManager.ShowLoadingScreen("Submitting Accusation...");
-
-        connectionManager.JudgeAccusation(name, motive, access, async (headline, article, isCorrect, error) =>
-        {
-            AudioClip newsClip = null;
-            if (string.IsNullOrEmpty(error) && conversationPipeline != null)
-            {
-                if (gameManager != null) gameManager.ShowLoadingScreen("Synthesizing News Broadcast...");
-                newsClip = await conversationPipeline.GenerateNewsAudio(article);
-            }
-
-            if (gameManager != null) gameManager.HideLoadingScreen();
-            ProcessJudgeResult(headline, article, isCorrect, error, newsClip);
-        });
-    }
 
     private void ProcessJudgeResult(string headline, string article, bool isCorrect, string error, AudioClip newsClip = null)
     {
@@ -429,9 +348,6 @@ public class InterrogationManager : MonoBehaviour
             EyePointManager.Instance.forceDirectEyeContact = false;
         }
 
-        // 5. Reset UI
-        responseTextField.text = "<i>...</i>";
-        playerInputField.text = "";
     }
 
     // Removed legacy transcript helpers
