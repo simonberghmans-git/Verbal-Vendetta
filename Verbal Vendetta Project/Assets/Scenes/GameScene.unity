@@ -7209,7 +7209,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: "\u200B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -9370,11 +9370,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   interrogationManager: {fileID: 1844292941}
+  conversationPipeline: {fileID: 95165381}
+  gameManager: {fileID: 63643235}
   micImage: {fileID: 0}
   micOnSprite: {fileID: 21300000, guid: 4272bf3b963080442890e66750c2763a, type: 3}
   micOffSprite: {fileID: 21300000, guid: d1882008de4485e409b51d096ac221c8, type: 3}
-  conversationPipeline: {fileID: 95165381}
-  gameManager: {fileID: 63643235}
+  textInputFallback: {fileID: 1157730747}
   debugTranscriptionText: {fileID: 0}
 --- !u!1 &1857552643
 GameObject:

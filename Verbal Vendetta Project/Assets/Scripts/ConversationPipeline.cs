@@ -103,6 +103,11 @@ public class ConversationPipeline : MonoBehaviour
         whisperManager?.StopRecording();
     }
 
+    public void SubmitTextQuestion(string text)
+    {
+        HandlePlayerWhisperTranscription(text);
+    }
+
     private void HandlePlayerWhisperTranscription(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;

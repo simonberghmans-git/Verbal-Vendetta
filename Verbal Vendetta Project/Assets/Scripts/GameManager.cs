@@ -153,6 +153,11 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        // Ignore hotkeys if the player is currently typing
+        if (inputManager != null && inputManager.textInputFallback != null && inputManager.textInputFallback.isFocused)
+        {
+            return;
+        }
         // Microphone Mute Toggle
         if (Input.GetKeyDown(KeyCode.M) && currentState == GameState.Interrogation)
         {
@@ -189,11 +194,7 @@ public class GameManager : MonoBehaviour
 
             // Continuous UI Update removed because suspectNameDisplay was deleted
 
-            // ENTER to start Accusation Phase
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                StartAccusationPhase();
-            }
+            // Accusation Phase is now entered via the dialog system or other means
         }
         else if (currentState == GameState.Interrogation)
         {
