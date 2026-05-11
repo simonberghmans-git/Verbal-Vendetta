@@ -74,10 +74,14 @@ public class ElevenLabsTTSHandler : MonoBehaviour
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("xi-api-key", apiKey.Trim());
 
+            float ttsStart = Time.realtimeSinceStartup;
+            Debug.Log($"Generation Debug: TTS request sent to ElevenLabs...");
             yield return request.SendWebRequest();
+            float ttsDuration = Time.realtimeSinceStartup - ttsStart;
 
             if (request.result == UnityWebRequest.Result.Success)
             {
+                Debug.Log($"Generation Debug: TTS generated (ready to play): {ttsDuration:F1}s");
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                 if (clip != null && voiceSource != null)
                 {

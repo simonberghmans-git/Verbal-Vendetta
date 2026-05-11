@@ -71,6 +71,7 @@ public class KokoroManager : MonoBehaviour
 
         try
         {
+            float ttsStart = Time.realtimeSinceStartup;
             Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Starting TTS Synthesis...");
             // Split text into sentences to avoid sequence length limits
             string[] sentences = text.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
@@ -125,6 +126,8 @@ public class KokoroManager : MonoBehaviour
             AudioClip clip = AudioClip.Create("Kokoro_Briefing", mergedData.Length, 1, 24000, false);
             clip.SetData(mergedData, 0);
 
+            float ttsDuration = Time.realtimeSinceStartup - ttsStart;
+            Debug.Log($"Generation Debug: TTS generated (ready to play): {ttsDuration:F1}s");
             Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] TTS Synthesis Finished. Ready to Play.");
             return clip;
         }

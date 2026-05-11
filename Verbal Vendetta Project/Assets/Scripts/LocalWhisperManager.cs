@@ -50,8 +50,12 @@ public class LocalWhisperManager : MonoBehaviour
 
         try
         {
+            float sttStart = Time.realtimeSinceStartup;
             Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Speech Sent to Whisper (Length: {lengthInSeconds:F2}s)");
             var res = await whisperManager.GetTextAsync(chunk.Data, chunk.Frequency, chunk.Channels);
+            float sttDuration = Time.realtimeSinceStartup - sttStart;
+            Debug.Log($"Generation Debug: STT done: {sttDuration:F1}s");
+            
             if (res != null && !string.IsNullOrWhiteSpace(res.Result))
             {
                 string text = res.Result.Trim();

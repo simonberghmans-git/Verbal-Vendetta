@@ -185,6 +185,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private IEnumerator PostScenarioRequest(ScenarioCallback callback)
     {
+        float generationStartTime = Time.time;
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
@@ -298,6 +299,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
                     if (debugDisplayField != null) debugDisplayField.text = currentScenario.ToString();
                     callback?.Invoke(currentScenario, null);
+                    Debug.Log($"Generation Debug: Scenario generation done: {(Time.time - generationStartTime):F1}s");
                     yield break;
                 }
                 catch (Exception ex) 
@@ -336,6 +338,7 @@ public class GeminiConnectionManager : MonoBehaviour
 
     private IEnumerator PostInterrogationRequest(string playerInput, SuspectData activeSuspect, string pastTranscript, bool isPoliceChief, Action<string, string> callback)
     {
+        float generationStartTime = Time.time;
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string systemPrompt;
@@ -428,6 +431,7 @@ Keep the provided_* flags true once they have been established in the conversati
                     {
                         string generatedText = res.candidates[0].content.parts[0].text;
                         callback?.Invoke(generatedText, null);
+                        Debug.Log($"Generation Debug: Interrogation response done: {(Time.time - generationStartTime):F1}s");
                         yield break;
                     }
                     else
@@ -467,9 +471,9 @@ Keep the provided_* flags true once they have been established in the conversati
         if (currentScenario == null) return;
         StartCoroutine(PostJudgeRequest(accusedName, motiveReasoning, accessReasoning, callback));
     }
-
-    private IEnumerator PostJudgeRequest(string accusedName, string motive, string access, JudgeCallback callback)
-    {
+private IEnumerator PostJudgeRequest(string accusedName, string motive, string access, JudgeCallback callback)
+{
+    float generationStartTime = Time.time;
         string url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey.Trim()}";
         
         string systemPrompt = $@"You are a cynical 1940s crime journalist for the 'Daily Truth'. 
@@ -520,6 +524,7 @@ Keep the provided_* flags true once they have been established in the conversati
                     if (result != null)
                     {
                         callback?.Invoke(result.headline, result.article, result.is_correct, null);
+                        Debug.Log($"Generation Debug: Judge evaluation done: {(Time.time - generationStartTime):F1}s");
                         yield break;
                     }
                     else
