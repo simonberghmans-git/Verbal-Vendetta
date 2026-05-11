@@ -7330,7 +7330,7 @@ MonoBehaviour:
     murder_weapon: 
     murder_location: 
     suspects: []
-  testing: 1
+  testing: 0
   suspectManager: {fileID: 1436198405}
   debugDisplayField: {fileID: 13931263}
 --- !u!4 &1524535819

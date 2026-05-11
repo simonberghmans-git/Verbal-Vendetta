@@ -16,7 +16,7 @@ public class GeminiConnectionManager : MonoBehaviour
 {
     public string apiKey = ""; // Made public for sync
 
-    private string model = "gemini-3.1-flash-lite-preview"; // Using the latest alias for maximum availability
+    private string model = "gemini-2.5-flash";// Using the latest alias for maximum availability
 
     public ScenarioData currentScenario;
 
