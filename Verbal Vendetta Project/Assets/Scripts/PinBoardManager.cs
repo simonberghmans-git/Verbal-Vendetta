@@ -75,7 +75,7 @@ public class PinBoardManager : MonoBehaviour
             if (ui != null)
             {
                 Sprite mugshot = suspectManager != null ? suspectManager.GetSuspectImage(data.model_id) : null;
-                ui.Setup(data.name, data.relationship, mugshot);
+                ui.Setup(i, data.name, data.relationship, mugshot);
             }
         }
     }

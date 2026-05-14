@@ -179,36 +179,10 @@ public class GameManager : MonoBehaviour
         if (currentState == GameState.SubjectSelection)
         {
             if (selectionManager != null) selectionManager.HandleInput();
-            
-            // Check for Toggle
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                // Check if Pin Board is open - if so, disable mode switching
-                if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
-                {
-                    return; 
-                }
-
-                StartCoroutine(SwitchToInterrogation());
-            }
-
-            // Continuous UI Update removed because suspectNameDisplay was deleted
-
-            // Accusation Phase is now entered via the dialog system or other means
         }
         else if (currentState == GameState.Interrogation)
         {
-            // Press Space to go back
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                // Check if Pin Board is open - if so, disable mode switching
-                if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
-                {
-                    return; 
-                }
-
-                StartCoroutine(SwitchToSelection());
-            }
+            // Back-switch via Space removed as requested
         }
 
         // --- GLOBAL PIN BOARD TOGGLE (TAB) ---
@@ -229,6 +203,29 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(OpenPinBoard());
             }
         }
+    }
+
+    public void StartInterrogationFromSelection(int index)
+    {
+        if (isInputLocked) return;
+        if (selectionManager != null) selectionManager.SetSelectionIndex(index);
+        StartCoroutine(SwitchToInterrogation());
+    }
+
+    public void StartInterrogationFromPinBoard(int index)
+    {
+        if (isInputLocked) return;
+        
+        // If the pin board is open, we need to close it first or just jump to interrogation
+        if (selectionManager != null) selectionManager.SetSelectionIndex(index);
+        
+        // Hide Pin Board UI if it's open
+        if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
+        {
+            PinBoardManager.Instance.SetVisible(false);
+        }
+
+        StartCoroutine(SwitchToInterrogation());
     }
 
     private System.Collections.IEnumerator SwitchToInterrogation()

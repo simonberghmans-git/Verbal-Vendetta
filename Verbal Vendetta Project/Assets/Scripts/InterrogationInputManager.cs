@@ -64,9 +64,9 @@ public class InterrogationInputManager : MonoBehaviour
         {
             // Only focus if the key isn't a "system" or "action" key
             if (!Input.GetMouseButtonDown(0) && !Input.GetMouseButtonDown(1) && !Input.GetMouseButtonDown(2) &&
-                !Input.GetKeyDown(KeyCode.X) && !Input.GetKeyDown(KeyCode.Return) && 
+                !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Return) && 
                 !Input.GetKeyDown(KeyCode.KeypadEnter) && !Input.GetKeyDown(KeyCode.Escape) && 
-                !Input.GetKeyDown(KeyCode.Tab) && !Input.GetKeyDown(KeyCode.Space))
+                !Input.GetKeyDown(KeyCode.Tab))
             {
                 textInputFallback.ActivateInputField();
                 // We don't manually append characters; TMP handles this once activated.
@@ -76,11 +76,11 @@ public class InterrogationInputManager : MonoBehaviour
         // 4. Handle Hold-to-Talk (Only if not typing)
         if (!isTyping)
         {
-            if (Input.GetKeyDown(KeyCode.X))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 StartRecording();
             }
-            else if (Input.GetKeyUp(KeyCode.X))
+            else if (Input.GetKeyUp(KeyCode.Space))
             {
                 StopRecording();
             }

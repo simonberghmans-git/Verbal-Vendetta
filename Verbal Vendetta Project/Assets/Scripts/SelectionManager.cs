@@ -49,7 +49,7 @@ public class SelectionManager : MonoBehaviour
             }
         }
         
-        UpdateSelectionHighlight();
+        UpdateSelectionHighlight(-1);
         SetVisible(true);
     }
 
@@ -57,51 +57,93 @@ public class SelectionManager : MonoBehaviour
     {
         if (!isInputActive || spawnedLowDetailSuspects.Count == 0) return;
 
-        // --- Mouse Click Selection ---
-        if (Input.GetMouseButtonDown(0))
-        {
-            // Prevent selection if clicking on UI
-            if (UnityEngine.EventSystems.EventSystem.current != null && 
-                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) 
-            {
-                Debug.Log("[Selection] Clicked on UI, ignoring.");
-                return;
-            }
+        // --- Mouse Hover & Click Selection ---
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        
+        bool isHovering = false;
+        int hoveredIndex = -1;
 
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+        // Prevent selection if clicking on UI
+        if (UnityEngine.EventSystems.EventSystem.current != null && 
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) 
+        {
+            // If over UI, we clear highlights but don't do selection
+            UpdateSelectionHighlight(-1);
+            return;
+        }
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            // Check if we hit one of our suspects
+            for (int i = 0; i < spawnedLowDetailSuspects.Count; i++)
             {
-                Debug.Log($"[Selection] Hit object: {hit.transform.name}");
-                
-                // Check if we hit one of our suspects
-                for (int i = 0; i < spawnedLowDetailSuspects.Count; i++)
+                if (hit.transform.IsChildOf(spawnedLowDetailSuspects[i].transform))
                 {
-                    if (hit.transform.IsChildOf(spawnedLowDetailSuspects[i].transform))
-                    {
-                        Debug.Log($"[Selection] Selected Suspect {i}: {spawnedLowDetailSuspects[i].name}");
-                        currentSelectionIndex = i;
-                        UpdateSelectionHighlight();
-                        break;
-                    }
+                    isHovering = true;
+                    hoveredIndex = i;
+                    break;
                 }
             }
-            else
+        }
+
+        if (isHovering)
+        {
+            currentSelectionIndex = hoveredIndex;
+            UpdateSelectionHighlight(currentSelectionIndex);
+
+            if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log("[Selection] Raycast hit nothing. Ensure suspects have Colliders.");
+                Debug.Log($"[Selection] Selected Suspect {currentSelectionIndex}: {spawnedLowDetailSuspects[currentSelectionIndex].name}");
+                // Trigger Interrogation Switch in GameManager
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.StartInterrogationFromSelection(currentSelectionIndex);
+                }
             }
+        }
+        else
+        {
+            // Optional: Clear highlight if not hovering any suspect
+            UpdateSelectionHighlight(-1);
         }
     }
 
-    private void UpdateSelectionHighlight()
+    private void UpdateSelectionHighlight(int index)
     {
-        if (spawnedLowDetailSuspects.Count == 0) return;
+        // Handle SuspectHighlight components if they exist
+        for (int i = 0; i < spawnedLowDetailSuspects.Count; i++)
+        {
+            var highlight = spawnedLowDetailSuspects[i].GetComponent<SuspectHighlight>();
+            if (highlight == null) highlight = spawnedLowDetailSuspects[i].GetComponentInChildren<SuspectHighlight>();
+            
+            if (highlight != null)
+            {
+                highlight.SetSelected(i == index);
+            }
+        }
 
         // Move Selection Light
         if (selectionLight != null)
         {
-            selectionLight.transform.position = spawnedLowDetailSuspects[currentSelectionIndex].transform.position + lightOffset;
-            selectionLight.gameObject.SetActive(true);
+            if (index >= 0 && index < spawnedLowDetailSuspects.Count)
+            {
+                selectionLight.transform.position = spawnedLowDetailSuspects[index].transform.position + lightOffset;
+                selectionLight.gameObject.SetActive(true);
+            }
+            else
+            {
+                selectionLight.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    public void SetSelectionIndex(int index)
+    {
+        if (index >= 0 && index < spawnedLowDetailSuspects.Count)
+        {
+            currentSelectionIndex = index;
+            UpdateSelectionHighlight(index);
         }
     }
 
@@ -112,7 +154,7 @@ public class SelectionManager : MonoBehaviour
     
     public SuspectData GetSelectedSuspectData()
     {
-        if (currentScenarioData != null && currentSelectionIndex < currentScenarioData.suspects.Count)
+        if (currentScenarioData != null && currentSelectionIndex >= 0 && currentSelectionIndex < currentScenarioData.suspects.Count)
         {
             return currentScenarioData.suspects[currentSelectionIndex];
         }
