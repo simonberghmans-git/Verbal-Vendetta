@@ -91,6 +91,7 @@ public class ConversationPipeline : MonoBehaviour
         activeSuspect = null;
         isPoliceChiefMode = false;
         geminiManager?.CancelCurrentInteraction();
+        kokoroManager?.StopSpeech();
     }
 
     public void StartRecording()
@@ -200,6 +201,26 @@ public class ConversationPipeline : MonoBehaviour
         kokoroManager.SetVoice(suspectManager.newsreaderVoice);
 
         return await kokoroManager.Synthesize(text);
+    }
+
+    public void TriggerPoliceChiefIntro()
+    {
+        if (!isPoliceChiefMode || kokoroManager == null) return;
+
+        string introText = "Detective, since you're calling I assume you have a verdict for me?";
+        
+        // Update transcript
+        pastTranscript += $"Police Chief: {introText}\n";
+        
+        // Notify UI
+        OnTranscriptionReceived?.Invoke("Police Chief", introText);
+        
+        // Notify State/Animations
+        OnMetadataReceived?.Invoke("Neutral", "Neutral", 0.5f);
+        OnSpeakStateChanged?.Invoke(true);
+        
+        // Synthesize and Play
+        kokoroManager.SynthesizeAndPlay(introText);
     }
 
     private void HandleKokoroFinished()

@@ -52,6 +52,22 @@ public class KokoroManager : MonoBehaviour
         targetAudioSource = source;
     }
 
+    public void StopSpeech()
+    {
+        if (targetAudioSource != null && targetAudioSource.isPlaying)
+        {
+            targetAudioSource.Stop();
+        }
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+        
+        // Note: The async Task.Delay in GenerateAndPlayLocal will still finish,
+        // but since the audio is stopped, it's effectively silent.
+        // We could use a CancellationToken if we needed more robust cancellation.
+    }
+
     public void SynthesizeAndPlay(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;

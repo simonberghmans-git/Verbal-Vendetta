@@ -335,6 +335,33 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SwitchToAccusation());
     }
 
+    public void StopAccusationPhase()
+    {
+        if (isInputLocked) return;
+        StartCoroutine(SwitchBackToPinBoard());
+    }
+
+    private System.Collections.IEnumerator SwitchBackToPinBoard()
+    {
+        isInputLocked = true;
+        
+        if (inputManager != null) inputManager.ForceReset();
+        if (inputManager != null && inputManager.micImage != null) inputManager.micImage.gameObject.SetActive(false);
+
+        if (interrogationManager != null)
+        {
+            interrogationManager.StopInterrogation();
+        }
+
+        currentState = GameState.PinBoard;
+        
+        // Reset stateBeforePinBoard so we don't accidentally loop
+        stateBeforePinBoard = GameState.SubjectSelection; 
+
+        yield return new WaitForSeconds(0.5f);
+        isInputLocked = false;
+    }
+
     private System.Collections.IEnumerator SwitchToAccusation()
     {
         if (inputManager != null) inputManager.ForceReset();
@@ -363,6 +390,7 @@ public class GameManager : MonoBehaviour
             if (interrogationManager.conversationPipeline != null)
             {
                 interrogationManager.conversationPipeline.ConnectSession(null, true);
+                interrogationManager.conversationPipeline.TriggerPoliceChiefIntro();
             }
         }
 
