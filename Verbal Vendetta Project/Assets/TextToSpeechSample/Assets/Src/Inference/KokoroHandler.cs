@@ -31,6 +31,11 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
                 return;
 
             var modelAsset = Resources.Load<ModelAsset>(k_KokoroModelPath);
+            if (modelAsset == null)
+            {
+                Debug.LogError($"[KokoroHandler] FAILED TO LOAD MODEL at 'Resources/{k_KokoroModelPath}'. Ensure model.onnx exists and is imported as a ModelAsset.");
+                return;
+            }
 
             m_Model = ModelLoader.Load(modelAsset);
 
@@ -71,7 +76,7 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
 
             foreach (var file in voicesList)
             {
-                var voiceAsset = Resources.Load<RawBytesAsset>(Path.Join(k_VoicesFolderPath, file));
+                var voiceAsset = Resources.Load<RawBytesAsset>($"{k_VoicesFolderPath}{file}");
 
                 if (voiceAsset == null)
                     continue;

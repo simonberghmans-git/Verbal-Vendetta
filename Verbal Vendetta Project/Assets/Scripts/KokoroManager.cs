@@ -10,7 +10,7 @@ using Unity.InferenceEngine.Samples.TTS.Inference;
 public class KokoroManager : MonoBehaviour
 {
     [Header("Sentis Settings")]
-    public BackendType backendType = BackendType.GPUCompute;
+    public BackendType backendType = BackendType.CPU;
     
     [Header("Speech Settings")]
     [Range(0.5f, 2.0f)] public float speed = 1.0f;
@@ -33,6 +33,14 @@ public class KokoroManager : MonoBehaviour
         
         // Load all voices from Resources/Voices/
         availableVoices = KokoroHandler.GetVoices();
+        if (availableVoices == null || availableVoices.Count == 0)
+        {
+            Debug.LogError("[KokoroManager] FAILED TO LOAD ANY VOICES from Resources/Voices/. Check voicesIndex.txt and .bin assets.");
+        }
+        else
+        {
+            Debug.Log($"[KokoroManager] Successfully loaded {availableVoices.Count} voices.");
+        }
     }
 
     public void SetVoice(string voiceName)
