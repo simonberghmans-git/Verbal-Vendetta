@@ -27,19 +27,44 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
 
         void LoadModelIfMissing()
         {
-            if (m_Model != null)
+            if (m_Model != null && m_Worker != null)
                 return;
 
+            Debug.Log($"[KokoroHandler] Attempting to load model from Resources: 'Resources/{k_KokoroModelPath}'...");
             var modelAsset = Resources.Load<ModelAsset>(k_KokoroModelPath);
             if (modelAsset == null)
             {
-                Debug.LogError($"[KokoroHandler] FAILED TO LOAD MODEL at 'Resources/{k_KokoroModelPath}'. Ensure model.onnx exists and is imported as a ModelAsset.");
+                Debug.LogError($"[KokoroHandler] FAILED TO LOAD MODEL at 'Resources/{k_KokoroModelPath}'. \n" +
+                               "1. Ensure the file 'model.onnx' exists in a Resources folder.\n" +
+                               "2. Ensure it is imported as a 'ModelAsset' (requires Unity Sentis package).\n" +
+                               "3. If using Git LFS, ensure the file was correctly pulled (not just a pointer).");
                 return;
             }
 
-            m_Model = ModelLoader.Load(modelAsset);
+            try
+            {
+                Debug.Log("[KokoroHandler] Compiling Model...");
+                m_Model = ModelLoader.Load(modelAsset);
+                if (m_Model == null)
+                {
+                    Debug.LogError("[KokoroHandler] ModelLoader.Load returned null! The model file might be corrupted or incompatible.");
+                    return;
+                }
 
-            m_Worker = new Worker(m_Model, m_BackendType);
+                Debug.Log($"[KokoroHandler] Creating Worker with Backend: {m_BackendType}...");
+                m_Worker = new Worker(m_Model, m_BackendType);
+                Debug.Log("[KokoroHandler] Model and Worker successfully initialized.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[KokoroHandler] CRITICAL ERROR during model/worker initialization: {ex.Message}\n{ex.StackTrace}");
+                if (m_BackendType != BackendType.CPU)
+                {
+                    Debug.LogWarning("[KokoroHandler] GPU backend may have failed. Consider switching KokoroManager backend to CPU in the Inspector.");
+                }
+                m_Model = null;
+                m_Worker = null;
+            }
         }
 
         public async Task<Tensor<float>> Execute(int[] inputIds, float speed, Voice voice)
@@ -60,6 +85,12 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
         public async Task<Tensor<float>> Execute(Tensor<int> inputIdsTensor, Tensor<float> voiceTensor, Tensor<float> speedTensor)
         {
             LoadModelIfMissing();
+
+            if (m_Worker == null)
+            {
+                Debug.LogError("[KokoroHandler] Cannot execute: Worker is null. Model likely failed to load.");
+                return null;
+            }
 
             m_Worker.Schedule(inputIdsTensor, voiceTensor, speedTensor);
             using var result = m_Worker.PeekOutput() as Tensor<float>;

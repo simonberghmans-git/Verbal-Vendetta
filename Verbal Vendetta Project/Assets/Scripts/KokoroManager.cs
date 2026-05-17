@@ -28,10 +28,18 @@ public class KokoroManager : MonoBehaviour
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        Debug.Log($"[KokoroManager] Initializing KokoroManager with backend: {backendType}");
+        
+        // GPUCompute (DirectML) is causing a hard D3D12 crash on this laptop's architecture for this ONNX model.
+        // Forcing CPU backend universally, which is highly stable and extremely fast due to Burst compilation.
+        Debug.LogWarning("[KokoroManager] Forcing BackendType.CPU to prevent DML driver crashes.");
+        backendType = BackendType.CPU;
+
         // Initialize the local Sentis handler
         kokoroHandler = new KokoroHandler(backendType);
         
         // Load all voices from Resources/Voices/
+        Debug.Log("[KokoroManager] Loading available voices...");
         availableVoices = KokoroHandler.GetVoices();
         if (availableVoices == null || availableVoices.Count == 0)
         {
@@ -124,7 +132,14 @@ public class KokoroManager : MonoBehaviour
                 }
 
                 // 2. Run Sentis Inference
+                Debug.Log($"[KokoroManager] Inferencing chunk: '{trimmed}' ({tokens.Length} tokens)...");
                 using Tensor<float> outputTensor = await kokoroHandler.Execute(tokens, speed, activeVoice);
+
+                if (outputTensor == null)
+                {
+                    Debug.LogError("[KokoroManager] Inference returned null tensor! Check KokoroHandler logs.");
+                    continue;
+                }
 
                 // 3. Store raw audio data
                 float[] chunkData = outputTensor.DownloadToArray();
