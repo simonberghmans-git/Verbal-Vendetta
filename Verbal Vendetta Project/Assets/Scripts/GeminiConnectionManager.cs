@@ -486,11 +486,12 @@ private IEnumerator PostJudgeRequest(string accusedName, string motive, string a
         2. Write a SENSATIONAL NEWSPAPER HEADLINE. 
            - If Correct: Celebrate the capture.
            - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., 'DETECTIVE BLUNDERS! [True Killer] WAS THE REAL CULPRIT!').
-           - Make the headline no more than 45 characters long.
+           - Headline format: 27 chars per line max, 2 lines max.
         3. Write the ARTICLE BODY (Noir Style).
            - Provide feedback on the investigation.
            - Explain WHY the logic was right or wrong.
-           - Article body max 685 characters.
+           - The first part of the article body MUST be formatted to fit 34 chars per line max, 9 lines max.
+           - The second part of the article body MUST be formatted to fit 53 chars per line max, 8 lines max.
         Output JSON: 
         {{
           ""is_correct"": true,

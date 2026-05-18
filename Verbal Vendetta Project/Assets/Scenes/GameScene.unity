@@ -1845,7 +1845,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 2.4373055, w: 5.4343987}
+  m_margin: {x: 0, y: 0, z: 2.4373055, w: 133.44775}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2609,7 +2609,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+  m_text: oooooooooooooooooooooooooooooooooooooooooooooooooooooo
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b2fdc08cda442c84bb1f4434cdb10968, type: 2}
   m_sharedMaterial: {fileID: 8417288577306199258, guid: b2fdc08cda442c84bb1f4434cdb10968, type: 2}
@@ -6868,7 +6868,7 @@ Transform:
   m_GameObject: {fileID: 1371408115}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.4, y: 1.25, z: 5.3}
+  m_LocalPosition: {x: 5.6, y: 1.25, z: 5.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9080,7 +9080,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationCameraLook
   gameManager: {fileID: 63643235}
   maxHorizontalAngle: 45
-  maxTopVerticalAngle: 30
+  maxTopVerticalAngle: 45
   maxBottomVerticalAngle: 0
   sensitivity: 2
   smoothTime: 5
@@ -10346,7 +10346,7 @@ GameObject:
   - component: {fileID: 2139242142}
   - component: {fileID: 2139242141}
   m_Layer: 5
-  m_Name: NewsArticle
+  m_Name: NewsArticleCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10699,8 +10699,8 @@ Transform:
   m_GameObject: {fileID: 4947929613374803364}
   serializedVersion: 2
   m_LocalRotation: {x: 0.50000006, y: 0.49999997, z: 0.5, w: -0.5}
-  m_LocalPosition: {x: 6.272, y: 0.833, z: 5.296}
-  m_LocalScale: {x: 101.68608, y: 51.35262, z: 2.394661}
+  m_LocalPosition: {x: 6.272, y: 0.831, z: 5.296}
+  m_LocalScale: {x: 101.68608, y: 51.35262, z: 2.5665205}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1234935767}
@@ -10973,7 +10973,7 @@ Transform:
   m_GameObject: {fileID: 4030866588638003152}
   serializedVersion: 2
   m_LocalRotation: {x: 0.50000006, y: 0.49999997, z: 0.5, w: -0.5}
-  m_LocalPosition: {x: 7.167, y: 0.389, z: 5.294}
+  m_LocalPosition: {x: 7.225, y: 0.389, z: 5.294}
   m_LocalScale: {x: 26, y: 26, z: 0.7016126}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11309,7 +11309,7 @@ Transform:
   m_GameObject: {fileID: 7279712013736754350}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6.063, y: 0.8595, z: 5.2461}
+  m_LocalPosition: {x: 6.063, y: 0.8586, z: 5.2461}
   m_LocalScale: {x: 0.03, y: 0.03, z: 0.03}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -12111,7 +12111,7 @@ Transform:
   m_GameObject: {fileID: 4383449925846508312}
   serializedVersion: 2
   m_LocalRotation: {x: -0.40177894, y: -0.57973343, z: -0.57886195, w: 0.4091476}
-  m_LocalPosition: {x: 5.8951, y: 0.853, z: 5.1625}
+  m_LocalPosition: {x: 5.8951, y: 0.8563, z: 5.1625}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12362,6 +12362,8 @@ GameObject:
   - component: {fileID: 5429946590939698224}
   - component: {fileID: 9004050470339271573}
   - component: {fileID: 6561788068097044319}
+  - component: {fileID: 9004050470339271575}
+  - component: {fileID: 9004050470339271574}
   m_Layer: 0
   m_Name: Microphone
   m_TagString: Untagged
@@ -12788,7 +12790,7 @@ Transform:
   m_GameObject: {fileID: 4616430459906002570}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 5.839, y: 0.856, z: 5.305}
+  m_LocalPosition: {x: 6.0278, y: 0.8567, z: 5.3543}
   m_LocalScale: {x: 2, y: 2, z: 2.3568559}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -14341,6 +14343,41 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4616430459906002570}
   m_Mesh: {fileID: -2124705421725058983, guid: 7051341cc36ca514db2715c88b9b6933, type: 3}
+--- !u!114 &9004050470339271574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4616430459906002570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9203b8fc6abbf14fb9cb1dd918a295c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MicrophoneInteractable
+  materialColor: {r: 1, g: 0.8, b: 0, a: 1}
+  highlightIntensity: 1
+--- !u!65 &9004050470339271575
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4616430459906002570}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.02, y: 0.019999998, z: 0.037399516}
+  m_Center: {x: 0, y: 0, z: 0.018699758}
 --- !u!4 &9151169453567930023
 Transform:
   m_ObjectHideFlags: 0

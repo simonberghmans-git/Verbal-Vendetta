@@ -76,13 +76,17 @@ public class InterrogationInputManager : MonoBehaviour
         // 4. Handle Hold-to-Talk (Only if not typing)
         if (!isTyping)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            // Allow spacebar only during Accusation Phase
+            if (gameManager != null && gameManager.currentState == GameManager.GameState.Accusation)
             {
-                StartRecording();
-            }
-            else if (Input.GetKeyUp(KeyCode.Space))
-            {
-                StopRecording();
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    StartRecording();
+                }
+                else if (Input.GetKeyUp(KeyCode.Space))
+                {
+                    StopRecording();
+                }
             }
         }
 
@@ -148,13 +152,13 @@ public class InterrogationInputManager : MonoBehaviour
         }
     }
 
-    void StartRecording()
+    public void StartRecording()
     {
         isRecording = true;
         conversationPipeline?.StartRecording();
     }
 
-    void StopRecording()
+    public void StopRecording()
     {
         isRecording = false;
         conversationPipeline?.StopRecording();
