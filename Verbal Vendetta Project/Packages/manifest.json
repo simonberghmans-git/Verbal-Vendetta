@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.soupday.cc3_unity_tools": "file:C:/Users/empir/Downloads/ccic_unity_tools-2_2_6/CCiC-Unity-Tools-2.2.6",
+    "com.soupday.cc3_unity_tools": "file:C:/Users/empir/Downloads/ccic_unity_tools-2_2_3/CCiC-Unity-Tools-2.2.3",
     "com.unity.ai.inference": "2.6.1",
     "com.unity.collab-proxy": "2.10.2",
     "com.unity.feature.development": "1.0.2",
