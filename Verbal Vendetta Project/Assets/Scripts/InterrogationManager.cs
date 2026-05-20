@@ -63,6 +63,13 @@ public class InterrogationManager : MonoBehaviour
         activeSuspectData = data;
         currentSuspectModel = suspectObject;
 
+        // Clear existing transcript cards on the desk when switching suspects
+        TranscriptCardManager cardManager = FindObjectOfType<TranscriptCardManager>();
+        if (cardManager != null)
+        {
+            cardManager.ClearAllCards();
+        }
+
         // Reset Eye State to Direct (Idle)
         if (EyePointManager.Instance != null)
         {
