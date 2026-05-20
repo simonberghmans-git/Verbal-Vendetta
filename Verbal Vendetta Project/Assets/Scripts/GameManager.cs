@@ -185,24 +185,6 @@ public class GameManager : MonoBehaviour
             // Back-switch via Space removed as requested
         }
 
-        // --- GLOBAL PIN BOARD TOGGLE (TAB) ---
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            // Do not allow toggling the Pin Board during the Accusation phase
-            if (currentState == GameState.Accusation)
-            {
-                return;
-            }
-
-            if (currentState == GameState.PinBoard)
-            {
-                StartCoroutine(ClosePinBoard());
-            }
-            else if (currentState == GameState.SubjectSelection || currentState == GameState.Interrogation)
-            {
-                StartCoroutine(OpenPinBoard());
-            }
-        }
     }
 
     public void StartInterrogationFromSelection(int index)
@@ -341,7 +323,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SwitchBackToPinBoard());
     }
 
-    private System.Collections.IEnumerator SwitchBackToPinBoard()
+    public System.Collections.IEnumerator SwitchBackToPinBoard()
     {
         isInputLocked = true;
         
@@ -409,7 +391,7 @@ public class GameManager : MonoBehaviour
         isInputLocked = false;
     }
 
-    private System.Collections.IEnumerator OpenPinBoard()
+    public System.Collections.IEnumerator OpenPinBoard()
     {
         if (inputManager != null) inputManager.ForceReset();
         isInputLocked = true;
