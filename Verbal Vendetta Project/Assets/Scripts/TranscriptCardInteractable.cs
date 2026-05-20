@@ -52,14 +52,14 @@ public class TranscriptCardInteractable : MonoBehaviour
         var state = GameManager.Instance.currentState;
         if (state != GameManager.GameState.Interrogation)
         {
-            SetHover(false);
+            if (isHovered) SetHover(false);
             return;
         }
 
         // Block input if Pin Board is open
         if (PinBoardManager.Instance != null && PinBoardManager.Instance.IsOpen)
         {
-            SetHover(false);
+            if (isHovered) SetHover(false);
             return;
         }
 
@@ -117,6 +117,11 @@ public class TranscriptCardInteractable : MonoBehaviour
         if (hovered)
         {
             unhoverTimer = 0f;
+            TooltipManager.Show("Left Click to Pin to Board");
+        }
+        else
+        {
+            TooltipManager.Hide();
         }
     }
 
@@ -160,6 +165,8 @@ public class TranscriptCardInteractable : MonoBehaviour
             {
                 manager.RemoveCard(this);
             }
+
+            TooltipManager.Hide();
 
             // Destroy physical card on desk
             Destroy(gameObject);

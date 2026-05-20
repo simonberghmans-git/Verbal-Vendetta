@@ -53,6 +53,8 @@ public class SelectionManager : MonoBehaviour
         SetVisible(true);
     }
 
+    private bool wasHovering = false;
+
     public void HandleInput()
     {
         if (!isInputActive || spawnedLowDetailSuspects.Count == 0) return;
@@ -70,6 +72,11 @@ public class SelectionManager : MonoBehaviour
         {
             // If over UI, we clear highlights but don't do selection
             UpdateSelectionHighlight(-1);
+            if (wasHovering) 
+            {
+                TooltipManager.Hide();
+                wasHovering = false;
+            }
             return;
         }
 
@@ -91,10 +98,20 @@ public class SelectionManager : MonoBehaviour
         {
             currentSelectionIndex = hoveredIndex;
             UpdateSelectionHighlight(currentSelectionIndex);
+            
+            if (currentScenarioData != null && currentScenarioData.suspects.Count > currentSelectionIndex)
+            {
+                string suspectName = currentScenarioData.suspects[currentSelectionIndex].name;
+                TooltipManager.Show($"Left Click to Interrogate {suspectName}");
+            }
+            
+            wasHovering = true;
 
             if (Input.GetMouseButtonDown(0))
             {
                 Debug.Log($"[Selection] Selected Suspect {currentSelectionIndex}: {spawnedLowDetailSuspects[currentSelectionIndex].name}");
+                TooltipManager.Hide(); // Hide when clicked
+                wasHovering = false;
                 // Trigger Interrogation Switch in GameManager
                 if (GameManager.Instance != null)
                 {
@@ -106,6 +123,11 @@ public class SelectionManager : MonoBehaviour
         {
             // Optional: Clear highlight if not hovering any suspect
             UpdateSelectionHighlight(-1);
+            if (wasHovering)
+            {
+                TooltipManager.Hide();
+                wasHovering = false;
+            }
         }
     }
 

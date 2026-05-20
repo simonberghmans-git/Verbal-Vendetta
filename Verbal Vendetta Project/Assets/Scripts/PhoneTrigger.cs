@@ -79,6 +79,21 @@ public class PhoneTrigger : MonoBehaviour
     {
         isHovered = hovered;
         UpdateVisuals(hovered);
+        if (hovered)
+        {
+            if (GameManager.Instance != null && GameManager.Instance.currentState == GameManager.GameState.Accusation)
+            {
+                TooltipManager.Show("Left Click to Hang Up");
+            }
+            else
+            {
+                TooltipManager.Show("Left Click to Call Police Chief");
+            }
+        }
+        else
+        {
+            TooltipManager.Hide();
+        }
     }
 
     private void UpdateVisuals(bool highlighted)

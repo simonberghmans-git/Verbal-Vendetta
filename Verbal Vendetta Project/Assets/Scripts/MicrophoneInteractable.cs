@@ -104,6 +104,14 @@ public class MicrophoneInteractable : MonoBehaviour
     {
         isHovered = hovered;
         UpdateVisuals(hovered);
+        if (hovered)
+        {
+            TooltipManager.Show("Hold Left Click to Speak");
+        }
+        else
+        {
+            TooltipManager.Hide();
+        }
     }
 
     private void UpdateVisuals(bool highlighted)

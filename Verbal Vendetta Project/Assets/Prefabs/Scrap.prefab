@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2201784052514129526}
   - component: {fileID: 4595441866993492884}
   - component: {fileID: 2886592714901226886}
+  - component: {fileID: 1304209411895842846}
   m_Layer: 0
   m_Name: Scrap
   m_TagString: Untagged
@@ -91,6 +92,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DraggableEvidence
   dragScale: 1
+--- !u!114 &1304209411895842846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682678695806048409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a60d935f63a789747b0a1187dd41aebc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScrapUI
 --- !u!1 &5436118729830540695
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Simple helper to update the visual components of a suspect card.
 /// </summary>
-public class SuspectCardUI : MonoBehaviour, IPointerClickHandler
+public class SuspectCardUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public Image portraitImage;
     public TMP_Text nameText;
@@ -28,13 +28,29 @@ public class SuspectCardUI : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.clickCount == 2)
+        if (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 2)
         {
             Debug.Log($"[SuspectCardUI] Double-clicked suspect {suspectIndex}. Entering interrogation.");
+            TooltipManager.Hide(); // Hide tooltip when transitioning
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.StartInterrogationFromPinBoard(suspectIndex);
             }
         }
+        else if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            TooltipManager.Hide();
+            Destroy(gameObject);
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        TooltipManager.Show("Left Click & Drag to Move\nDouble Click to Interrogate\nRight Click to Remove");
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        TooltipManager.Hide();
     }
 }
