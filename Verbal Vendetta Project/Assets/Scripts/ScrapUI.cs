@@ -1,20 +1,23 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ScrapUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class ScrapUI : PinBoardItem, IPointerEnterHandler, IPointerExitHandler
 {
-    public void OnPointerClick(PointerEventData eventData)
+    public override void OnPointerClick(PointerEventData eventData)
     {
+        base.OnPointerClick(eventData);
+
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             TooltipManager.Hide();
+            PinBoardItem.CancelConnection();
             Destroy(gameObject);
         }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        TooltipManager.Show("Left Click & Drag to Move\nRight Click to Remove");
+        TooltipManager.Show("Left Click & Drag to Move\nClick to start/end Thread\nRight Click to Remove");
     }
 
     public void OnPointerExit(PointerEventData eventData)

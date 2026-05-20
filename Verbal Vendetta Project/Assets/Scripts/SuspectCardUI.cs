@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Simple helper to update the visual components of a suspect card.
 /// </summary>
-public class SuspectCardUI : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class SuspectCardUI : PinBoardItem, IPointerEnterHandler, IPointerExitHandler
 {
     public Image portraitImage;
     public TMP_Text nameText;
@@ -26,12 +26,15 @@ public class SuspectCardUI : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         }
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public override void OnPointerClick(PointerEventData eventData)
     {
+        base.OnPointerClick(eventData);
+
         if (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount == 2)
         {
             Debug.Log($"[SuspectCardUI] Double-clicked suspect {suspectIndex}. Entering interrogation.");
             TooltipManager.Hide(); // Hide tooltip when transitioning
+            PinBoardItem.CancelConnection();
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.StartInterrogationFromPinBoard(suspectIndex);
@@ -40,13 +43,14 @@ public class SuspectCardUI : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
             TooltipManager.Hide();
+            PinBoardItem.CancelConnection();
             Destroy(gameObject);
         }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        TooltipManager.Show("Left Click & Drag to Move\nDouble Click to Interrogate\nRight Click to Remove");
+        TooltipManager.Show("Left Click & Drag to Move\nClick to start/end Thread\nDouble Click to Interrogate\nRight Click to Remove");
     }
 
     public void OnPointerExit(PointerEventData eventData)
