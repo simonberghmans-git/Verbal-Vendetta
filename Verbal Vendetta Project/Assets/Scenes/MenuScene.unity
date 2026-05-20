@@ -2712,6 +2712,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 524506195}
   m_CullTransparentMesh: 1
+--- !u!1 &542257887
+GameObject:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 542257889}
+  - component: {fileID: 542257888}
+  m_Layer: 0
+  m_Name: StaticLightingSky
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &542257888
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 542257887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 441482e8936e35048a1dffac814e3ef8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.HighDefinition.Runtime::UnityEngine.Rendering.HighDefinition.StaticLightingSky
+  m_Profile: {fileID: 0}
+  m_StaticLightingSkyUniqueID: 0
+  m_StaticLightingCloudsUniqueID: 0
+  m_StaticLightingVolumetricClouds: 0
+  bounces: 1
+--- !u!4 &542257889
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 542257887}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &551184987
 GameObject:
   m_ObjectHideFlags: 0
@@ -3312,9 +3361,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 39999.992
-  m_Range: 5
+  m_Color: {r: 1, g: 0.9869589, b: 0.7783019, a: 1}
+  m_Intensity: 100000.016
+  m_Range: 4
   m_SpotAngle: 160
   m_InnerSpotAngle: 100
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -3365,7 +3414,7 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 2.5
   m_LightUnit: 2
-  m_LuxAtDistance: 20
+  m_LuxAtDistance: 10
   m_EnableSpotReflector: 0
 --- !u!1 &700730515
 GameObject:
@@ -4022,11 +4071,11 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 640
-  m_Range: 28
-  m_SpotAngle: 130
-  m_InnerSpotAngle: 1
+  m_Color: {r: 1, g: 0.9869589, b: 0.7783019, a: 1}
+  m_Intensity: 100000.016
+  m_Range: 4
+  m_SpotAngle: 160
+  m_InnerSpotAngle: 100
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
     m_Type: 2
@@ -4075,7 +4124,7 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 2.5
   m_LightUnit: 2
-  m_LuxAtDistance: 8
+  m_LuxAtDistance: 10
   m_EnableSpotReflector: 0
 --- !u!1 &934293760
 GameObject:
@@ -4721,9 +4770,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 39999.992
-  m_Range: 5
+  m_Color: {r: 1, g: 0.9869589, b: 0.7783019, a: 1}
+  m_Intensity: 100000.016
+  m_Range: 4
   m_SpotAngle: 160
   m_InnerSpotAngle: 100
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -4774,7 +4823,7 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 2.5
   m_LightUnit: 2
-  m_LuxAtDistance: 20
+  m_LuxAtDistance: 10
   m_EnableSpotReflector: 0
 --- !u!1 &1012413369
 GameObject:
@@ -5467,12 +5516,12 @@ Light:
   m_GameObject: {fileID: 1121500431}
   m_Enabled: 1
   serializedVersion: 12
-  m_Type: 2
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 2465.9692
-  m_Range: 28
-  m_SpotAngle: 85.23427
-  m_InnerSpotAngle: 50.46856
+  m_Type: 0
+  m_Color: {r: 1, g: 0.9869589, b: 0.7783019, a: 1}
+  m_Intensity: 100000.016
+  m_Range: 4
+  m_SpotAngle: 160
+  m_InnerSpotAngle: 100
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
     m_Type: 2
@@ -5513,15 +5562,15 @@ Light:
   m_AreaSize: {x: 0.5, y: 0.5}
   m_BounceIntensity: 1
   m_ColorTemperature: 6500
-  m_UseColorTemperature: 1
+  m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 2.5
-  m_LightUnit: 0
-  m_LuxAtDistance: 1
+  m_LightUnit: 2
+  m_LuxAtDistance: 10
   m_EnableSpotReflector: 0
 --- !u!1 &1137892613
 GameObject:
@@ -7692,9 +7741,9 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 39999.992
-  m_Range: 5
+  m_Color: {r: 1, g: 0.9869589, b: 0.7783019, a: 1}
+  m_Intensity: 100000.016
+  m_Range: 4
   m_SpotAngle: 160
   m_InnerSpotAngle: 100
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -7745,7 +7794,7 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 2.5
   m_LightUnit: 2
-  m_LuxAtDistance: 20
+  m_LuxAtDistance: 10
   m_EnableSpotReflector: 0
 --- !u!1 &1735226916
 GameObject:
@@ -9647,11 +9696,11 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 192
-  m_Range: 28
-  m_SpotAngle: 110
-  m_InnerSpotAngle: 1
+  m_Color: {r: 1, g: 0.9869589, b: 0.7783019, a: 1}
+  m_Intensity: 100000.016
+  m_Range: 4
+  m_SpotAngle: 160
+  m_InnerSpotAngle: 100
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
     m_Type: 2
@@ -9700,7 +9749,7 @@ Light:
   m_ShadowRadius: 0
   m_ShadowAngle: 2.5
   m_LightUnit: 2
-  m_LuxAtDistance: 8
+  m_LuxAtDistance: 10
   m_EnableSpotReflector: 0
 --- !u!1 &2100705384
 GameObject:
@@ -10156,3 +10205,4 @@ SceneRoots:
   - {fileID: 893330672}
   - {fileID: 595487469}
   - {fileID: 1411576837}
+  - {fileID: 542257889}
