@@ -35,10 +35,16 @@ public class InterrogationInputManager : MonoBehaviour
 
     void Update()
     {
-        // 1. Manage Visibility based on Game State
+        // 1. Block all input while pause menu is open
+        if (PauseMenuManager.IsPaused) return;
+
+        // 2. Manage Visibility based on Game State + PlayerPrefs
         if (textInputFallback != null && gameManager != null)
         {
-            bool shouldBeVisible = (gameManager.currentState == GameManager.GameState.Interrogation);
+            bool textInputPref = PlayerPrefs.GetInt("TextInputEnabled", 1) == 1;
+            bool shouldBeVisible = textInputPref &&
+                (gameManager.currentState == GameManager.GameState.Interrogation ||
+                 gameManager.currentState == GameManager.GameState.Accusation);
             if (textInputFallback.gameObject.activeSelf != shouldBeVisible)
             {
                 textInputFallback.gameObject.SetActive(shouldBeVisible);
@@ -49,7 +55,7 @@ public class InterrogationInputManager : MonoBehaviour
             }
         }
 
-        // 2. Check Valid States for Input
+        // 3. Check Valid States for Input
         if (gameManager == null || (gameManager.currentState != GameManager.GameState.Interrogation && 
                                     gameManager.currentState != GameManager.GameState.Accusation)) return;
 
@@ -59,7 +65,7 @@ public class InterrogationInputManager : MonoBehaviour
 
         bool isTyping = textInputFallback != null && textInputFallback.isFocused;
 
-        // 3. Handle Auto-Focus (Opening the text box)
+        // 4. Handle Auto-Focus (Opening the text box)
         if (textInputFallback != null && !isTyping && Input.anyKeyDown)
         {
             // Only focus if the key isn't a "system" or "action" key
@@ -73,7 +79,7 @@ public class InterrogationInputManager : MonoBehaviour
             }
         }
 
-        // 4. Handle Hold-to-Talk (Only if not typing)
+        // 5. Handle Hold-to-Talk (Only if not typing)
         if (!isTyping)
         {
             // Allow spacebar only during Accusation Phase
@@ -90,7 +96,7 @@ public class InterrogationInputManager : MonoBehaviour
             }
         }
 
-        // 5. Mic UI Feedback
+        // 6. Mic UI Feedback
         UpdateMicUI();
     }
 
@@ -183,5 +189,25 @@ public class InterrogationInputManager : MonoBehaviour
         isRecording = false;
         if (textInputFallback != null) textInputFallback.text = "";
         UpdateMicUI();
+    }
+
+    /// <summary>
+    /// Called by SettingsManager when the TextInputEnabled preference changes.
+    /// Forces an immediate visibility refresh of the text input field.
+    /// </summary>
+    public void RefreshTextInputVisibility()
+    {
+        if (textInputFallback == null || gameManager == null) return;
+
+        bool textInputPref = PlayerPrefs.GetInt("TextInputEnabled", 1) == 1;
+        bool shouldBeVisible = textInputPref &&
+            (gameManager.currentState == GameManager.GameState.Interrogation ||
+             gameManager.currentState == GameManager.GameState.Accusation);
+
+        textInputFallback.gameObject.SetActive(shouldBeVisible);
+        if (!shouldBeVisible && textInputFallback.isFocused)
+        {
+            textInputFallback.DeactivateInputField();
+        }
     }
 }
