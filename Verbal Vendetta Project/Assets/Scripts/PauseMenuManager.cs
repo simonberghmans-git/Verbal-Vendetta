@@ -16,6 +16,8 @@ public class PauseMenuManager : MonoBehaviour
     [Tooltip("The settings sub-panel (toggled by the Settings button).")]
     public GameObject settingsPanel;
 
+    private bool pauseMenuHiddenForSettings = false;
+
     /// <summary>
     /// True while the pause menu is visible. Other scripts can check this
     /// to suppress their own input handling.
@@ -40,10 +42,10 @@ public class PauseMenuManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // If settings sub-panel is open, close it first
+            // If settings sub-panel is open, close it first and restore the pause menu.
             if (settingsPanel != null && settingsPanel.activeSelf)
             {
-                settingsPanel.SetActive(false);
+                CloseSettings();
                 return;
             }
 
@@ -88,9 +90,46 @@ public class PauseMenuManager : MonoBehaviour
     /// </summary>
     public void ToggleSettings()
     {
-        if (settingsPanel != null)
+        if (settingsPanel == null || pauseMenuPanel == null)
         {
-            settingsPanel.SetActive(!settingsPanel.activeSelf);
+            return;
+        }
+
+        if (settingsPanel.activeSelf)
+        {
+            CloseSettings();
+        }
+        else
+        {
+            OpenSettings();
+        }
+    }
+
+    private void OpenSettings()
+    {
+        if (settingsPanel == null || pauseMenuPanel == null)
+        {
+            return;
+        }
+
+        pauseMenuHiddenForSettings = pauseMenuPanel.activeSelf;
+        settingsPanel.SetActive(true);
+        pauseMenuPanel.SetActive(false);
+    }
+
+    private void CloseSettings()
+    {
+        if (settingsPanel == null || pauseMenuPanel == null)
+        {
+            return;
+        }
+
+        settingsPanel.SetActive(false);
+
+        if (pauseMenuHiddenForSettings)
+        {
+            pauseMenuPanel.SetActive(true);
+            pauseMenuHiddenForSettings = false;
         }
     }
 
@@ -136,6 +175,12 @@ public class PauseMenuManager : MonoBehaviour
 
                 var camLook = GameManager.Instance.mainCamera.GetComponent<InterrogationCameraLook>();
                 if (camLook != null) camLook.enabled = true;
+            }
+
+            if (settingsPanel != null)
+            {
+                settingsPanel.SetActive(false);
+                pauseMenuHiddenForSettings = false;
             }
         }
     }

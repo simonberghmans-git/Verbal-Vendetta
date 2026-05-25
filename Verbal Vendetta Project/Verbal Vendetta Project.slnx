@@ -1,14 +1,20 @@
 ﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="uLipSync.Editor.csproj" />
+  <Project Path="soupday.cc3_unity_tools.editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="uLipSync.Runtime.csproj" />
   <Project Path="UnityChan.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="uLipSync.Example.RuntimeProfile.Runtime.csproj" />
+  <Project Path="TTS.csproj" />
+  <Project Path="TTS.Editor.csproj" />
   <Project Path="uLipSync.Samples.VRM.Editor.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="uLipSync.Samples.VRM.Runtime.csproj" />
+  <Project Path="soupday.cc3_unity_tools.project_runtime.csproj" />
   <Project Path="uLipSync.Samples.RuntimeSetup.Runtime.csproj" />
   <Project Path="uLipSync.Samples.Animator.Runtime.csproj" />
+  <Project Path="soupday.cc3_unity_tools.runtime.csproj" />
   <Project Path="uLipSync.Samples.Common.csproj" />
+  <Project Path="TTSTests.csproj" />
   <Project Path="uLipSync.Samples.WebGL.Runtime.csproj" />
 </Solution>
