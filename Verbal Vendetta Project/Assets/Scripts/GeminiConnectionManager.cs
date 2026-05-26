@@ -396,8 +396,7 @@ Keep the provided_* flags true once they have been established in the conversati
         4. If you are the killer ({activeSuspect.is_killer}), you will lie about your motive and access to the weapon, and stick to your false alibi.
         5. Respond naturally to the detective's most recent statement or question.
         6. Do not generate asterisks or roleplay actions (e.g. *sighs*), only dialogue.
-        7. TTS OPTIMIZATION: Do not refer to people by name but rather by their job title/ relationship to you.
-        8. EMOTION: You MUST ALWAYS provide an 'emotion' from the allowed list that reflects your character's reaction.
+        7. EMOTION: You MUST ALWAYS provide an 'emotion' from the allowed list that reflects your character's reaction.
         
         OUTPUT JSON:
         - text: Your spoken dialogue.
