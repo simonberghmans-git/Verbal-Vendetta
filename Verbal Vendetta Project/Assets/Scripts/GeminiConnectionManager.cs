@@ -207,7 +207,7 @@ public class GeminiConnectionManager : MonoBehaviour
         STORY & TIMELINE RULES:
         6. TIMELINE: You MUST provide a specific 'murder_time', 'murder_date', and 'interrogation_date'.
         7. Victim Biography: Provide 2-3 sentences of background info.
-        8. Relationship: Define a clear connection.
+        8. Relationship: Define a clear connection (MUST be under 20 characters).
         9. Personality: Adjectives only.
         10. RANDOMIZATION: You MUST randomize the index of the killer in the suspects list (0-4).
         11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' of one suspect MUST have a corresponding clue in the 'rumors' of a different suspect.
