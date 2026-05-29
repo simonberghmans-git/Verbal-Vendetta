@@ -81,7 +81,7 @@ public class GeminiLiveConnection : MonoBehaviour
             if (string.IsNullOrEmpty(apiKey))
             {
                 var manager = FindObjectOfType<GeminiConnectionManager>();
-                if (manager != null) apiKey = manager.apiKey;
+                if (manager != null) apiKey = manager.GetApiKey();
             }
 
             if (string.IsNullOrEmpty(apiKey)) return;

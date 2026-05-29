@@ -14,7 +14,8 @@ using TMPro;
 /// </summary>
 public class GeminiConnectionManager : MonoBehaviour
 {
-    public string apiKey = ""; // Made public for sync
+    private string apiKey = "";
+    private const string API_KEY_FILE = "apikey.txt";
 
     private string model = "gemini-2.5-flash";// Using the latest alias for maximum availability
 
@@ -143,6 +144,32 @@ public class GeminiConnectionManager : MonoBehaviour
     [SerializeField] private TMP_Text debugDisplayField;
 
     // Removed NotebookManager reference in favor of PinBoardManager (managed by GameManager)
+
+    private void Awake()
+    {
+        LoadApiKey();
+    }
+
+    private void LoadApiKey()
+    {
+        // Load from project root (parent of Assets folder)
+        string projectRoot = System.IO.Directory.GetParent(Application.dataPath).FullName;
+        string filePath = System.IO.Path.Combine(projectRoot, API_KEY_FILE);
+        if (System.IO.File.Exists(filePath))
+        {
+            apiKey = System.IO.File.ReadAllText(filePath).Trim();
+            Debug.Log("API key loaded from file.");
+        }
+        else
+        {
+            Debug.LogError($"API key file not found at: {filePath}. Please create {API_KEY_FILE} in the project root.");
+        }
+    }
+
+    public string GetApiKey()
+    {
+        return apiKey;
+    }
 
     // --- DELEGATES ---
     public delegate void ScenarioCallback(ScenarioData data, string error);
