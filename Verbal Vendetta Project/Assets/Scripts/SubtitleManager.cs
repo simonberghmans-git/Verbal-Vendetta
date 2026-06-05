@@ -70,9 +70,13 @@ public class SubtitleManager : MonoBehaviour
 
     private void HandleTranscriptionReceived(string speaker, string text)
     {
-        // Do not display if not in interrogation
-        if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Interrogation)
-            return;
+        if (GameManager.Instance == null) return;
+
+        var currentState = GameManager.Instance.currentState;
+        bool isSubtitleState = currentState == GameManager.GameState.Interrogation ||
+                               currentState == GameManager.GameState.Accusation;
+
+        if (!isSubtitleState) return;
 
         Show(speaker, text, displayDuration);
     }
