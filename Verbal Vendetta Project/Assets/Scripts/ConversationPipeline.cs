@@ -169,7 +169,7 @@ public class ConversationPipeline : MonoBehaviour
         }
     }
 
-    public async Task<AudioClip> GenerateBriefingAudio(ScenarioData data)
+    public async Task<Tuple<AudioClip, string>> GenerateBriefingAudio(ScenarioData data)
     {
         if (data == null || kokoroManager == null || suspectManager == null) return null;
 
@@ -181,7 +181,8 @@ public class ConversationPipeline : MonoBehaviour
                             $"The murder weapon was a {data.murder_weapon}. {data.victim_discovery_details}. " +
                             $"We've brought in {data.suspects.Count} suspects for you to talk to. Get to work.";
 
-        return await kokoroManager.Synthesize(briefingText);
+        AudioClip clip = await kokoroManager.Synthesize(briefingText);
+        return new Tuple<AudioClip, string>(clip, briefingText);
     }
 
     public async Task<AudioClip> GenerateNewsAudio(string text)

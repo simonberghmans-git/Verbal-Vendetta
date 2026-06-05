@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public GeminiConnectionManager connectionManager;
     public InterrogationInputManager inputManager; // Added reference
     public Camera mainCamera;
+    public SubtitleManager subtitleManager; // Assign in inspector
 
     [Header("Loading Screen")]
     public GameObject loadingScreen;
@@ -44,6 +45,7 @@ public class GameManager : MonoBehaviour
     public bool isInputLocked = false;
     private GameState stateBeforePinBoard = GameState.SubjectSelection;
     private AudioClip briefingClip;
+    private string briefingText;
     private AudioSource briefingAudioSource;
 
     private void Awake()
@@ -114,10 +116,12 @@ public class GameManager : MonoBehaviour
     private async Task GenerateBriefing(ScenarioData data)
     {
         Debug.Log("[GameManager] Starting Briefing Synthesis...");
-        briefingClip = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
+        var briefingData = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
         
-        if (briefingClip != null)
+        if (briefingData != null)
         {
+            briefingClip = briefingData.Item1;
+            briefingText = briefingData.Item2;
             Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefingClip.length}s");
             // Auto-play the briefing
             ReplayBriefing();
@@ -135,6 +139,10 @@ public class GameManager : MonoBehaviour
             Debug.Log("[GameManager] Playing Briefing...");
             briefingAudioSource.clip = briefingClip;
             briefingAudioSource.Play();
+            if (subtitleManager != null)
+            {
+                subtitleManager.Show("Police Chief", briefingText, briefingClip.length);
+            }
         }
         else
         {
@@ -217,6 +225,8 @@ public class GameManager : MonoBehaviour
         isInputLocked = true;
         currentState = GameState.Interrogation;
 
+        if (subtitleManager != null) subtitleManager.Hide();
+
         // Stop the briefing if it's playing
         StopBriefing();
 
@@ -275,6 +285,8 @@ public class GameManager : MonoBehaviour
         isInputLocked = true;
         currentState = GameState.SubjectSelection;
 
+        if (subtitleManager != null) subtitleManager.Hide();
+
         // Unlock cursor for selection
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -330,6 +342,8 @@ public class GameManager : MonoBehaviour
         if (inputManager != null) inputManager.ForceReset();
         if (inputManager != null && inputManager.micImage != null) inputManager.micImage.gameObject.SetActive(false);
 
+        if (subtitleManager != null) subtitleManager.Hide();
+
         if (interrogationManager != null)
         {
             interrogationManager.StopInterrogation();
@@ -351,6 +365,8 @@ public class GameManager : MonoBehaviour
         isInputLocked = true;
         currentState = GameState.Accusation;
         if (inputManager != null && inputManager.micImage != null) inputManager.micImage.gameObject.SetActive(true);
+
+        if (subtitleManager != null) subtitleManager.Hide();
         
         if (selectionManager != null)
         {

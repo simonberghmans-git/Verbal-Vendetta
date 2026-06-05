@@ -40,21 +40,32 @@ public class SubtitleManager : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void Show(string speaker, string text, float duration)
     {
-        // Only visible during interrogation
-        if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Interrogation)
+        if (subtitleText == null) return;
+
+        subtitleText.text = $"<b>{speaker}:</b> {text}";
+        subtitleText.gameObject.SetActive(true);
+
+        if (hideCoroutine != null)
         {
-            if (subtitleText != null && subtitleText.gameObject.activeSelf)
-            {
-                subtitleText.gameObject.SetActive(false);
-                if (hideCoroutine != null)
-                {
-                    StopCoroutine(hideCoroutine);
-                    hideCoroutine = null;
-                }
-            }
+            StopCoroutine(hideCoroutine);
         }
+
+        hideCoroutine = StartCoroutine(HideAfter(duration));
+    }
+
+    public void Hide()
+    {
+        if (subtitleText == null) return;
+
+        if (hideCoroutine != null)
+        {
+            StopCoroutine(hideCoroutine);
+            hideCoroutine = null;
+        }
+        subtitleText.gameObject.SetActive(false);
+        subtitleText.text = "";
     }
 
     private void HandleTranscriptionReceived(string speaker, string text)
@@ -63,30 +74,12 @@ public class SubtitleManager : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.currentState != GameManager.GameState.Interrogation)
             return;
 
-        if (subtitleText == null) return;
-
-        // Display the speaker and text
-        subtitleText.text = $"<b>{speaker}:</b> {text}";
-        subtitleText.gameObject.SetActive(true);
-
-        // Prevent overlap by stopping any existing hide coroutine
-        if (hideCoroutine != null)
-        {
-            StopCoroutine(hideCoroutine);
-        }
-
-        // Start a new hide coroutine
-        hideCoroutine = StartCoroutine(HideSubtitleAfterDelay());
+        Show(speaker, text, displayDuration);
     }
 
-    private IEnumerator HideSubtitleAfterDelay()
+    private IEnumerator HideAfter(float duration)
     {
-        yield return new WaitForSeconds(displayDuration);
-        
-        if (subtitleText != null)
-        {
-            subtitleText.gameObject.SetActive(false);
-            subtitleText.text = "";
-        }
+        yield return new WaitForSeconds(duration);
+        Hide();
     }
 }

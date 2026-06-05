@@ -687,6 +687,7 @@ MonoBehaviour:
   connectionManager: {fileID: 1524535818}
   inputManager: {fileID: 1856740769}
   mainCamera: {fileID: 1823688466}
+  subtitleManager: {fileID: 805520168}
   loadingScreen: {fileID: 1857552643}
   loadingText: {fileID: 1806098135}
   interrogationSpot: {fileID: 170990120}
@@ -4350,7 +4351,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: -100}
-  m_SizeDelta: {x: 250, y: 50}
+  m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &805520166
 MonoBehaviour:
