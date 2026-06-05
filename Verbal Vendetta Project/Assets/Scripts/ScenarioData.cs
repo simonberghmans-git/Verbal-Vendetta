@@ -47,7 +47,7 @@ public class SuspectData
     public string gender;                         // "Male" or "Female"
     public string relationship;                   // e.g., "Estranged Daughter", "Personal Chef"
     public string personality;
-    public int voice_index;                       // The Piper Voice Index assigned at generation
+    public string voice_id;                       // The Piper Voice Index assigned at generation
     public int model_id;                          // The ID of the visual model (prefab + image)
     public string motive;                         // Only assigned if has_motive is true
     public string access_to_weapon_description;    // The specific "Means" for the Judge to verify

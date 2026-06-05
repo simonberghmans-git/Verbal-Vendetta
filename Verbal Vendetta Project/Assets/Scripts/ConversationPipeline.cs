@@ -66,16 +66,7 @@ public class ConversationPipeline : MonoBehaviour
             }
             else if (activeSuspect != null)
             {
-                if (activeSuspect.gender == "Male")
-                {
-                    int index = Mathf.Clamp(activeSuspect.voice_index, 0, suspectManager.maleKokoroVoices.Count - 1);
-                    assignedVoice = suspectManager.maleKokoroVoices[index];
-                }
-                else
-                {
-                    int index = Mathf.Clamp(activeSuspect.voice_index, 0, suspectManager.femaleKokoroVoices.Count - 1);
-                    assignedVoice = suspectManager.femaleKokoroVoices[index];
-                }
+                assignedVoice = activeSuspect.voice_id;
             }
             else
             {

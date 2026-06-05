@@ -761,7 +761,7 @@ MonoBehaviour:
     gender: 
     relationship: 
     personality: 
-    voice_index: 0
+    voice_id: 
     model_id: 0
     motive: 
     access_to_weapon_description: 
@@ -8977,7 +8977,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22825f7cd935a624695db1baaa7e755a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GeminiConnectionManager
-  apiKey: AIzaSyDifRfFIhjiyHnYoysiwbPgjZ-SkKkIIWM
   currentScenario:
     victim_name: 
     victim_occupation: 

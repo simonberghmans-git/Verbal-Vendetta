@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -11,15 +12,27 @@ public class PinBoardConnection : MonoBehaviour, IPointerClickHandler, IPointerE
     public float threadThickness = 5f; // Change this value to make it thinner/thicker
     
     private RectTransform rectTransform;
+    private Image threadImage;
+    private List<Color> threadColors = new List<Color>()
+    {
+        new Color(0.8f, 0.1f, 0.1f, 0.8f), // Red
+        new Color(0.1f, 0.8f, 0.1f, 0.8f), // Green
+        new Color(0.1f, 0.1f, 0.8f, 0.8f), // Blue
+        new Color(0.8f, 0.8f, 0.1f, 0.8f), // Yellow
+        new Color(0.8f, 0.1f, 0.8f, 0.8f), // Magenta
+        new Color(0.1f, 0.8f, 0.8f, 0.8f)  // Cyan
+    };
+    private int currentColorIndex = 0;
+    private bool isHovering = false;
 
     public void Initialize(PinBoardItem a, PinBoardItem b)
     {
         itemA = a;
         itemB = b;
         
-        Image img = gameObject.AddComponent<Image>();
-        img.color = new Color(0.8f, 0.1f, 0.1f, 0.8f); // Red thread
-        img.raycastTarget = true; // So it can be clicked
+        threadImage = gameObject.AddComponent<Image>();
+        threadImage.color = threadColors[currentColorIndex]; // Red thread
+        threadImage.raycastTarget = true; // So it can be clicked
         
         rectTransform = GetComponent<RectTransform>();
         rectTransform.pivot = new Vector2(0.5f, 0.5f); // Center pivot for rotation
@@ -36,6 +49,12 @@ public class PinBoardConnection : MonoBehaviour, IPointerClickHandler, IPointerE
         }
 
         UpdateLine();
+
+        if (isHovering && Input.GetKeyDown(KeyCode.R))
+        {
+            currentColorIndex = (currentColorIndex + 1) % threadColors.Count;
+            threadImage.color = threadColors[currentColorIndex];
+        }
     }
 
     private void UpdateLine()
@@ -68,11 +87,13 @@ public class PinBoardConnection : MonoBehaviour, IPointerClickHandler, IPointerE
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        TooltipManager.Show("Right Click to Remove Thread");
+        isHovering = true;
+        TooltipManager.Show("Right Click to Remove Thread\n'R' to Change Color");
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        isHovering = false;
         TooltipManager.Hide();
     }
 }

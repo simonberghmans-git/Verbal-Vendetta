@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using TMPro;
+using System.Linq;
 
 /// <summary>
 /// Manages the connection to the Gemini API and stores the current mystery state.
@@ -218,8 +219,12 @@ public class GeminiConnectionManager : MonoBehaviour
         string maleModelIndicesStr = suspectManager.maleModelIndices != null && suspectManager.maleModelIndices.Count > 0 ? string.Join(", ", suspectManager.maleModelIndices) : "0";
         string femaleModelIndicesStr = suspectManager.femaleModelIndices != null && suspectManager.femaleModelIndices.Count > 0 ? string.Join(", ", suspectManager.femaleModelIndices) : "0";
 
-        int maxMaleVoiceIndex = Mathf.Max(0, suspectManager.maleKokoroVoices.Count - 1);
-        int maxFemaleVoiceIndex = Mathf.Max(0, suspectManager.femaleKokoroVoices.Count - 1);
+        string maleVoicesStr = suspectManager.maleKokoroVoices != null && suspectManager.maleKokoroVoices.Count > 0
+            ? string.Join(", ", suspectManager.maleKokoroVoices.Select(v => $"\"{v}\""))
+            : "";
+        string femaleVoicesStr = suspectManager.femaleKokoroVoices != null && suspectManager.femaleKokoroVoices.Count > 0
+            ? string.Join(", ", suspectManager.femaleKokoroVoices.Select(v => $"\"{v}\""))
+            : "";
 
         string systemPrompt = $@"You are a master mystery writer. Generate a murder mystery scenario in JSON.
         
@@ -239,9 +244,9 @@ public class GeminiConnectionManager : MonoBehaviour
         10. RANDOMIZATION: You MUST randomize the index of the killer in the suspects list (0-4).
         11. SOLVABILITY: Every 'Motive', 'Access', and 'False Alibi' of one suspect MUST have a corresponding clue in the 'rumors' of a different suspect.
         12. CONTRADICTION: Every 'rumor' a suspect knows, must not contradict their own alibi. Unless the suspect who knows this 'rumor' has a false alibi (Killer or Red Herring).
-        13. VOICE ASSIGNMENT: Assign a 'voice_index' (integer) to each suspect based on their gender.
-            - Available Male Indices: 0 to {maxMaleVoiceIndex}
-            - Available Female Indices: 0 to {maxFemaleVoiceIndex}
+        13. VOICE ASSIGNMENT: Assign a 'voice_id' (string) to each suspect from the available lists based on their gender.
+            - Available Male Voices: [ {maleVoicesStr} ]
+            - Available Female Voices: [ {femaleVoicesStr} ]
         14. MODEL ASSIGNMENT:
             - Available Male Model IDs: [ {maleModelIndicesStr} ]
             - Available Female Model IDs: [ {femaleModelIndicesStr} ]
@@ -271,7 +276,7 @@ public class GeminiConnectionManager : MonoBehaviour
               ""gender"": ""..."",
               ""relationship"": ""..."",
               ""personality"": ""..."",
-              ""voice_index"": 0,
+              ""voice_id"": ""..."",
               ""model_id"": 0,
               ""motive"": ""..."",
               ""access_to_weapon_description"": ""..."",
