@@ -8787,7 +8787,6 @@ MonoBehaviour:
   femaleKokoroVoices:
   - af_heart
   - af_bella
-  - af_nicole
   - af_sky
   - af_sarah
   policeChiefVoice: bm_lewis
@@ -11117,7 +11116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InterrogationCameraLook
   gameManager: {fileID: 63643235}
-  maxHorizontalAngle: 45
+  maxHorizontalAngle: 70
   maxTopVerticalAngle: 60
   maxBottomVerticalAngle: 0
   sensitivity: 2
