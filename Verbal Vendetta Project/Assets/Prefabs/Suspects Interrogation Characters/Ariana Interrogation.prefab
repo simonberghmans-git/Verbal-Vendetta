@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ariana Interrogation
       objectReference: {fileID: 0}
+    - target: {fileID: 1332060864521090764, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1458866324339330890, guid: bd5f652942e669a47b2393d56690c7df, type: 3}
       propertyPath: m_BlendShapeWeights.Array.size
       value: 395
