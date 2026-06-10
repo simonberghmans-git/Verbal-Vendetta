@@ -516,13 +516,13 @@ private IEnumerator PostJudgeRequest(string accusedName, string motive, string a
         1. Evaluate if the detective identified the CORRECT KILLER and valid LOGIC (Motive/Access).
         2. Write a SENSATIONAL NEWSPAPER HEADLINE. 
            - If Correct: Celebrate the capture.
-           - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., 'DETECTIVE BLUNDERS! [True Killer] WAS THE REAL CULPRIT!').
-           - Headline format: 40 characters max.
+           - If Incorrect: Reveal the TRUE KILLER in the headline (e.g., '[True Killer] ESCAPES IN MURDER CASE!').
+           - Headline format: 35 characters max. One sentence only. Count spaces as characters. 
         3. Write the ARTICLE BODY (Noir Style).
            - Provide feedback on the investigation.
            - Explain WHY the logic was right or wrong.
-           - The first part of the article body MUST be formatted to fit 300 characters max.
-           - The second part of the article body MUST be formatted to fit 400 characters max.
+           - The first part of the article body MUST be formatted to fit 300 characters max. Do not add your own line endings. Count spaces as characters.
+           - The second part of the article body MUST be formatted to fit 400 characters max.Do not add your own line endings. Count spaces as characters.
         Output JSON: 
         {{
           ""is_correct"": true,

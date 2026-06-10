@@ -8,6 +8,7 @@ public class TranscriptCardInteractable : MonoBehaviour
     
     [Header("Settings")]
     public float lerpSpeed = 10f;
+    public float hoverDelay = 0.5f;
     public float unhoverDelay = 0.5f;
     
     private string fullTranscriptText;
@@ -16,6 +17,7 @@ public class TranscriptCardInteractable : MonoBehaviour
     
     private bool isHovered = false;
     private bool isPressed = false;
+      private float hoverTimer = 0f;
     private float unhoverTimer = 0f;
 
     public void Setup(string text, Transform assignedSlot, Transform hoverPos)
@@ -84,7 +86,14 @@ public class TranscriptCardInteractable : MonoBehaviour
             {
                 isCurrentlyRaycasting = true;
 
-                if (!isHovered && !isPressed) SetHover(true);
+                if (!isHovered && !isPressed)
+                {
+                    hoverTimer += Time.deltaTime;
+                    if (hoverTimer >= hoverDelay)
+                    {
+                        SetHover(true);
+                    }
+                }
 
                 if (Input.GetMouseButtonDown(0))
                 {
@@ -95,6 +104,11 @@ public class TranscriptCardInteractable : MonoBehaviour
 
         if (!isCurrentlyRaycasting)
         {
+            if (!isHovered)
+            {
+                hoverTimer = 0f;  // Reset hover timer when we leave
+            }
+            
             if (isHovered && !isPressed) 
             {
                 unhoverTimer += Time.deltaTime;
