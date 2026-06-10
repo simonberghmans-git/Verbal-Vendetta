@@ -80,7 +80,7 @@ public class GeminiLiveConnection : MonoBehaviour
         {
             if (string.IsNullOrEmpty(apiKey))
             {
-                var manager = FindObjectOfType<GeminiConnectionManager>();
+                var manager = FindAnyObjectByType<GeminiConnectionManager>();
                 if (manager != null) apiKey = manager.GetApiKey();
             }
 
@@ -184,7 +184,7 @@ public class GeminiLiveConnection : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            var manager = FindObjectOfType<GeminiConnectionManager>();
+            var manager = FindAnyObjectByType<GeminiConnectionManager>();
             if (manager != null && manager.currentScenario != null && currentSuspect != null)
             {
                 Debug.Log("GeminiLiveConnection: Hard reset triggered via 'R' key.");

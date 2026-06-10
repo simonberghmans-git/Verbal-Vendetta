@@ -20,7 +20,7 @@ public class MicrophoneInteractable : MonoBehaviour
 
     void Start()
     {
-        inputManager = FindObjectOfType<InterrogationInputManager>();
+        inputManager = FindAnyObjectByType<InterrogationInputManager>();
         
         // Cache renderers and original material colors
         renderers = GetComponentsInChildren<Renderer>();

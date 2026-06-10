@@ -11,6 +11,12 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
         public static Tensor<float> Apply2NotchFiltering(Tensor<float> kokoroOutput)
         {
             var signal = kokoroOutput.DownloadToArray();
+            var finalOutput = Apply2NotchFiltering(signal);
+            return new Tensor<float>(new TensorShape(1, finalOutput.Length), finalOutput);
+        }
+
+        public static float[] Apply2NotchFiltering(float[] signal)
+        {
             double r = 24000;
             double[] freqs = { 4810, 9600 };
 
@@ -18,7 +24,7 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
 
             var finalOutput = new float[signal.Length];
             chain.ProcessBuffer(signal, finalOutput);
-            return new Tensor<float>(new TensorShape(1, finalOutput.Length), finalOutput);
+            return finalOutput;
         }
 
         // Create a chain for multiple notch frequencies; cascade stages per notch if deeper attenuation desired

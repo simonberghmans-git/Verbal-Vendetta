@@ -73,7 +73,7 @@ public class PauseMenuManager : MonoBehaviour
     {
         SetPauseMenu(false);
 
-        ScenesManager scenesManager = FindObjectOfType<ScenesManager>();
+        ScenesManager scenesManager = FindAnyObjectByType<ScenesManager>();
         if (scenesManager != null)
         {
             scenesManager.GoToMenu();

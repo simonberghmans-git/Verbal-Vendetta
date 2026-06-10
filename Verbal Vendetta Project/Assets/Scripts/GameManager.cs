@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        if (inputManager == null) inputManager = FindObjectOfType<InterrogationInputManager>();
+        if (inputManager == null) inputManager = FindAnyObjectByType<InterrogationInputManager>();
 
         briefingAudioSource = GetComponent<AudioSource>();
         if (briefingAudioSource == null) briefingAudioSource = gameObject.AddComponent<AudioSource>();
@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] Starting Briefing Synthesis...");
         var briefingData = await interrogationManager.conversationPipeline.GenerateBriefingAudio(data);
         
-        if (briefingData != null)
+        if (briefingData != null && briefingData.Item1 != null)
         {
             briefingClip = briefingData.Item1;
             briefingText = briefingData.Item2;

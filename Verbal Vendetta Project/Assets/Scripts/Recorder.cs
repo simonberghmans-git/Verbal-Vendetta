@@ -121,7 +121,7 @@ public class Recorder : MonoBehaviour
     {
         recorderAnimator.SetTrigger("Click");
         Debug.Log("[Recorder] Clicked! Recording last statement.");
-        var intMan = FindObjectOfType<InterrogationManager>();
+        var intMan = FindAnyObjectByType<InterrogationManager>();
         if (intMan != null)
         {
             intMan.RecordLastStatement();

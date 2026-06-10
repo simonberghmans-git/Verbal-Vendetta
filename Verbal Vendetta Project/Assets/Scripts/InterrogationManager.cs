@@ -64,7 +64,7 @@ public class InterrogationManager : MonoBehaviour
         currentSuspectModel = suspectObject;
 
         // Clear existing transcript cards on the desk when switching suspects
-        TranscriptCardManager cardManager = FindObjectOfType<TranscriptCardManager>();
+        TranscriptCardManager cardManager = FindAnyObjectByType<TranscriptCardManager>();
         if (cardManager != null)
         {
             cardManager.ClearAllCards();
@@ -278,7 +278,7 @@ public class InterrogationManager : MonoBehaviour
             // Show killer's portrait
             if (killerPortraitDisplay != null && connectionManager.currentScenario != null)
             {
-                SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
+                SuspectManager suspectManager = FindAnyObjectByType<SuspectManager>();
                 if (suspectManager != null)
                 {
                     var killer = connectionManager.currentScenario.suspects.Find(s => s.is_killer);

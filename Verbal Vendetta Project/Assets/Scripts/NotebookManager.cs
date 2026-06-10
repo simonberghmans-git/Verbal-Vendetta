@@ -151,7 +151,7 @@ public class NotebookManager : MonoBehaviour
 
         if (scenario == null || scenario.suspects == null) return;
 
-        SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
+        SuspectManager suspectManager = FindAnyObjectByType<SuspectManager>();
 
         int count = scenario.suspects.Count;
         for (int i = 0; i < count; i++)

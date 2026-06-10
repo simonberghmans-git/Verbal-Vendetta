@@ -119,11 +119,59 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
 
                 var styleShape = new TensorShape(voiceArray.Length / 256, 1, 256);
                 var tensor = new Tensor<float>(styleShape, voiceArray);
-                var voice = new Voice(file, tensor);
+                var voice = new Voice(file, tensor, voiceArray);
                 voices.Add(voice);
             }
 
             return voices;
+        }
+
+        public float[] ExecuteAndExtract(int[] inputIds, float speed, Voice voice)
+        {
+            LoadModelIfMissing();
+
+            if (m_Worker == null)
+            {
+                Debug.LogError("[KokoroHandler] Cannot execute: Worker is null. Model likely failed to load.");
+                return null;
+            }
+
+            // 1. Prepare padded inputs
+            var paddedInputIds = new int[inputIds.Length + 2];
+            paddedInputIds[0] = 0;
+            Array.Copy(inputIds, 0, paddedInputIds, 1, inputIds.Length);
+            paddedInputIds[^1] = 0;
+
+            // 2. Prepare voice style vector directly (instant, no functional graph or worker compilation!)
+            int index = paddedInputIds.Length;
+            int offset = index * 256;
+            if (voice.RawData == null || offset + 256 > voice.RawData.Length)
+            {
+                offset = 0;
+            }
+
+            float[] slice = new float[256];
+            if (voice.RawData != null)
+            {
+                Array.Copy(voice.RawData, offset, slice, 0, 256);
+            }
+
+            // 3. Create Tensors
+            using var inputIdsTensor = new Tensor<int>(new TensorShape(1, paddedInputIds.Length), paddedInputIds);
+            using var speedTensor = new Tensor<float>(new TensorShape(1), new[] { speed });
+            using var voiceTensor = new Tensor<float>(new TensorShape(1, 256), slice);
+
+            // 4. Run Schedule (this executes Burst compiled jobs synchronously and occupies the calling thread)
+            m_Worker.Schedule(inputIdsTensor, voiceTensor, speedTensor);
+
+            // 5. Download the output to float array
+            using var result = m_Worker.PeekOutput() as Tensor<float>;
+            float[] rawOutput = result.DownloadToArray();
+
+            // 6. Apply Notch Filtering directly on the float array
+            float[] processedOutput = KokoroOutputProcessor.Apply2NotchFiltering(rawOutput);
+
+            return processedOutput;
         }
 
         async Task<Tensor<float>> GetVoiceVector(Tensor<int> inputIds, Tensor<float> voice)
@@ -150,11 +198,13 @@ namespace Unity.InferenceEngine.Samples.TTS.Inference
         {
             public string Name;
             public Tensor<float> Tensor;
+            public float[] RawData;
 
-            public Voice(string name, Tensor<float> data)
+            public Voice(string name, Tensor<float> data, float[] rawData)
             {
                 Name = name;
                 Tensor = data;
+                RawData = rawData;
             }
             public void Dispose()
             {

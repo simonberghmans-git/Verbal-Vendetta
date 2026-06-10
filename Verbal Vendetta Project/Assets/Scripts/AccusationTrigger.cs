@@ -87,7 +87,7 @@ public class AccusationTrigger : MonoBehaviour
         }
         
         // Play pick up sound if InterrogationManager has one
-        var intMan = FindObjectOfType<InterrogationManager>();
+        var intMan = FindAnyObjectByType<InterrogationManager>();
         if (intMan != null && intMan.accusationTriggerClip != null)
         {
             AudioSource source = intMan.GetComponent<AudioSource>();

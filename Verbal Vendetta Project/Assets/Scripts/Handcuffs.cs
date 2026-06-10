@@ -124,7 +124,7 @@ public class Handcuffs : MonoBehaviour
         }
         
         // Play pick up sound
-        var intMan = FindObjectOfType<InterrogationManager>();
+        var intMan = FindAnyObjectByType<InterrogationManager>();
         if (intMan != null && intMan.accusationTriggerClip != null)
         {
             AudioSource source = intMan.GetComponent<AudioSource>();

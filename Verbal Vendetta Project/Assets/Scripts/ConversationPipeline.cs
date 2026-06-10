@@ -161,7 +161,7 @@ public class ConversationPipeline : MonoBehaviour
         // Check for Accusation Completion (Police Chief Mode)
         if (isPoliceChiefMode && result.provided_suspect && result.provided_motive && result.provided_means)
         {
-            InterrogationManager im = FindObjectOfType<InterrogationManager>();
+            InterrogationManager im = FindAnyObjectByType<InterrogationManager>();
             if (im != null)
             {
                 im.SubmitAutomatedAccusation(result.suspect_name, result.motive_description, result.means_description);

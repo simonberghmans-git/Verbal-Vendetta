@@ -53,7 +53,7 @@ public class PinBoardManager : MonoBehaviour
         //     Destroy(child.gameObject);
         // }
 
-        SuspectManager suspectManager = FindObjectOfType<SuspectManager>();
+        SuspectManager suspectManager = FindAnyObjectByType<SuspectManager>();
 
         for (int i = 0; i < scenario.suspects.Count; i++)
         {

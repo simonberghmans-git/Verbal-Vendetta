@@ -523,6 +523,11 @@ private IEnumerator PostJudgeRequest(string accusedName, string motive, string a
            - Explain WHY the logic was right or wrong.
            - The first part of the article body MUST be formatted to fit 300 characters max.
            - The second part of the article body MUST be formatted to fit 400 characters max.
+        
+        CRITICAL FORMATTING INSTRUCTIONS:
+        - Spaces count as characters in all the above character limits (headline 40 max, body part1 300 max, body part2 400 max).
+        - Do NOT include any random, artificial, or arbitrary line endings, line breaks, or newlines within the text of any field. The headline and article body text must flow naturally and be on single continuous lines within their JSON fields.
+        
         Output JSON: 
         {{
           ""is_correct"": true,

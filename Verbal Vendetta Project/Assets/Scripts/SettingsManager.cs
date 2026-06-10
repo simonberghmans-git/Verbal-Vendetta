@@ -42,7 +42,7 @@ public class SettingsManager : MonoBehaviour
         PlayerPrefs.Save();
 
         // Live-update: tell InterrogationInputManager to refresh right now
-        InterrogationInputManager inputManager = FindObjectOfType<InterrogationInputManager>();
+        InterrogationInputManager inputManager = FindAnyObjectByType<InterrogationInputManager>();
         if (inputManager != null)
         {
             inputManager.RefreshTextInputVisibility();

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.InferenceEngine;
 using Unity.InferenceEngine.Samples.TTS.Inference;
+using Unity.Jobs;
 
 [RequireComponent(typeof(AudioSource))]
 public class KokoroManager : MonoBehaviour
@@ -35,8 +36,14 @@ public class KokoroManager : MonoBehaviour
         Debug.LogWarning("[KokoroManager] Forcing BackendType.CPU to prevent DML driver crashes.");
         backendType = BackendType.CPU;
 
-        // Initialize the local Sentis handler
-        kokoroHandler = new KokoroHandler(backendType);
+        // Initialize the local Sentis handler with lazyLoadModel=false so that the model and worker
+        // are fully loaded and prepared on the main thread before any background threads call them.
+        kokoroHandler = new KokoroHandler(backendType, lazyLoadModel: false);
+        
+        // Warm up MisakiSharp phonetic dictionaries on the main thread so they are loaded and ready
+        // for background-thread tokenization.
+        Debug.Log("[KokoroManager] Warming up MisakiSharp phonetic dictionaries on the main thread...");
+        MisakiSharp.TokenizeGraphemes("warmup");
         
         // Load all voices from Resources/Voices/
         Debug.Log("[KokoroManager] Loading available voices...");
@@ -92,6 +99,41 @@ public class KokoroManager : MonoBehaviour
         _ = GenerateAndPlayLocal(text);
     }
 
+    private class KokoroJobData
+    {
+        public KokoroHandler handler;
+        public int[] tokens;
+        public float speed;
+        public KokoroHandler.Voice voice;
+        public float[] result;
+    }
+
+    private static readonly List<KokoroJobData> activeJobs = new List<KokoroJobData>();
+    private static readonly object jobLock = new object();
+
+    private struct KokoroInferenceJob : Unity.Jobs.IJob
+    {
+        public int jobIndex;
+
+        public void Execute()
+        {
+            KokoroJobData data;
+            lock (jobLock)
+            {
+                data = activeJobs[jobIndex];
+            }
+
+            try
+            {
+                data.result = data.handler.ExecuteAndExtract(data.tokens, data.speed, data.voice);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[KokoroJob] Inference error on worker thread: {ex.Message}");
+            }
+        }
+    }
+
     public async Task<AudioClip> Synthesize(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
@@ -101,52 +143,95 @@ public class KokoroManager : MonoBehaviour
             return null;
         }
 
+        // Capture voice and speed on main thread to prevent thread-safety issues
+        var voiceToUse = activeVoice;
+        float currentSpeed = speed;
+
         try
         {
             float ttsStart = Time.realtimeSinceStartup;
             Debug.Log($"[PERF] [{DateTime.Now:HH:mm:ss.fff}] Starting TTS Synthesis...");
-            // Split text into sentences to avoid sequence length limits
-            string[] sentences = text.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // 1. Text tokenization in the background
+            List<int[]> sentenceTokens = await Task.Run(() =>
+            {
+                string[] sentences = text.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+                List<int[]> tokensList = new List<int[]>();
+
+                foreach (string sentence in sentences)
+                {
+                    string trimmed = sentence.Trim();
+                    if (string.IsNullOrEmpty(trimmed)) continue;
+
+                    // Add punctuation back for better prosody
+                    char punctuation = text.Length > text.IndexOf(sentence) + sentence.Length ? text[text.IndexOf(sentence) + sentence.Length] : '.';
+                    trimmed += punctuation;
+
+                    int[] tokens = MisakiSharp.TokenizeGraphemes(trimmed);
+                    if (tokens.Length > 500)
+                    {
+                        Debug.LogWarning($"Sentence too long ({tokens.Length} tokens), skipping chunk.");
+                        continue;
+                    }
+                    tokensList.Add(tokens);
+                }
+                return tokensList;
+            });
+
+            if (sentenceTokens == null || sentenceTokens.Count == 0) return null;
+
+            // 2. Schedule model execution on Unity Job System's worker threads!
+            // Each sentence runs on a separate worker thread, completely in parallel and off the main thread.
+            // Under Unity, Temp native allocations are fully supported inside Job System worker threads.
+            var handles = new Unity.Collections.NativeArray<Unity.Jobs.JobHandle>(sentenceTokens.Count, Unity.Collections.Allocator.TempJob);
+            List<KokoroJobData> jobsData = new List<KokoroJobData>();
+
+            lock (jobLock)
+            {
+                for (int i = 0; i < sentenceTokens.Count; i++)
+                {
+                    var data = new KokoroJobData
+                    {
+                        handler = kokoroHandler,
+                        tokens = sentenceTokens[i],
+                        speed = currentSpeed,
+                        voice = voiceToUse
+                    };
+                    jobsData.Add(data);
+                    activeJobs.Add(data);
+                    int index = activeJobs.Count - 1;
+
+                    var job = new KokoroInferenceJob { jobIndex = index };
+                    handles[i] = job.Schedule();
+                }
+            }
+
+            // Combine all job handles to wait for them together
+            var combinedHandle = Unity.Jobs.JobHandle.CombineDependencies(handles);
+            handles.Dispose();
+
+            // Await completion of all jobs while yielding control to the main thread!
+            // This ensures 100% smooth, lag-free gameplay while synthesis is running.
+            while (!combinedHandle.IsCompleted)
+            {
+                await Task.Yield();
+            }
+            combinedHandle.Complete(); // finalize/clean up the jobs
+
+            // 3. Retrieve results and clean up activeJobs list
             List<float[]> audioChunks = new List<float[]>();
             int totalLength = 0;
 
-            foreach (string sentence in sentences)
+            lock (jobLock)
             {
-                string trimmed = sentence.Trim();
-                if (string.IsNullOrEmpty(trimmed)) continue;
-
-                // Add punctuation back for better prosody
-                char punctuation = text.Length > text.IndexOf(sentence) + sentence.Length ? text[text.IndexOf(sentence) + sentence.Length] : '.';
-                trimmed += punctuation;
-
-                // 1. Convert text to phoneme IDs using MisakiSharp
-                int[] tokens = MisakiSharp.TokenizeGraphemes(trimmed);
-                
-                // Safety: Kokoro usually has a 512 token limit. 
-                // We'll be conservative and skip if it's somehow massive, 
-                // or we could split further, but sentence-splitting usually suffices.
-                if (tokens.Length > 500)
+                foreach (var data in jobsData)
                 {
-                    Debug.LogWarning($"Sentence too long ({tokens.Length} tokens), skipping chunk to avoid crash.");
-                    continue;
-                }
-
-                // 2. Run Sentis Inference
-                Debug.Log($"[KokoroManager] Inferencing chunk: '{trimmed}' ({tokens.Length} tokens)...");
-                using Tensor<float> outputTensor = await kokoroHandler.Execute(tokens, speed, activeVoice);
-
-                if (outputTensor == null)
-                {
-                    Debug.LogError("[KokoroManager] Inference returned null tensor! Check KokoroHandler logs.");
-                    continue;
-                }
-
-                // 3. Store raw audio data
-                float[] chunkData = outputTensor.DownloadToArray();
-                if (chunkData != null && chunkData.Length > 0)
-                {
-                    audioChunks.Add(chunkData);
-                    totalLength += chunkData.Length;
+                    if (data.result != null && data.result.Length > 0)
+                    {
+                        audioChunks.Add(data.result);
+                        totalLength += data.result.Length;
+                    }
+                    activeJobs.Remove(data);
                 }
             }
 
@@ -161,7 +246,7 @@ public class KokoroManager : MonoBehaviour
                 offset += chunk.Length;
             }
 
-            // 5. Create final AudioClip
+            // 5. Create final AudioClip (must be on the main thread!)
             AudioClip clip = AudioClip.Create("Kokoro_Briefing", mergedData.Length, 1, 24000, false);
             clip.SetData(mergedData, 0);
 

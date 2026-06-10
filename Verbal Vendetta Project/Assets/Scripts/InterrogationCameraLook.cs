@@ -24,7 +24,7 @@ public class InterrogationCameraLook : MonoBehaviour
 
     void Start()
     {
-        if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
+        if (gameManager == null) gameManager = FindAnyObjectByType<GameManager>();
         lastState = gameManager != null ? gameManager.currentState : GameManager.GameState.SubjectSelection;
     }
 
