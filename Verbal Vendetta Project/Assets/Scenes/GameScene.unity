@@ -5418,7 +5418,7 @@ Transform:
   m_GameObject: {fileID: 964586782}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 7.14, y: 0, z: 5.3}
+  m_LocalPosition: {x: 7.336, y: 0, z: 5.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9201,7 +9201,7 @@ MonoBehaviour:
     murder_weapon: 
     murder_location: 
     suspects: []
-  testing: 1
+  testing: 0
   suspectManager: {fileID: 1436198405}
   debugDisplayField: {fileID: 13931263}
 --- !u!4 &1524535819
@@ -14852,7 +14852,7 @@ Transform:
   m_GameObject: {fileID: 4030866588638003152}
   serializedVersion: 2
   m_LocalRotation: {x: 0.50000006, y: 0.49999997, z: 0.5, w: -0.5}
-  m_LocalPosition: {x: 7.225, y: 0.389, z: 5.294}
+  m_LocalPosition: {x: 7.421, y: 0.389, z: 5.294}
   m_LocalScale: {x: 26, y: 26, z: 0.7016126}
   m_ConstrainProportionsScale: 0
   m_Children: []
