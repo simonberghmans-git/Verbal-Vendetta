@@ -122,12 +122,16 @@ public class GameManager : MonoBehaviour
         {
             briefingClip = briefingData.Item1;
             briefingText = briefingData.Item2;
-            Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefingClip.length}s");
-            // Auto-play the briefing
-            ReplayBriefing();
-        }
-        else
-        {
+            if (briefingClip != null)
+            {
+                Debug.Log($"[GameManager] Briefing synthesized successfully. Length: {briefingClip.length}s");
+                // Auto-play the briefing
+                ReplayBriefing();
+            }
+            else
+            {
+                Debug.LogError("[GameManager] Briefing AudioClip is null. Cannot play briefing.");
+            }
             Debug.LogWarning("[GameManager] Briefing synthesis failed.");
         }
     }

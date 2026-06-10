@@ -10,7 +10,7 @@ public class ConversationPipeline : MonoBehaviour
     [Header("Dependencies")]
     public LocalWhisperManager whisperManager;
     public GeminiConnectionManager geminiManager;
-    public KokoroManager kokoroManager;
+    public GeminiRemoteTTSManager geminiRemoteTTSManager;
     public SuspectManager suspectManager;
     
     [Header("State")]
@@ -31,9 +31,9 @@ public class ConversationPipeline : MonoBehaviour
         {
             whisperManager.OnTranscriptionReceived += HandlePlayerWhisperTranscription;
         }
-        if (kokoroManager != null)
+        if (geminiRemoteTTSManager != null)
         {
-            kokoroManager.OnSpeechFinished += HandleKokoroFinished;
+            geminiRemoteTTSManager.OnSpeechFinished += HandleGeminiTTSFinished;
         }
     }
 
@@ -43,9 +43,9 @@ public class ConversationPipeline : MonoBehaviour
         {
             whisperManager.OnTranscriptionReceived -= HandlePlayerWhisperTranscription;
         }
-        if (kokoroManager != null)
+        if (geminiRemoteTTSManager != null)
         {
-            kokoroManager.OnSpeechFinished -= HandleKokoroFinished;
+            geminiRemoteTTSManager.OnSpeechFinished -= HandleGeminiTTSFinished;
         }
     }
 
@@ -56,7 +56,7 @@ public class ConversationPipeline : MonoBehaviour
         pastTranscript = "";
         
         // Assign Voice based on suspect or police chief
-        if (kokoroManager != null && suspectManager != null)
+        if (geminiRemoteTTSManager != null && suspectManager != null)
         {
             string assignedVoice;
             
@@ -73,7 +73,7 @@ public class ConversationPipeline : MonoBehaviour
                 return;
             }
 
-            kokoroManager.SetVoice(assignedVoice);
+            geminiRemoteTTSManager.SetVoice(assignedVoice);
         }
     }
 
@@ -82,7 +82,7 @@ public class ConversationPipeline : MonoBehaviour
         activeSuspect = null;
         isPoliceChiefMode = false;
         geminiManager?.CancelCurrentInteraction();
-        kokoroManager?.StopSpeech();
+        geminiRemoteTTSManager?.StopSpeech();
     }
 
     public void StartRecording()
@@ -152,10 +152,10 @@ public class ConversationPipeline : MonoBehaviour
         OnMetadataReceived?.Invoke(emotion, emotion, 0.5f);
 
         // Start Kokoro
-        if (kokoroManager != null)
+        if (geminiRemoteTTSManager != null)
         {
             OnSpeakStateChanged?.Invoke(true);
-            kokoroManager.SynthesizeAndPlay(cleanedText);
+            geminiRemoteTTSManager.SynthesizeAndPlay(cleanedText);
         }
 
         // Check for Accusation Completion (Police Chief Mode)
@@ -171,33 +171,33 @@ public class ConversationPipeline : MonoBehaviour
 
     public async Task<Tuple<AudioClip, string>> GenerateBriefingAudio(ScenarioData data)
     {
-        if (data == null || kokoroManager == null || suspectManager == null) return null;
+        if (data == null || geminiRemoteTTSManager == null || suspectManager == null) return null;
 
         // Set the Police Chief voice first
-        kokoroManager.SetVoice(suspectManager.policeChiefVoice);
+        geminiRemoteTTSManager.SetVoice(suspectManager.policeChiefVoice);
 
         string briefingText = $"Listen up detective, we've got a new case on our hands. The victim is {data.victim_name}, a {data.victim_occupation}. " +
                             $"Body was found at {data.murder_location}. Time of death is estimated at {data.murder_time} on {data.murder_date}. " +
                             $"The murder weapon was a {data.murder_weapon}. {data.victim_discovery_details}. " +
                             $"We've brought in {data.suspects.Count} suspects for you to talk to. Get to work.";
 
-        AudioClip clip = await kokoroManager.Synthesize(briefingText);
+        AudioClip clip = await geminiRemoteTTSManager.Synthesize(briefingText);
         return new Tuple<AudioClip, string>(clip, briefingText);
     }
 
     public async Task<AudioClip> GenerateNewsAudio(string text)
     {
-        if (string.IsNullOrEmpty(text) || kokoroManager == null || suspectManager == null) return null;
+        if (string.IsNullOrEmpty(text) || geminiRemoteTTSManager == null || suspectManager == null) return null;
 
         // Set the Newsreader voice
-        kokoroManager.SetVoice(suspectManager.newsreaderVoice);
+        geminiRemoteTTSManager.SetVoice(suspectManager.newsreaderVoice);
 
-        return await kokoroManager.Synthesize(text);
+        return await geminiRemoteTTSManager.Synthesize(text);
     }
 
     public void TriggerPoliceChiefIntro()
     {
-        if (!isPoliceChiefMode || kokoroManager == null) return;
+        if (!isPoliceChiefMode || geminiRemoteTTSManager == null) return;
 
         string introText = "Detective, since you're calling I assume you have a verdict for me?";
         
@@ -212,10 +212,10 @@ public class ConversationPipeline : MonoBehaviour
         OnSpeakStateChanged?.Invoke(true);
         
         // Synthesize and Play
-        kokoroManager.SynthesizeAndPlay(introText);
+        geminiRemoteTTSManager.SynthesizeAndPlay(introText);
     }
 
-    private void HandleKokoroFinished()
+    private void HandleGeminiTTSFinished()
     {
         OnSpeakStateChanged?.Invoke(false);
     }

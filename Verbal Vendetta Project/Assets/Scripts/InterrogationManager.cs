@@ -86,11 +86,11 @@ public class InterrogationManager : MonoBehaviour
                 AnimationsManager.Instance.SetCurrentAnimator(currentSuspectModel.GetComponent<Animator>());
             }
 
-            if (conversationPipeline != null && conversationPipeline.kokoroManager != null)
+            if (conversationPipeline != null && conversationPipeline.geminiRemoteTTSManager != null)
             {
                 AudioSource suspectAudio = currentSuspectModel.GetComponent<AudioSource>();
                 if (suspectAudio == null) suspectAudio = currentSuspectModel.GetComponentInChildren<AudioSource>();
-                conversationPipeline.kokoroManager.SetTargetAudioSource(suspectAudio);
+                conversationPipeline.geminiRemoteTTSManager.SetTargetAudioSource(suspectAudio);
             }
         }
 
@@ -297,18 +297,18 @@ public class InterrogationManager : MonoBehaviour
             }
 
             // Play News Audio via KokoroManager's AudioSource
-            if (newsClip != null && conversationPipeline != null && conversationPipeline.kokoroManager != null)
+            if (newsClip != null && conversationPipeline != null && conversationPipeline.geminiRemoteTTSManager != null)
             {
-                AudioSource kokoroSource = conversationPipeline.kokoroManager.GetComponent<AudioSource>();
+                AudioSource geminiSource = conversationPipeline.geminiRemoteTTSManager.GetComponent<AudioSource>();
                 
                 // Stop any existing speech (e.g., Police Chief)
-                if (kokoroSource.isPlaying) kokoroSource.Stop();
+                if (geminiSource.isPlaying) geminiSource.Stop();
                 
                 // Ensure we are playing from the local source, not a suspect's source
-                conversationPipeline.kokoroManager.SetTargetAudioSource(null); 
+                conversationPipeline.geminiRemoteTTSManager.SetTargetAudioSource(null); 
                 
-                kokoroSource.clip = newsClip;
-                kokoroSource.Play();
+                geminiSource.clip = newsClip;
+                geminiSource.Play();
             }
 
             StartCoroutine(ReturnToMenuRoutine());
@@ -386,12 +386,12 @@ public class InterrogationManager : MonoBehaviour
         }
 
         // Wait for the news audio to finish if it's still playing
-        if (conversationPipeline != null && conversationPipeline.kokoroManager != null)
+        if (conversationPipeline != null && conversationPipeline.geminiRemoteTTSManager != null)
         {
-            AudioSource kokoroSource = conversationPipeline.kokoroManager.GetComponent<AudioSource>();
-            if (kokoroSource != null && kokoroSource.isPlaying)
+            AudioSource geminiSource = conversationPipeline.geminiRemoteTTSManager.GetComponent<AudioSource>();
+            if (geminiSource != null && geminiSource.isPlaying)
             {
-                while (kokoroSource.isPlaying)
+                while (geminiSource.isPlaying)
                 {
                     yield return null;
                 }

@@ -853,7 +853,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConversationPipeline
   whisperManager: {fileID: 1055246173}
   geminiManager: {fileID: 1524535818}
-  kokoroManager: {fileID: 260803837}
+  geminiRemoteTTSManager: {fileID: 260803839}
   suspectManager: {fileID: 1436198405}
   activeSuspect:
     name: 
@@ -1945,9 +1945,9 @@ GameObject:
   m_Component:
   - component: {fileID: 260803836}
   - component: {fileID: 260803838}
-  - component: {fileID: 260803837}
+  - component: {fileID: 260803839}
   m_Layer: 0
-  m_Name: KokoroManager
+  m_Name: Gemini TTS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1968,21 +1968,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 228109500}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &260803837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 260803835}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 740922b15e675a44e868c176e954e7dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KokoroManager
-  backendType: 256
-  speed: 1
-  testing: 1
 --- !u!82 &260803838
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2080,6 +2065,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &260803839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260803835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b373a5ca19f93d4bb70ad998e7bad7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GeminiRemoteTTSManager
+  speed: 1
+  testing: 0
+  connectionManager: {fileID: 1524535818}
 --- !u!114 &283843278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8779,18 +8779,19 @@ MonoBehaviour:
   - {fileID: 1234586954406057694, guid: dabd0cc4e87529c46a9002f6e3578495, type: 3}
   - {fileID: 3873473889567577070, guid: 43fc5df42912c234fb3a1cdeaf9b1636, type: 3}
   maleKokoroVoices:
-  - am_adam
-  - am_michael
-  - am_fenrir
-  - am_puck
-  - bm_george
+  - en-US-Standard-C
+  - en-US-Wavenet-D
+  - en-US-Neural2-A
+  - en-GB-Standard-B
+  - en-GB-Wavenet-D
   femaleKokoroVoices:
-  - af_heart
-  - af_bella
-  - af_sky
-  - af_sarah
-  policeChiefVoice: bm_lewis
-  newsreaderVoice: bm_daniel
+  - en-US-Standard-A
+  - en-US-Wavenet-C
+  - en-US-Neural2-C
+  - en-GB-Standard-A
+  - en-GB-Wavenet-C
+  policeChiefVoice: en-US-Standard-B
+  newsreaderVoice: en-US-Standard-E
   maleModelIndices: 000000000100000002000000
   femaleModelIndices: 0300000004000000
   suspectHeadshots:
@@ -9201,7 +9202,7 @@ MonoBehaviour:
     murder_weapon: 
     murder_location: 
     suspects: []
-  testing: 0
+  testing: 1
   suspectManager: {fileID: 1436198405}
   debugDisplayField: {fileID: 13931263}
 --- !u!4 &1524535819
