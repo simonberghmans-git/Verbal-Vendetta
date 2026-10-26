@@ -1,0 +1,8 @@
+To run in editor:
+-Add a text file called ApiKey.txt to Verbal-Vendetta\Verbal Vendetta Project containing a Gemini studio api key
+-Pres play in editor
+
+To run build
+-Build project
+-Add a text file called ApiKey.txt to the game directory containing a Gemini studio api key
+-Run the application
